@@ -45,6 +45,7 @@ export default function ProductShowcase() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    supabase
       .from('products')
       .select('*')
       .eq('active', true)
