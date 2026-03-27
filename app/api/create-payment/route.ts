@@ -233,7 +233,7 @@ export async function POST(req: NextRequest) {
     try {
       const { data: fullOrder } = await db
         .from('orders')
-        .select('id, total, delivery_address, customer_name, user_id, tax_amount, discount_amount, zones(name), order_items(quantity, price, products(name)), profiles:user_id(name, email)')
+        .select('id, total, delivery_address, customer_name, payment_method, payment_status, user_id, tax_amount, discount_amount, created_at, zones(name), order_items(quantity, price, products(name)), profiles:user_id(name, email)')
         .eq('id', order.id)
         .single()
 
@@ -245,13 +245,22 @@ export async function POST(req: NextRequest) {
         const { data: contentRows } = await db.from('site_content').select('key, value')
           .in('key', [
             'notif_order_confirmation', 'email_confirmation_subject', 'email_confirmation_greeting',
-            'notif_admin_order', 'email_admin_order_subject', 'settings_email'
+            'notif_admin_order', 'email_admin_order_subject', 'settings_email',
+            'settings_company', 'settings_phone', 'settings_address'
           ])
         const contentMap: Record<string, string> = {}
         for (const r of (contentRows ?? [])) contentMap[r.key] = r.value
         const confirmNotifEnabled = contentMap['notif_order_confirmation'] !== 'false'
         const adminNotifEnabled = contentMap['notif_admin_order'] === 'true'
         const adminEmail = contentMap['settings_email'] || process.env.NEXT_PUBLIC_COMPANY_EMAIL
+
+        const invoiceCompanyInfo = {
+          name:    contentMap['settings_company'] || 'Taj Water LTD.',
+          address: contentMap['settings_address'] || '1770 McLean Ave, Port Coquitlam, BC V3C 4K8, Canada',
+          phone:   contentMap['settings_phone']   || process.env.NEXT_PUBLIC_COMPANY_PHONE || '',
+          email:   contentMap['settings_email']   || 'billing@tajwater.ca',
+          website: 'tajwater.ca'
+        }
 
         if (toEmail && confirmNotifEnabled) {
           // resend proxy from @/lib/email is used here
@@ -273,21 +282,15 @@ export async function POST(req: NextRequest) {
           // Generate invoice PDF attachment
           let pdfAttachment: { filename: string; content: string } | undefined
           try {
-            const invoiceCompanyInfo = {
-              name: 'TajWater',
-              address: 'Metro Vancouver, BC, Canada',
-              phone: process.env.NEXT_PUBLIC_COMPANY_PHONE ?? '',
-              email: process.env.NEXT_PUBLIC_COMPANY_EMAIL ?? '',
-              website: process.env.NEXT_PUBLIC_SITE_URL ?? 'tajwater.ca',
-            }
             const invoiceOrder: InvoiceOrderData = {
               id: fullOrder.id,
               total: fullOrder.total,
-              payment_status: 'paid',
+              payment_status: fullOrder.payment_status,
+              payment_method: fullOrder.payment_method,
               delivery_address: fullOrder.delivery_address ?? null,
               customer_name: fullOrder.customer_name ?? null,
-              customer_phone: null,
-              created_at: new Date().toISOString(),
+              customer_phone: (fullOrder as any).customer_phone || null,
+              created_at: fullOrder.created_at || new Date().toISOString(),
               zones: Array.isArray(fullOrder.zones) ? (fullOrder.zones[0] ?? null) : (fullOrder.zones as { name: string } | null) ?? null,
               order_items: ((fullOrder.order_items ?? []) as unknown as RawItem[]).map(i => ({
                 id: crypto.randomUUID(),

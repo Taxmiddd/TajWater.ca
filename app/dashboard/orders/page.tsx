@@ -61,6 +61,7 @@ interface OrderRow {
   id: string
   status: string
   payment_status: string | null
+  payment_method?: string | null
   total: number
   delivery_address: string
   created_at: string
@@ -92,7 +93,7 @@ export default function OrdersPage() {
 
       const { data } = await supabase
         .from('orders')
-        .select('id, status, payment_status, total, delivery_address, created_at, order_items(quantity, price, product:products(id, name, price, description, category, stock, active, image_url))')
+        .select('id, status, payment_status, payment_method, total, delivery_address, created_at, order_items(quantity, price, product:products(id, name, price, description, category, stock, active, image_url))')
         .eq('user_id', session.user.id)
         .order('created_at', { ascending: false })
 
@@ -235,7 +236,7 @@ export default function OrdersPage() {
                   </div>
                   <div className="flex items-center gap-3 shrink-0 flex-wrap">
                     <span className="text-lg font-extrabold text-[#0097a7]">${Number(order.total).toFixed(2)}</span>
-                    {order.payment_status === 'paid' && (
+                    {(order.payment_status === 'paid' || order.payment_method === 'cash_on_delivery' || order.payment_method === 'card_on_delivery') && (
                       <a href={`/api/invoice/${order.id}`} target="_blank" rel="noreferrer" title="Download Invoice">
                         <Button size="sm" variant="outline" className="border-[#cce7f0] text-[#4a7fa5] gap-1 h-8">
                           <Download className="w-3.5 h-3.5" /> Invoice

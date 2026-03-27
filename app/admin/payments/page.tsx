@@ -18,6 +18,7 @@ type TxnRow = {
   user_id: string | null
   status: string
   payment_status: string | null
+  payment_method?: string | null
   total: number
   refund_amount: number | null
   created_at: string
@@ -129,7 +130,7 @@ export default function PaymentsPage() {
 
     const { data: rows, error } = await supabase
       .from('orders')
-      .select('id, user_id, status, payment_status, total, refund_amount, created_at, customer_name, square_payment_id, zones(name)')
+      .select('id, user_id, status, payment_status, payment_method, total, refund_amount, created_at, customer_name, square_payment_id, zones(name)')
       .order('created_at', { ascending: false })
       .limit(300)
 
@@ -402,6 +403,13 @@ export default function PaymentsPage() {
                             <Button size="sm" variant="outline"
                               className="border-[#0097a7]/30 dark:border-[#b3e5fc]/20 text-[#0097a7] dark:text-[#b3e5fc] hover:bg-[#e0f7fa] dark:hover:bg-white/5 h-7 text-xs gap-1 transition-colors">
                               <ExternalLink className="w-3 h-3" /> Square
+                            </Button>
+                          </a>
+                        )}
+                        {(txn.payment_status === 'paid' || txn.payment_method === 'cash_on_delivery' || txn.payment_method === 'card_on_delivery') && (
+                          <a href={`/api/invoice/${txn.id}`} target="_blank" rel="noreferrer">
+                            <Button size="sm" variant="outline" className="border-[#cce7f0] text-[#4a7fa5] h-7 text-xs gap-1 transition-colors" title="Download Invoice">
+                              <Download className="w-3 h-3" /> Invoice
                             </Button>
                           </a>
                         )}

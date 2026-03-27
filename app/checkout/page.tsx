@@ -80,38 +80,35 @@ export default function CheckoutPage() {
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        router.replace('/auth/login?redirect=/checkout')
-        return
-      }
-      setUserId(session.user.id)
+      if (session) {
+        setUserId(session.user.id)
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('name, phone, delivery_address, zone_id, email')
+          .eq('id', session.user.id)
+          .single()
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('name, phone, delivery_address, zone_id, email')
-        .eq('id', session.user.id)
-        .single()
-
-      if (profile) {
-        let zoneName = ''
-        if (profile.zone_id) {
-          const { data: zoneRow } = await supabase
-            .from('zones')
-            .select('name')
-            .eq('id', profile.zone_id)
-            .single()
-          zoneName = zoneRow?.name ?? ''
+        if (profile) {
+          let zoneName = ''
+          if (profile.zone_id) {
+            const { data: zoneRow } = await supabase
+              .from('zones')
+              .select('name')
+              .eq('id', profile.zone_id)
+              .single()
+            zoneName = zoneRow?.name ?? ''
+          }
+          setAddress(prev => ({
+            ...prev,
+            name: profile.name ?? '',
+            phone: profile.phone ?? '',
+            street: profile.delivery_address ?? '',
+            zone: zoneName,
+            email: profile.email ?? session.user.email ?? '',
+          }))
+        } else {
+          setAddress(prev => ({ ...prev, email: session.user.email ?? '' }))
         }
-        setAddress(prev => ({
-          ...prev,
-          name: profile.name ?? '',
-          phone: profile.phone ?? '',
-          street: profile.delivery_address ?? '',
-          zone: zoneName,
-          email: profile.email ?? session.user.email ?? '',
-        }))
-      } else {
-        setAddress(prev => ({ ...prev, email: session.user.email ?? '' }))
       }
       setAuthChecked(true)
     }
@@ -400,6 +397,11 @@ export default function CheckoutPage() {
                   <div>
                     <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Street Address</label>
                     <Input placeholder="123 Main Street, Suite 4" className="border-[#cce7f0]" required value={address.street} onChange={(e) => setAddress({ ...address, street: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Email Address</label>
+                    <Input type="email" placeholder="email@example.com" className="border-[#cce7f0]" required value={address.email} onChange={(e) => setAddress({ ...address, email: e.target.value })} />
+                    {!userId && <p className="text-[10px] text-[#4a7fa5] mt-1">Used for sending your order confirmation and invoice.</p>}
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>

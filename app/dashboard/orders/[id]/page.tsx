@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
@@ -30,6 +30,7 @@ interface OrderDetail {
   user_id: string
   status: string
   payment_status: string | null
+  payment_method?: string | null
   total: number
   tax_amount: number | null
   delivery_address: string
@@ -129,7 +130,7 @@ export default function OrderDetailPage() {
       const { data, error } = await supabase
         .from('orders')
         .select(`
-          id, user_id, status, payment_status, total, tax_amount,
+          id, user_id, status, payment_status, payment_method, total, tax_amount,
           delivery_address, notes, driver_name, customer_name, customer_phone,
           created_at, updated_at,
           zones ( name, delivery_fee ),
@@ -213,7 +214,7 @@ export default function OrderDetailPage() {
             <span className="text-sm font-semibold text-[#0c2340]">#{order.id.slice(-6).toUpperCase()}</span>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            {order.payment_status === 'paid' && (
+            {(order.payment_status === 'paid' || order.payment_method === 'cash_on_delivery' || order.payment_method === 'card_on_delivery') && (
               <a href={`/api/invoice/${order.id}`} target="_blank" rel="noreferrer">
                 <Button size="sm" variant="outline" className="h-8 gap-1.5 border-gray-200 text-gray-600 hover:border-[#cce7f0] hover:text-[#0097a7]">
                   <Download className="w-3.5 h-3.5" /> Download invoice

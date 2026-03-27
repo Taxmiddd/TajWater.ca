@@ -27,6 +27,7 @@ type OrderRow = {
   user_id: string | null
   status: string
   payment_status: string | null
+  payment_method?: string | null
   total: number
   delivery_address: string | null
   zone_id: string | null
@@ -78,7 +79,7 @@ export default function AdminOrdersPage() {
     const { data: rows, error } = await supabase
       .from('orders')
       .select(`
-        id, user_id, status, payment_status, total, delivery_address, zone_id,
+        id, user_id, status, payment_status, payment_method, total, delivery_address, zone_id,
         driver_name, customer_name, customer_phone, notes, created_at,
         zones ( name ),
         order_items ( id, quantity, price, products ( name, image_url ) )
@@ -656,11 +657,18 @@ export default function AdminOrdersPage() {
                       Mark as {STATUS_STYLE[selected.status].nextLabel}
                     </Button>
                   )}
+                  {(selected.payment_status === 'paid' || selected.payment_method === 'cash_on_delivery' || selected.payment_method === 'card_on_delivery') && (
+                    <a href={`/api/invoice/${selected.id}`} target="_blank" rel="noreferrer" className="flex-1">
+                      <Button variant="outline" className="w-full border-[#cce7f0] text-[#4a7fa5] gap-2">
+                        <Download className="w-4 h-4" /> Invoice
+                      </Button>
+                    </a>
+                  )}
                   {selected.status !== 'delivered' && selected.status !== 'cancelled' && (
                     <Button
                       variant="outline"
                       onClick={() => cancelOrder(selected)}
-                      className="border-red-200 text-red-500 hover:bg-red-50 gap-2"
+                      className="flex-1 border-red-200 text-red-500 hover:bg-red-50 gap-2"
                     >
                       <XCircle className="w-4 h-4" /> Cancel
                     </Button>

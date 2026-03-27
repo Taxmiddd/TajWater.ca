@@ -40,6 +40,7 @@ interface OrderDetail {
   zones: { name: string } | { name: string }[] | null
   order_items: OrderItem[]
   profile: { name: string; email: string; phone: string } | null
+  payment_method?: string | null
 }
 
 const STATUS_STYLE: Record<string, { color: string; icon: React.ElementType; next: string | null; nextLabel: string }> = {
@@ -93,7 +94,7 @@ export default function AdminOrderDetailPage() {
       const { data, error } = await supabase
         .from('orders')
         .select(`
-          id, user_id, status, payment_status, total, delivery_address, zone_id,
+          id, user_id, status, payment_status, payment_method, total, delivery_address, zone_id,
           driver_name, customer_name, customer_phone, notes, created_at, updated_at,
           zones ( name ),
           order_items ( id, quantity, price, products ( name, image_url, category ) )
@@ -280,7 +281,7 @@ export default function AdminOrderDetailPage() {
               <XCircle className="w-3.5 h-3.5" /> Cancel &amp; Refund
             </Button>
           )}
-          {order.payment_status === 'paid' && (
+          {(order.payment_status === 'paid' || order.payment_method === 'cash_on_delivery' || order.payment_method === 'card_on_delivery') && (
             <a href={`/api/invoice/${order.id}`} target="_blank" rel="noreferrer">
               <Button size="sm" variant="outline" className="border-[#cce7f0] text-[#4a7fa5] hover:text-[#0097a7] gap-1.5">
                 <Download className="w-3.5 h-3.5" /> Invoice

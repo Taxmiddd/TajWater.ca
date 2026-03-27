@@ -40,7 +40,7 @@ export async function GET(
   const { data: order, error } = await db
     .from('orders')
     .select(`
-      id, user_id, total, payment_status, delivery_address, customer_name, customer_phone, created_at,
+      id, user_id, total, payment_status, payment_method, delivery_address, customer_name, customer_phone, created_at,
       tax_amount, discount_amount, notes,
       zones ( name ),
       order_items ( id, quantity, price, products ( name ) ),
@@ -63,7 +63,7 @@ export async function GET(
   const { data: contentRows } = await db
     .from('site_content')
     .select('key, value')
-    .in('key', ['company_name', 'company_address', 'company_phone', 'company_email', 'company_website'])
+    .in('key', ['settings_company', 'settings_address', 'settings_phone', 'settings_email'])
 
   const content: Record<string, string> = {}
   for (const row of (contentRows ?? [])) {
@@ -71,11 +71,11 @@ export async function GET(
   }
 
   const companyInfo = {
-    name:    content['company_name']    ?? 'TajWater',
-    address: content['company_address'] ?? 'Metro Vancouver, BC, Canada',
-    phone:   content['company_phone']   ?? process.env.NEXT_PUBLIC_COMPANY_PHONE ?? '',
-    email:   content['company_email']   ?? process.env.NEXT_PUBLIC_COMPANY_EMAIL ?? '',
-    website: content['company_website'] ?? (process.env.NEXT_PUBLIC_SITE_URL ?? 'tajwater.ca'),
+    name:    content['settings_company'] ?? 'Taj Water LTD.',
+    address: content['settings_address'] ?? '1770 McLean Ave, Port Coquitlam, BC V3C 4K8, Canada',
+    phone:   content['settings_phone']   ?? process.env.NEXT_PUBLIC_COMPANY_PHONE ?? '',
+    email:   content['settings_email']   ?? 'billing@tajwater.ca',
+    website: 'tajwater.ca',
   }
 
   const pdfBuffer = await generateInvoicePDF(orderData as InvoiceOrderData, companyInfo)
