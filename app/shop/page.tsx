@@ -87,36 +87,38 @@ export default function ShopPage() {
       <section className="py-12 bg-[#f0f9ff]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Toolbar */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-8">
+          <div className="flex flex-col md:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8">
             <div className="relative flex-1">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#0097a7]" />
-              <Input placeholder="Search products..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 h-11 border-[#cce7f0] bg-white" />
+              <Input placeholder="Search products..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 h-11 border-[#cce7f0] bg-white text-base" />
             </div>
-            <select value={sort} onChange={(e) => setSort(e.target.value)} className="h-11 px-4 rounded-xl border border-[#cce7f0] bg-white text-[#0c2340] text-sm focus:border-[#0097a7] focus:outline-none">
-              <option value="default">Sort: Featured</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-            </select>
-            <Link href="/checkout">
-              <Button className="h-11 gap-2 bg-gradient-to-r from-[#0097a7] to-[#1565c0] text-white font-semibold px-5 relative">
-                <ShoppingCart className="w-4 h-4" />
-                Cart
-                {_hasHydrated && count() > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white text-[#0097a7] text-[10px] font-bold flex items-center justify-center">
-                    {count()}
-                  </span>
-                )}
-              </Button>
-            </Link>
+            <div className="flex gap-2 sm:gap-4">
+              <select value={sort} onChange={(e) => setSort(e.target.value)} className="flex-1 md:flex-none h-11 px-3 sm:px-4 rounded-xl border border-[#cce7f0] bg-white text-[#0c2340] text-sm focus:border-[#0097a7] focus:outline-none">
+                <option value="default">Sort: Featured</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+              </select>
+              <Link href="/checkout" className="flex-1 md:flex-none">
+                <Button className="w-full h-11 gap-2 bg-gradient-to-r from-[#0097a7] to-[#1565c0] text-white font-semibold px-5 relative">
+                  <ShoppingCart className="w-4 h-4" />
+                  <span className="hidden sm:inline">Cart</span>
+                  {_hasHydrated && count() > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white text-[#0097a7] text-[10px] font-bold flex items-center justify-center border-2 border-[#f0f9ff]">
+                      {count()}
+                    </span>
+                  )}
+                </Button>
+              </Link>
+            </div>
           </div>
 
           {/* Category tabs */}
-          <div className="flex flex-wrap gap-2 mb-8">
+          <div className="flex overflow-x-auto pb-4 sm:pb-0 sm:flex-wrap gap-2 mb-8 no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
             {categories.map((cat) => (
               <button key={cat} onClick={() => setCategory(cat)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${category === cat
-                    ? 'bg-[#0097a7] text-white shadow-lg shadow-[#0097a7]/30'
-                    : 'bg-white border border-[#cce7f0] text-[#4a7fa5] hover:border-[#0097a7] hover:text-[#0097a7]'
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap ${category === cat
+                  ? 'bg-[#0097a7] text-white shadow-lg shadow-[#0097a7]/30'
+                  : 'bg-white border border-[#cce7f0] text-[#4a7fa5] hover:border-[#0097a7] hover:text-[#0097a7]'
                   }`}>
                 {cat === 'all' ? '🌊 All' : `${categoryEmoji[cat] ?? '📦'} ${cat.charAt(0).toUpperCase() + cat.slice(1)}`}
               </button>

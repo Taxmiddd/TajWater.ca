@@ -64,7 +64,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.7 }}
-            className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white leading-tight mb-6"
+            className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-white leading-[1.15] mb-6"
           >
             Pure Water,
             <br />
@@ -113,24 +113,19 @@ export default function Hero() {
           </motion.div>
 
           {/* Quick stats */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.7 }}
-            className="flex flex-wrap gap-6 mt-12"
-          >
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-4 sm:gap-6 mt-12">
             {[
               { value: '5,000+', label: 'Happy Customers' },
               { value: '10', label: 'Delivery Zones' },
               { value: '15+', label: 'Years Serving BC' },
               { value: '24h', label: 'Delivery Window' },
             ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <p className="text-2xl font-extrabold text-white">{stat.value}</p>
-                <p className="text-xs text-[#b3e5fc] uppercase tracking-wider">{stat.label}</p>
+              <div key={stat.label} className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-0 sm:bg-transparent sm:backdrop-blur-none sm:text-center">
+                <p className="text-xl sm:text-2xl font-extrabold text-white">{stat.value}</p>
+                <p className="text-[10px] sm:text-xs text-[#b3e5fc] uppercase tracking-wider">{stat.label}</p>
               </div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </div>
 

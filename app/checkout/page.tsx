@@ -185,19 +185,19 @@ export default function CheckoutPage() {
   const displayTotal = serverTotal ?? orderTotal
 
   const StepIndicator = () => (
-    <div className="flex items-center justify-center gap-2 mb-10">
+    <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-8 sm:mb-10">
       {(['cart', 'address', 'payment'] as Step[]).map((s, i) => (
-        <div key={s} className="flex items-center gap-2">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${step === s ? 'bg-[#0097a7] text-white' :
-              ['cart', 'address', 'payment', 'confirmed'].indexOf(step) > i ? 'bg-[#e0f7fa] text-[#0097a7]' :
-                'bg-[#f0f9ff] text-[#4a7fa5] border border-[#cce7f0]'
+        <div key={s} className="flex items-center gap-1.5 sm:gap-2">
+          <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold transition-all ${step === s ? 'bg-[#0097a7] text-white' :
+            ['cart', 'address', 'payment', 'confirmed'].indexOf(step) > i ? 'bg-[#e0f7fa] text-[#0097a7]' :
+              'bg-[#f0f9ff] text-[#4a7fa5] border border-[#cce7f0]'
             }`}>
             {['cart', 'address', 'payment', 'confirmed'].indexOf(step) > i ? '✓' : i + 1}
           </div>
-          <span className={`text-sm font-medium hidden sm:block ${step === s ? 'text-[#0097a7]' : 'text-[#4a7fa5]'}`}>
+          <span className={`text-xs sm:text-sm font-medium ${step === s ? 'text-[#0097a7]' : 'text-[#4a7fa5]'} ${step !== s && 'hidden sm:block'}`}>
             {s.charAt(0).toUpperCase() + s.slice(1)}
           </span>
-          {i < 2 && <div className="w-8 h-0.5 bg-[#cce7f0]" />}
+          {i < 2 && <div className="w-4 sm:w-8 h-px sm:h-0.5 bg-[#cce7f0]" />}
         </div>
       ))}
     </div>
