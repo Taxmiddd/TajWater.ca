@@ -15,7 +15,7 @@ import type { Product } from '@/types'
 const categories = ['water', 'equipment', 'subscription', 'accessories']
 const categoryEmoji: Record<string, string> = { water: '💧', equipment: '🔧', subscription: '🔄', accessories: '🧹' }
 
-const empty: Omit<Product, 'id'> = { name: '', description: '', price: 0, image_url: '', stock: 0, category: 'water', active: true }
+const empty: Omit<Product, 'id'> = { name: '', description: '', price: 0, image_url: '', stock: 0, category: 'water', active: true, featured: false }
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
@@ -26,10 +26,10 @@ export default function AdminProductsPage() {
   const [form, setForm] = useState<Omit<Product, 'id'>>(empty)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
-  const [toast, setToast]           = useState('')
+  const [toast, setToast] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [lowThreshold, setLowThreshold] = useState(20)
-  const [stockFilter, setStockFilter]   = useState<'all' | 'low' | 'out'>('all')
+  const [stockFilter, setStockFilter] = useState<'all' | 'low' | 'out'>('all')
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 3000) }
 
@@ -66,7 +66,7 @@ export default function AdminProductsPage() {
   }
 
   const openAdd = () => { setEditing(null); setForm(empty); setDialogOpen(true) }
-  const openEdit = (p: Product) => { setEditing(p); setForm({ name: p.name, description: p.description, price: p.price, image_url: p.image_url, stock: p.stock, category: p.category, active: p.active }); setDialogOpen(true) }
+  const openEdit = (p: Product) => { setEditing(p); setForm({ name: p.name, description: p.description, price: p.price, image_url: p.image_url, stock: p.stock, category: p.category, active: p.active, featured: p.featured || false }); setDialogOpen(true) }
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -102,6 +102,12 @@ export default function AdminProductsPage() {
     setProducts((prev) => prev.map((x) => x.id === p.id ? { ...x, active: !x.active } : x))
   }
 
+  const toggleFeatured = async (p: Product) => {
+    await supabase.from('products').update({ featured: !p.featured }).eq('id', p.id)
+    setProducts((prev) => prev.map((x) => x.id === p.id ? { ...x, featured: !x.featured } : x))
+    showToast(p.featured ? 'Removed from featured.' : 'Marked as featured!')
+  }
+
   const handleDelete = async (id: string) => {
     if (!confirm('Archive this product? It will be hidden from the shop but order history is preserved.')) return
     await supabase.from('products').update({ active: false }).eq('id', id)
@@ -114,8 +120,8 @@ export default function AdminProductsPage() {
       p.category.toLowerCase().includes(search.toLowerCase())
     const matchStock =
       stockFilter === 'all' ? true :
-      stockFilter === 'out' ? p.stock === 0 :
-      p.stock > 0 && p.stock < lowThreshold
+        stockFilter === 'out' ? p.stock === 0 :
+          p.stock > 0 && p.stock < lowThreshold
     return matchSearch && matchStock
   })
 
@@ -149,9 +155,9 @@ export default function AdminProductsPage() {
       {!loading && (
         <div className="grid grid-cols-3 gap-4">
           {[
-            { label: 'Total SKUs',    value: products.length,  color: '#0097a7', bg: '#e0f7fa' },
-            { label: 'Low Stock',     value: lowStockCount,    color: '#d97706', bg: '#fef3c7' },
-            { label: 'Out of Stock',  value: outOfStockCount,  color: '#dc2626', bg: '#fef2f2' },
+            { label: 'Total SKUs', value: products.length, color: '#0097a7', bg: '#e0f7fa' },
+            { label: 'Low Stock', value: lowStockCount, color: '#d97706', bg: '#fef3c7' },
+            { label: 'Out of Stock', value: outOfStockCount, color: '#dc2626', bg: '#fef2f2' },
           ].map((s, i) => (
             <motion.div key={s.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
               className="bg-white rounded-2xl p-4 border border-[#cce7f0] shadow-sm flex items-center gap-3">
@@ -176,9 +182,8 @@ export default function AdminProductsPage() {
         <div className="flex gap-2">
           {(['all', 'low', 'out'] as const).map(f => (
             <button key={f} onClick={() => setStockFilter(f)}
-              className={`px-3 py-2 rounded-xl text-xs font-medium transition-all capitalize ${
-                stockFilter === f ? 'bg-[#0097a7] text-white' : 'bg-white border border-[#cce7f0] text-[#4a7fa5] hover:border-[#0097a7]'
-              }`}>
+              className={`px-3 py-2 rounded-xl text-xs font-medium transition-all capitalize ${stockFilter === f ? 'bg-[#0097a7] text-white' : 'bg-white border border-[#cce7f0] text-[#4a7fa5] hover:border-[#0097a7]'
+                }`}>
               {f === 'all' ? 'All' : f === 'low' ? 'Low Stock' : 'Out of Stock'}
             </button>
           ))}
@@ -211,6 +216,11 @@ export default function AdminProductsPage() {
                     <Badge className={product.active ? 'bg-green-100 text-green-700 text-[10px]' : 'bg-[#f0f9ff] text-[#4a7fa5] text-[10px]'}>
                       {product.active ? 'Active' : 'Inactive'}
                     </Badge>
+                    {product.featured && (
+                      <Badge className="bg-amber-100 text-amber-700 text-[10px] flex items-center gap-1">
+                        ★ Featured
+                      </Badge>
+                    )}
                   </div>
                 </div>
                 <div className="flex gap-1">
@@ -257,6 +267,10 @@ export default function AdminProductsPage() {
                 <span className="text-[10px] text-[#4a7fa5] ml-1">units</span>
               </div>
 
+              <button onClick={() => toggleFeatured(product)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${product.featured ? 'bg-amber-50 border-amber-200 text-amber-600' : 'border-[#cce7f0] text-[#4a7fa5] hover:border-amber-300'}`}>
+                {product.featured ? 'Unfeature' : 'Feature'}
+              </button>
               <button onClick={() => toggleActive(product)}
                 className={`w-full py-1.5 rounded-xl text-xs font-medium border transition-colors ${product.active ? 'border-amber-200 text-amber-600 hover:bg-amber-50' : 'border-green-200 text-green-600 hover:bg-green-50'}`}>
                 {product.active ? 'Deactivate' : 'Activate'}
@@ -325,6 +339,10 @@ export default function AdminProductsPage() {
             <div className="flex items-center gap-3 pt-1">
               <input type="checkbox" id="active" checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} className="w-4 h-4 accent-[#0097a7]" />
               <label htmlFor="active" className="text-sm text-[#0c2340]">Active (visible on shop)</label>
+            </div>
+            <div className="flex items-center gap-3">
+              <input type="checkbox" id="featured" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} className="w-4 h-4 accent-amber-500" />
+              <label htmlFor="featured" className="text-sm text-[#0c2340]">Featured (shown on home page)</label>
             </div>
             <div className="flex gap-3 pt-2">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="flex-1 border-[#cce7f0]">Cancel</Button>

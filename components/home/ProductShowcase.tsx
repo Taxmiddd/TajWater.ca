@@ -45,14 +45,27 @@ export default function ProductShowcase() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    supabase
       .from('products')
       .select('*')
       .eq('active', true)
+      .eq('featured', true)
       .limit(3)
       .then(({ data }) => {
-        if (data) setProductList(data)
-        setLoading(false)
+        if (data && data.length > 0) {
+          setProductList(data)
+          setLoading(false)
+        } else {
+          // Fallback if no featured products
+          supabase
+            .from('products')
+            .select('*')
+            .eq('active', true)
+            .limit(3)
+            .then(({ data: fallbackData }) => {
+              if (fallbackData) setProductList(fallbackData)
+              setLoading(false)
+            })
+        }
       })
   }, [])
 
