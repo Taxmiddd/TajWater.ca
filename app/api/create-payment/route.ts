@@ -117,18 +117,18 @@ export async function POST(req: NextRequest) {
     const { data: order, error: orderError } = await db
       .from('orders')
       .insert({
-        user_id:          userId ?? null,
-        status:           'pending',
-        payment_status:   'pending',
-        total:            serverTotal,
+        user_id: userId ?? null,
+        status: 'pending',
+        payment_status: 'pending',
+        total: serverTotal,
         delivery_address: deliveryAddress,
-        zone_id:          zoneId,
-        customer_name:    address?.name  ?? null,
-        customer_phone:    address?.phone ?? null,
-        notes:             notes ?? null,
-        tax_amount:        taxAmount,
-        discount_code_id:  validatedDiscountCodeId,
-        discount_amount:   discountAmt,
+        zone_id: zoneId,
+        customer_name: address?.name ?? null,
+        customer_phone: address?.phone ?? null,
+        notes: notes ?? null,
+        tax_amount: taxAmount,
+        discount_code_id: validatedDiscountCodeId,
+        discount_amount: discountAmt,
       })
       .select('id')
       .single()
@@ -140,10 +140,10 @@ export async function POST(req: NextRequest) {
 
     // 9. Create order_items using server-validated prices
     const orderItems = (items as CartItem[]).map(item => ({
-      order_id:   order.id,
+      order_id: order.id,
       product_id: item.product_id,
-      quantity:   item.quantity,
-      price:      item.subscribeFrequency
+      quantity: item.quantity,
+      price: item.subscribeFrequency
         ? Math.round(priceMap[item.product_id] * (1 - SUBSCRIBE_DISCOUNT) * 100) / 100
         : priceMap[item.product_id],
     }))
@@ -160,13 +160,13 @@ export async function POST(req: NextRequest) {
           const nextDelivery = new Date(now)
           nextDelivery.setDate(now.getDate() + (freq === 'weekly' ? 7 : freq === 'biweekly' ? 14 : 30))
           return {
-            user_id:       userId,
-            product_id:    item.product_id,
-            frequency:     freq,
-            quantity:      item.quantity,
-            zone_id:       zoneId,
-            price:         Math.round(priceMap[item.product_id] * (1 - SUBSCRIBE_DISCOUNT) * 100) / 100,
-            status:        'active',
+            user_id: userId,
+            product_id: item.product_id,
+            frequency: freq,
+            quantity: item.quantity,
+            zone_id: zoneId,
+            price: Math.round(priceMap[item.product_id] * (1 - SUBSCRIBE_DISCOUNT) * 100) / 100,
+            status: 'active',
             next_delivery: nextDelivery.toISOString(),
           }
         })
@@ -180,7 +180,7 @@ export async function POST(req: NextRequest) {
     const amountCents = Math.round(serverTotal * 100)
     const idempotencyKey = crypto.randomUUID()
 
-    const { result } = await square.paymentsApi.createPayment({
+    const { result } = await square.payments.create({
       sourceId,
       idempotencyKey,
       amountMoney: {
@@ -231,8 +231,8 @@ export async function POST(req: NextRequest) {
         .single()
 
       if (fullOrder) {
-        const profile  = fullOrder.profiles as { name?: string; email?: string } | null
-        const toEmail  = profile?.email ?? address?.email ?? null
+        const profile = fullOrder.profiles as { name?: string; email?: string } | null
+        const toEmail = profile?.email ?? address?.email ?? null
 
         // Check notification preference + fetch email templates
         const { data: contentRows } = await db.from('site_content').select('key, value')
@@ -242,55 +242,55 @@ export async function POST(req: NextRequest) {
         const confirmNotifEnabled = contentMap['notif_order_confirmation'] !== 'false'
 
         if (toEmail && confirmNotifEnabled) {
-          const resend    = new Resend(process.env.RESEND_API_KEY)
+          const resend = new Resend(process.env.RESEND_API_KEY)
           const fromEmail = process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev'
-          type RawItem    = { quantity: number; price: number; products: { name: string } | null }
-          const subject   = contentMap['email_confirmation_subject'] || `Your TajWater Order #${fullOrder.id.slice(0, 8).toUpperCase()} is Confirmed`
+          type RawItem = { quantity: number; price: number; products: { name: string } | null }
+          const subject = contentMap['email_confirmation_subject'] || `Your TajWater Order #${fullOrder.id.slice(0, 8).toUpperCase()} is Confirmed`
           const html = buildOrderConfirmationEmail({
-            id:              fullOrder.id,
-            customerName:    profile?.name ?? fullOrder.customer_name ?? 'Valued Customer',
-            items:           ((fullOrder.order_items ?? []) as unknown as RawItem[]).map(i => ({ name: i.products?.name ?? 'Product', qty: i.quantity, price: i.price })),
-            total:           fullOrder.total,
+            id: fullOrder.id,
+            customerName: profile?.name ?? fullOrder.customer_name ?? 'Valued Customer',
+            items: ((fullOrder.order_items ?? []) as unknown as RawItem[]).map(i => ({ name: i.products?.name ?? 'Product', qty: i.quantity, price: i.price })),
+            total: fullOrder.total,
             deliveryAddress: fullOrder.delivery_address ?? null,
-            zone:            (fullOrder.zones as { name?: string } | null)?.name ?? null,
-            greeting:        contentMap['email_confirmation_greeting'] || undefined,
-            taxAmount:       (fullOrder as { tax_amount?: number }).tax_amount ?? undefined,
-            discountAmount:  (fullOrder as { discount_amount?: number }).discount_amount ?? undefined,
+            zone: (fullOrder.zones as { name?: string } | null)?.name ?? null,
+            greeting: contentMap['email_confirmation_greeting'] || undefined,
+            taxAmount: (fullOrder as { tax_amount?: number }).tax_amount ?? undefined,
+            discountAmount: (fullOrder as { discount_amount?: number }).discount_amount ?? undefined,
           })
 
           // Generate invoice PDF attachment
           let pdfAttachment: { filename: string; content: string } | undefined
           try {
             const invoiceCompanyInfo = {
-              name:    'TajWater',
+              name: 'TajWater',
               address: 'Metro Vancouver, BC, Canada',
-              phone:   process.env.NEXT_PUBLIC_COMPANY_PHONE ?? '',
-              email:   process.env.NEXT_PUBLIC_COMPANY_EMAIL ?? '',
+              phone: process.env.NEXT_PUBLIC_COMPANY_PHONE ?? '',
+              email: process.env.NEXT_PUBLIC_COMPANY_EMAIL ?? '',
               website: process.env.NEXT_PUBLIC_SITE_URL ?? 'tajwater.ca',
             }
             const invoiceOrder: InvoiceOrderData = {
-              id:               fullOrder.id,
-              total:            fullOrder.total,
-              payment_status:   'paid',
+              id: fullOrder.id,
+              total: fullOrder.total,
+              payment_status: 'paid',
               delivery_address: fullOrder.delivery_address ?? null,
-              customer_name:    fullOrder.customer_name ?? null,
-              customer_phone:   null,
-              created_at:       new Date().toISOString(),
-              zones:            Array.isArray(fullOrder.zones) ? (fullOrder.zones[0] ?? null) : (fullOrder.zones as { name: string } | null) ?? null,
-              order_items:      ((fullOrder.order_items ?? []) as unknown as RawItem[]).map(i => ({
-                id:       crypto.randomUUID(),
+              customer_name: fullOrder.customer_name ?? null,
+              customer_phone: null,
+              created_at: new Date().toISOString(),
+              zones: Array.isArray(fullOrder.zones) ? (fullOrder.zones[0] ?? null) : (fullOrder.zones as { name: string } | null) ?? null,
+              order_items: ((fullOrder.order_items ?? []) as unknown as RawItem[]).map(i => ({
+                id: crypto.randomUUID(),
                 quantity: i.quantity,
-                price:    i.price,
+                price: i.price,
                 products: i.products ? { name: i.products.name } : null,
               })),
-              profiles:         profile ? { name: profile.name ?? '', email: profile.email ?? '' } : null,
-              tax_amount:       (fullOrder as { tax_amount?: number }).tax_amount ?? null,
-              discount_amount:  (fullOrder as { discount_amount?: number }).discount_amount ?? null,
+              profiles: profile ? { name: profile.name ?? '', email: profile.email ?? '' } : null,
+              tax_amount: (fullOrder as { tax_amount?: number }).tax_amount ?? null,
+              discount_amount: (fullOrder as { discount_amount?: number }).discount_amount ?? null,
             }
             const pdfBuf = await generateInvoicePDF(invoiceOrder, invoiceCompanyInfo)
             pdfAttachment = {
               filename: `INV-${fullOrder.id.slice(-8).toUpperCase()}.pdf`,
-              content:  pdfBuf.toString('base64'),
+              content: pdfBuf.toString('base64'),
             }
           } catch (pdfErr) {
             console.error('Invoice PDF generation failed:', pdfErr)
@@ -301,8 +301,8 @@ export async function POST(req: NextRequest) {
           let emailError: string | undefined
           try {
             const emailResult = await resend.emails.send({
-              from:        fromEmail,
-              to:          toEmail,
+              from: fromEmail,
+              to: toEmail,
               subject,
               html,
               attachments: pdfAttachment ? [{ filename: pdfAttachment.filename, content: pdfAttachment.content }] : undefined,
@@ -310,19 +310,19 @@ export async function POST(req: NextRequest) {
             resendId = emailResult.data?.id
           } catch (e) {
             emailStatus = 'failed'
-            emailError  = String(e)
+            emailError = String(e)
           }
 
           await db.from('email_logs').insert({
-            user_id:         fullOrder.user_id ?? null,
+            user_id: fullOrder.user_id ?? null,
             recipient_email: toEmail,
-            email_type:      'order_confirmation',
+            email_type: 'order_confirmation',
             subject,
-            status:          emailStatus,
-            resend_id:       resendId ?? null,
-            error_message:   emailError ?? null,
-            sent_by:         null,
-            metadata:        { order_id: fullOrder.id },
+            status: emailStatus,
+            resend_id: resendId ?? null,
+            error_message: emailError ?? null,
+            sent_by: null,
+            metadata: { order_id: fullOrder.id },
           })
         }
       }
@@ -332,8 +332,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({
-      success:        true,
-      orderId:        order.id,
+      success: true,
+      orderId: order.id,
       serverTotal,
       taxAmount,
       deliveryFee,

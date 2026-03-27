@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     const square = getSquareClient()
     const amountCents = Math.round(Number(order.total) * 100)
 
-    const { result } = await square.paymentsApi.createPayment({
+    const { result } = await square.payments.create({
       sourceId,
       idempotencyKey: crypto.randomUUID(),
       amountMoney: {

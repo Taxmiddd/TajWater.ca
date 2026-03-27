@@ -1,5 +1,3 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getSquareClient } from '@/lib/square'
 import { createServerClient } from '@/lib/supabase'
 import { createServerClient as createSsrClient } from '@supabase/ssr'
 
@@ -11,7 +9,7 @@ export async function POST(req: NextRequest) {
     {
       cookies: {
         getAll: () => req.cookies.getAll(),
-        setAll: () => {},
+        setAll: () => { },
       },
     }
   )
@@ -56,24 +54,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Order already refunded' }, { status: 400 })
   }
 
+  // Automated refund removed — process manually in Square Dashboard
   const refundAmount = amount ?? order.total
-  const refundCents = Math.round(refundAmount * 100)
-
-  try {
-    const square = getSquareClient()
-    await square.refundsApi.refundPayment({
-      paymentId: order.square_payment_id,
-      idempotencyKey: crypto.randomUUID(),
-      amountMoney: {
-        amount: BigInt(refundCents),
-        currency: 'CAD',
-      },
-    })
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Square refund failed'
-    console.error('Square refund error:', err)
-    return NextResponse.json({ error: message }, { status: 500 })
-  }
 
   // Update order
   await db
