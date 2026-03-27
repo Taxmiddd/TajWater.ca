@@ -4,11 +4,32 @@ import { motion, useScroll, useTransform } from 'framer-motion'
 import Link from 'next/link'
 import { ArrowRight, Play, Droplets, ChevronDown } from 'lucide-react'
 import WaterBackground from '@/components/shared/WaterBackground'
+import { supabase } from '@/lib/supabase'
 
 export default function Hero() {
   const { scrollY } = useScroll()
+  const [services, setServices] = useState<string[]>([])
+
   // Very subtle — blobs drift 40px up over first 500px of scroll
   const blobY = useTransform(scrollY, [0, 500], [0, -40])
+
+  useEffect(() => {
+    supabase
+      .from('services')
+      .select('title')
+      .eq('active', true)
+      .order('sort_order')
+      .limit(3)
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setServices(data.map(s => s.title))
+        }
+      })
+  }, [])
+
+  const description = services.length > 0
+    ? `${services.join(', ')} across Metro Vancouver. Fresh, clean, and on time — every time.`
+    : 'Premium 5 Gallon water delivery, filtration installation, and commercial supply across Metro Vancouver. Fresh, clean, and on time — every time.'
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden hero-gradient">
@@ -77,9 +98,9 @@ export default function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.35 }}
-            className="text-lg sm:text-xl text-[#b3e5fc] mb-10 max-w-xl leading-relaxed"
+            className="text-lg sm:text-xl text-[#b3e5fc] mb-10 max-w-xl leading-relaxed min-h-[3.5rem]"
           >
-            Premium 5 Gallon water delivery, filtration installation, and commercial supply across Metro Vancouver. Fresh, clean, and on time — every time.
+            {description}
           </motion.p>
 
           {/* CTAs */}
