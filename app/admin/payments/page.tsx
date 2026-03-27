@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   DollarSign, TrendingUp, Clock, XCircle, Download,
   RefreshCw, Search, CheckCircle2, Package, CreditCard,
-  RotateCcw, AlertTriangle, ExternalLink
+  RotateCcw, AlertTriangle, ExternalLink, Trash2
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -89,6 +89,39 @@ export default function PaymentsPage() {
     ))
     setRefundDlg(null)
     showToast(`Refund of $${amt.toFixed(2)} processed`)
+  }
+
+  const handleCleanup = async () => {
+    const pendingCount = txns.filter(t => (t.payment_status ?? 'pending') === 'pending').length
+    if (pendingCount === 0) {
+      showToast('No pending orders to clean up')
+      return
+    }
+    if (!confirm(`Delete all ${pendingCount} pending test orders? This cannot be undone.`)) return
+    
+    setLoading(true)
+    try {
+      // 1. Get IDs of pending orders
+      const pendingIds = txns
+        .filter(t => (t.payment_status ?? 'pending') === 'pending')
+        .map(t => t.id)
+
+      // 2. Delete order_items first
+      await supabase.from('order_items').delete().in('order_id', pendingIds)
+
+      // 3. Delete orders
+      const { error } = await supabase.from('orders').delete().in('id', pendingIds)
+
+      if (error) throw error
+
+      setTxns(prev => prev.filter(t => !pendingIds.includes(t.id)))
+      showToast(`Cleaned up ${pendingCount} orders`)
+    } catch (err) {
+      console.error('Cleanup error:', err)
+      showToast('Cleanup failed')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const fetchData = async () => {
@@ -213,6 +246,9 @@ export default function PaymentsPage() {
           <p className="text-sm text-[#4a7fa5]">Square-powered · auto-updated via webhooks · live from Supabase</p>
         </div>
         <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={handleCleanup} className="border-red-200 text-red-500 hover:bg-red-50 gap-2">
+            <Trash2 className="w-4 h-4" /> Cleanup Pending
+          </Button>
           <Button size="sm" variant="outline" onClick={fetchData} className="border-[#cce7f0] text-[#4a7fa5]">
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </Button>

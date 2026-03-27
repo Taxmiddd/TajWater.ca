@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search, Download, Eye, Truck, CheckCircle2, Clock, Package,
-  XCircle, RefreshCw, User, MapPin, ShoppingBag, FileText, UserCheck
+  XCircle, RefreshCw, User, MapPin, ShoppingBag, FileText, UserCheck, Trash2
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -104,6 +104,36 @@ export default function AdminOrdersPage() {
 
     setOrders(orderRows.map(o => ({ ...o, profile: o.user_id ? (profileMap[o.user_id] ?? null) : null })))
     setLoading(false)
+  }
+
+  const handleCleanup = async () => {
+    const pendingCount = orders.filter(o => o.status === 'pending').length
+    if (pendingCount === 0) {
+      showToast('No pending orders to clean up')
+      return
+    }
+    if (!confirm(`Delete all ${pendingCount} pending test orders? This cannot be undone.`)) return
+
+    setLoading(true)
+    try {
+      const pendingIds = orders.filter(o => o.status === 'pending').map(o => o.id)
+      
+      // Delete items first
+      await supabase.from('order_items').delete().in('order_id', pendingIds)
+      
+      // Delete orders
+      const { error } = await supabase.from('orders').delete().in('id', pendingIds)
+      
+      if (error) throw error
+      
+      setOrders(prev => prev.filter(o => !pendingIds.includes(o.id)))
+      showToast(`Cleaned up ${pendingCount} orders`)
+    } catch (err) {
+      console.error('Cleanup error:', err)
+      showToast('Cleanup failed')
+    } finally {
+      setLoading(false)
+    }
   }
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -258,6 +288,9 @@ export default function AdminOrdersPage() {
           <p className="text-sm text-[#4a7fa5]">{orders.length} total orders · live from Supabase</p>
         </div>
         <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={handleCleanup} className="border-red-200 text-red-500 hover:bg-red-50 gap-2">
+            <Trash2 className="w-4 h-4" /> Cleanup Pending
+          </Button>
           <Button size="sm" variant="outline" onClick={fetchOrders} className="border-[#cce7f0] text-[#4a7fa5]">
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </Button>
