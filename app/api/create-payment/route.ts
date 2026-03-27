@@ -233,12 +233,16 @@ export async function POST(req: NextRequest) {
     try {
       const { data: fullOrder } = await db
         .from('orders')
-        .select('id, total, delivery_address, customer_name, payment_method, payment_status, user_id, tax_amount, discount_amount, created_at, zones(name), order_items(quantity, price, products(name)), profiles:user_id(name, email)')
+        .select('id, total, delivery_address, customer_name, payment_method, payment_status, user_id, tax_amount, discount_amount, created_at, zones(name), order_items(quantity, price, products(name))')
         .eq('id', order.id)
         .single()
 
       if (fullOrder) {
-        const profile = fullOrder.profiles as { name?: string; email?: string } | null
+        let profile = null
+        if (fullOrder.user_id) {
+          const { data: p } = await db.from('profiles').select('name, email').eq('id', fullOrder.user_id).maybeSingle()
+          profile = p
+        }
         const toEmail = profile?.email ?? address?.email ?? null
 
         // Check notification preference + fetch email templates + admin settings

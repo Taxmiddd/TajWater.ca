@@ -36,26 +36,41 @@ export async function GET(
     .eq('email', session.user.email ?? '')
     .maybeSingle()
 
-  // Fetch order with related data
-  const { data: order, error } = await db
+  // 1. Fetch order with related data (excluding profiles join which fails in schema cache)
+  const { data: order, error: orderError } = await db
     .from('orders')
     .select(`
       id, user_id, total, payment_status, payment_method, delivery_address, customer_name, customer_phone, created_at,
       tax_amount, discount_amount, notes,
       zones ( name ),
-      order_items ( id, quantity, price, products ( name ) ),
-      profiles:user_id ( name, email )
+      order_items ( id, quantity, price, products ( name ) )
     `)
     .eq('id', orderId)
     .single()
 
-  if (error || !order) {
-    return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+  if (orderError || !order) {
+    console.error('Invoice API Order Error:', orderError)
+    return NextResponse.json({ error: 'Order not found', details: orderError?.message }, { status: 404 })
   }
 
-  // Verify ownership: must be the order owner or an admin
-  const orderData = order as unknown as InvoiceOrderData & { user_id: string | null }
-  if (!adminRow && orderData.user_id !== session.user.id) {
+  // 2. Fetch profile separately if user_id exists
+  let profileData = null
+  const anyOrder = order as any
+  if (anyOrder.user_id) {
+    const { data: p } = await db
+      .from('profiles')
+      .select('name, email')
+      .eq('id', anyOrder.user_id)
+      .maybeSingle()
+    profileData = p
+  }
+
+  const orderData: InvoiceOrderData = {
+    ...(order as any),
+    profiles: profileData
+  }
+
+  if (!adminRow && anyOrder.user_id && anyOrder.user_id !== session.user.id) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

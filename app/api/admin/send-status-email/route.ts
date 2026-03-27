@@ -42,24 +42,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ skipped: true, reason: 'notification disabled' })
     }
 
-    // Fetch order + customer info
-    const { data: order } = await db
-      .from('orders')
-      .select('id, customer_name, customer_email: profiles!inner(email), zone_id, zones(name)')
-      .eq('id', orderId)
-      .single()
-
-    if (!order) return NextResponse.json({ error: 'Order not found' }, { status: 404 })
-
-    const customerName = (order as { customer_name?: string }).customer_name ?? 'Customer'
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const customerEmail = (order as unknown as { profiles?: { email: string } | null })
-    // Fallback: fetch profile email via order directly
+    // Fetch order + customer info via separate queries to avoid schema relationship errors
     const { data: fullOrder } = await db
       .from('orders')
-      .select('id, customer_name, zone_id, user_id, zones(name)')
+      .select('id, customer_name, zone_id, user_id, zones(name), total, payment_status, payment_method, delivery_address, created_at')
       .eq('id', orderId)
       .single()
+
+    if (!fullOrder) return NextResponse.json({ error: 'Order not found' }, { status: 404 })
 
     if (!fullOrder?.user_id) return NextResponse.json({ skipped: true, reason: 'no user_id' })
 
