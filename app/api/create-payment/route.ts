@@ -14,11 +14,13 @@ export async function POST(req: NextRequest) {
 
   try {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { amount, items, address, userId, notes, discountCodeId, discountAmount: clientDiscountAmount, sourceId } = await req.json()
+    const { amount, items, address, userId, notes, discountCodeId, discountAmount: clientDiscountAmount, sourceId, paymentMethod = 'square_online' } = await req.json()
     type CartItem = { product_id: string; quantity: number; subscribeFrequency?: 'weekly' | 'biweekly' | 'monthly' }
     type RawItem = { quantity: number; price: number; products: { name: string } | null }
 
-    if (!sourceId) {
+    const isOffline = paymentMethod === 'cash_on_delivery' || paymentMethod === 'card_on_delivery'
+
+    if (!sourceId && !isOffline) {
       return NextResponse.json({ error: 'Payment source token is required' }, { status: 400 })
     }
 
@@ -129,6 +131,7 @@ export async function POST(req: NextRequest) {
         tax_amount: taxAmount,
         discount_code_id: validatedDiscountCodeId,
         discount_amount: discountAmt,
+        payment_method: paymentMethod,
       })
       .select('id')
       .single()
@@ -175,36 +178,40 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 10. Create Square payment with the nonce token
-    const square = getSquareClient()
-    const amountCents = Math.round(serverTotal * 100)
-    const idempotencyKey = crypto.randomUUID()
+    // 10. Process Square payment ONLY if online
+    let squarePaymentId: string | null = null
+    if (!isOffline) {
+      const square = getSquareClient()
+      const amountCents = Math.round(serverTotal * 100)
+      const idempotencyKey = crypto.randomUUID()
 
-    const response = await square.payments.create({
-      sourceId,
-      idempotencyKey,
-      amountMoney: {
-        amount: BigInt(amountCents),
-        currency: 'CAD',
-      },
-      locationId: process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID!,
-      referenceId: order.id,
-      note: `TajWater order ${order.id.slice(-8).toUpperCase()}`,
-    })
+      const response = await square.payments.create({
+        sourceId: sourceId!,
+        idempotencyKey,
+        amountMoney: {
+          amount: BigInt(amountCents),
+          currency: 'CAD',
+        },
+        locationId: process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID!,
+        referenceId: order.id,
+        note: `TajWater order ${order.id.slice(-8).toUpperCase()}`,
+      })
 
-    const payment = response.payment
-    if (!payment || (payment.status !== 'COMPLETED' && payment.status !== 'APPROVED')) {
-      // Payment failed — update order status
-      await db.from('orders').update({ payment_status: 'failed' }).eq('id', order.id)
-      return NextResponse.json({ error: 'Payment was declined. Please try again.' }, { status: 400 })
+      const payment = response.payment
+      if (!payment || (payment.status !== 'COMPLETED' && payment.status !== 'APPROVED')) {
+        // Payment failed — update order status
+        await db.from('orders').update({ payment_status: 'failed' }).eq('id', order.id)
+        return NextResponse.json({ error: 'Payment was declined. Please try again.' }, { status: 400 })
+      }
+      squarePaymentId = payment.id
     }
 
-    // 11. Store the Square payment ID on the order and update status
+    // 11. Store payment details and update status
     await db
       .from('orders')
       .update({
-        square_payment_id: payment.id,
-        payment_status: 'paid',
+        square_payment_id: squarePaymentId,
+        payment_status: isOffline ? 'pending' : 'paid',
         status: 'processing',
       })
       .eq('id', order.id)

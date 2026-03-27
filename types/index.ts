@@ -38,6 +38,7 @@ export interface Order {
   delivery_address: string
   zone_id: string
   created_at: string
+  payment_method: 'square_online' | 'cash_on_delivery' | 'card_on_delivery'
   items?: OrderItem[]
   profile?: Profile
 }
