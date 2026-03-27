@@ -203,7 +203,7 @@ export async function POST(req: NextRequest) {
         await db.from('orders').update({ payment_status: 'failed' }).eq('id', order.id)
         return NextResponse.json({ error: 'Payment was declined. Please try again.' }, { status: 400 })
       }
-      squarePaymentId = payment.id
+      squarePaymentId = payment.id ?? null
     }
 
     // 11. Store payment details and update status
