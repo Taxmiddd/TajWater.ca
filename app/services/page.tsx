@@ -8,7 +8,7 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
 const iconMap: Record<string, LucideIcon> = {
-  Droplets, Settings, Building2, Clock, Shield,
+  Droplets, Settings, Building2, RefreshCw, Clock, Shield,
 }
 
 const bgMap: Record<string, string> = {
