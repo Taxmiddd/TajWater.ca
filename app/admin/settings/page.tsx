@@ -37,6 +37,7 @@ type BusinessInfo = {
 
 const NOTIF_KEYS = [
   { key: 'notif_order_confirmation', label: 'Order confirmation to customer', defaultOn: true },
+  { key: 'notif_admin_order', label: 'New order alert to admin', defaultOn: true },
   { key: 'notif_delivery_reminder', label: 'Delivery scheduled reminder', defaultOn: true },
   { key: 'notif_delivery_completed', label: 'Delivery completed notification', defaultOn: true },
   { key: 'notif_low_stock', label: 'Low stock alerts to admin', defaultOn: true },
@@ -55,6 +56,7 @@ const BUSINESS_DEFAULTS: BusinessInfo = {
 const EMAIL_TEMPLATE_KEYS = [
   'email_confirmation_subject',
   'email_confirmation_greeting',
+  'email_admin_order_subject',
   'email_welcome_subject',
   'email_welcome_message',
   'email_delivery_subject',
@@ -66,6 +68,7 @@ type EmailTemplateKey = typeof EMAIL_TEMPLATE_KEYS[number]
 const EMAIL_TEMPLATE_DEFAULTS: Record<EmailTemplateKey, string> = {
   email_confirmation_subject: 'Your TajWater Order is Confirmed! 💧',
   email_confirmation_greeting: 'Hi {{customer_name}}, your order has been received and we\'re preparing it for delivery.',
+  email_admin_order_subject: 'New Order Received! 🔔',
   email_welcome_subject: 'Welcome to TajWater! 💧',
   email_welcome_message: 'Hi {{customer_name}}, your account is ready. Fresh water is just a few clicks away.',
   email_delivery_subject: 'Your TajWater order is on its way! 🚚',
@@ -604,7 +607,7 @@ export default function SettingsPage() {
             <div className="rounded-2xl border border-[#cce7f0] overflow-hidden">
               <div className="bg-[#f0f9ff] px-5 py-3 flex items-center gap-2">
                 <Mail className="w-4 h-4 text-[#0097a7]" />
-                <span className="text-sm font-semibold text-[#0c2340]">Order Confirmation</span>
+                <span className="text-sm font-semibold text-[#0c2340]">Order Confirmation (Customer)</span>
                 <span className="ml-auto text-xs text-[#4a7fa5]">Sent after successful payment</span>
               </div>
               <div className="p-5 space-y-4">
@@ -625,6 +628,26 @@ export default function SettingsPage() {
                     placeholder={EMAIL_TEMPLATE_DEFAULTS.email_confirmation_greeting}
                     className="border-[#cce7f0] resize-none"
                     rows={2}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Admin Order Notification */}
+            <div className="rounded-2xl border border-[#cce7f0] overflow-hidden">
+              <div className="bg-[#f0f9ff] px-5 py-3 flex items-center gap-2">
+                <Bell className="w-4 h-4 text-[#0097a7]" />
+                <span className="text-sm font-semibold text-[#0c2340]">New Order Notification (Admin)</span>
+                <span className="ml-auto text-xs text-[#4a7fa5]">Sent to company email on new order</span>
+              </div>
+              <div className="p-5 space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Subject Line</label>
+                  <Input
+                    value={emailTmpl.email_admin_order_subject}
+                    onChange={e => setEmailTmpl(p => ({ ...p, email_admin_order_subject: e.target.value }))}
+                    placeholder={EMAIL_TEMPLATE_DEFAULTS.email_admin_order_subject}
+                    className="border-[#cce7f0]"
                   />
                 </div>
               </div>

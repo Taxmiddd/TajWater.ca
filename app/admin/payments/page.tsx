@@ -353,18 +353,18 @@ export default function PaymentsPage() {
                         {txn.square_payment_id ?? '—'}
                       </td>
                       <td className="hidden sm:table-cell px-4 py-3 text-xs text-[#4a7fa5] whitespace-nowrap">{fmtDate(txn.created_at)}</td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 flex gap-2">
                         {txn.payment_status === 'paid' && (
                           <Button size="sm" variant="outline" onClick={() => openRefund(txn)}
                             className="border-red-200 text-red-500 hover:bg-red-50 h-7 text-xs gap-1">
                             <RotateCcw className="w-3 h-3" /> Refund
                           </Button>
                         )}
-                        {txn.payment_status === 'disputed' && txn.square_payment_id && (
-                          <a href={`https://squareup.com/dashboard/sales/transactions`}
+                        {txn.square_payment_id && (txn.payment_status === 'paid' || txn.payment_status === 'disputed') && (
+                          <a href={`https://squareup.com/dashboard/sales/transactions/${txn.square_payment_id}`}
                             target="_blank" rel="noreferrer">
                             <Button size="sm" variant="outline"
-                              className="border-orange-200 text-orange-600 hover:bg-orange-50 h-7 text-xs gap-1">
+                              className="border-[#0097a7]/30 text-[#0097a7] hover:bg-[#e0f7fa] h-7 text-xs gap-1">
                               <ExternalLink className="w-3 h-3" /> Square
                             </Button>
                           </a>

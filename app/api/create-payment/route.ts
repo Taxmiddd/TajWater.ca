@@ -3,7 +3,7 @@ import { getSquareClient } from '@/lib/square'
 import { createServerClient } from '@/lib/supabase'
 import { rateLimit } from '@/lib/ratelimit'
 import { Resend } from 'resend'
-import { buildOrderConfirmationEmail } from '@/lib/email'
+import { buildOrderConfirmationEmail, buildAdminOrderNotificationEmail } from '@/lib/email'
 import { generateInvoicePDF, type InvoiceOrderData } from '@/lib/generateInvoice'
 
 export async function POST(req: NextRequest) {
@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { amount, items, address, userId, notes, discountCodeId, discountAmount: clientDiscountAmount, sourceId } = await req.json()
     type CartItem = { product_id: string; quantity: number; subscribeFrequency?: 'weekly' | 'biweekly' | 'monthly' }
+    type RawItem = { quantity: number; price: number; products: { name: string } | null }
 
     if (!sourceId) {
       return NextResponse.json({ error: 'Payment source token is required' }, { status: 400 })
@@ -234,12 +235,17 @@ export async function POST(req: NextRequest) {
         const profile = fullOrder.profiles as { name?: string; email?: string } | null
         const toEmail = profile?.email ?? address?.email ?? null
 
-        // Check notification preference + fetch email templates
+        // Check notification preference + fetch email templates + admin settings
         const { data: contentRows } = await db.from('site_content').select('key, value')
-          .in('key', ['notif_order_confirmation', 'email_confirmation_subject', 'email_confirmation_greeting'])
+          .in('key', [
+            'notif_order_confirmation', 'email_confirmation_subject', 'email_confirmation_greeting',
+            'notif_admin_order', 'email_admin_order_subject', 'settings_email'
+          ])
         const contentMap: Record<string, string> = {}
         for (const r of (contentRows ?? [])) contentMap[r.key] = r.value
         const confirmNotifEnabled = contentMap['notif_order_confirmation'] !== 'false'
+        const adminNotifEnabled = contentMap['notif_admin_order'] === 'true'
+        const adminEmail = contentMap['settings_email'] || process.env.NEXT_PUBLIC_COMPANY_EMAIL
 
         if (toEmail && confirmNotifEnabled) {
           const resend = new Resend(process.env.RESEND_API_KEY)
@@ -324,6 +330,29 @@ export async function POST(req: NextRequest) {
             sent_by: null,
             metadata: { order_id: fullOrder.id },
           })
+          // 14b. Send admin notification email
+          if (adminEmail && adminNotifEnabled) {
+            try {
+              const adminSubject = contentMap['email_admin_order_subject'] || `New TajWater Order Received! 🔔`
+              const adminHtml = buildAdminOrderNotificationEmail({
+                id: fullOrder.id,
+                customerName: profile?.name ?? fullOrder.customer_name ?? 'Valued Customer',
+                items: ((fullOrder.order_items ?? []) as unknown as RawItem[]).map(i => ({ name: i.products?.name ?? 'Product', qty: i.quantity, price: i.price })),
+                total: fullOrder.total,
+                deliveryAddress: fullOrder.delivery_address ?? null,
+                zone: (fullOrder.zones as { name?: string } | null)?.name ?? null,
+              })
+
+              await resend.emails.send({
+                from: fromEmail,
+                to: adminEmail,
+                subject: adminSubject,
+                html: adminHtml,
+              })
+            } catch (adminEmailErr) {
+              console.error('Admin order notification failed:', adminEmailErr)
+            }
+          }
         }
       }
     } catch (emailErr) {

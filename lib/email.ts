@@ -315,3 +315,55 @@ export function buildTicketReplyEmail({ ticketSubject, adminReply, customerName 
 `, `Support reply: ${ticketSubject}`, coEmail, coUrl)
 }
 
+// ─── Admin Order Notification ─────────────────────────────────────────
+export function buildAdminOrderNotificationEmail(order: {
+  id: string
+  customerName: string
+  items: { name: string; qty: number; price: number }[]
+  total: number
+  deliveryAddress: string | null
+  zone: string | null
+  taxAmount?: number
+  discountAmount?: number
+}): string {
+  const shortId = 'TW-' + order.id.slice(-8).toUpperCase()
+  const coUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://tajwater.ca'
+  
+  const rows = order.items.map(i => `
+    <tr>
+      <td style="padding:8px 0;border-bottom:1px solid #edf4f7;font-size:14px;color:#1a3347;">${i.name}</td>
+      <td style="padding:8px 0;border-bottom:1px solid #edf4f7;font-size:14px;color:#6b8c9e;text-align:center;">&times;${i.qty}</td>
+      <td style="padding:8px 0;border-bottom:1px solid #edf4f7;font-size:14px;font-weight:700;color:#1a3347;text-align:right;">$${(i.qty * i.price).toFixed(2)}</td>
+    </tr>`).join('')
+
+  return shell(`
+<h1 style="margin:0 0 6px;font-size:24px;font-weight:900;color:#0c2340;">New Order Received! 🔔</h1>
+<p style="margin:0 0 20px;font-size:15px;color:#6b8c9e;line-height:1.6;">A new order has been placed on TajWater.</p>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5fafb;border:1px solid #e5eff3;border-radius:12px;margin-bottom:20px;">
+  <tr><td style="padding:16px 20px;">
+    <p style="margin:0 0 4px;font-size:11px;font-weight:700;color:#0097a7;text-transform:uppercase;">Customer</p>
+    <p style="margin:0;font-size:15px;font-weight:700;color:#1a3347;">${order.customerName}</p>
+    <p style="margin:4px 0 0;font-size:13px;color:#6b8c9e;">${order.deliveryAddress ?? 'No address provided'}</p>
+    ${order.zone ? `<p style="margin:2px 0 0;font-size:12px;color:#0097a7;font-weight:600;">Zone: ${order.zone}</p>` : ''}
+  </td></tr>
+</table>
+
+<div style="margin-bottom:20px;">
+  <p style="margin:0 0 10px;font-size:11px;font-weight:700;color:#8caab8;text-transform:uppercase;">Order Details (${shortId})</p>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    ${rows}
+    <tr>
+      <td colspan="2" style="padding:12px 0;font-size:16px;font-weight:800;color:#0c2340;">Total Amount</td>
+      <td style="padding:12px 0;font-size:18px;font-weight:900;color:#0097a7;text-align:right;">$${order.total.toFixed(2)}</td>
+    </tr>
+  </table>
+</div>
+
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:10px;">
+  <tr><td style="border-radius:12px;background-color:#0097a7;background-image:linear-gradient(135deg,#0097a7,#1565c0);">
+    <a href="${coUrl}/admin/orders/${order.id}" style="display:inline-block;padding:14px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;">View Order in Admin Panel &rarr;</a>
+  </td></tr>
+</table>
+`, `New Order from ${order.customerName} — ${shortId}`, undefined, coUrl)
+}

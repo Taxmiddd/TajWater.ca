@@ -33,7 +33,7 @@ TajWater is a full-stack e-commerce platform built for a water delivery company 
 | **State** | Zustand (cart — localStorage persist) |
 | **Database** | Supabase (PostgreSQL + RLS) |
 | **Auth** | Supabase Auth (email/password + Google OAuth) |
-| **Payments** | Square (Web Payments SDK + Webhooks) |
+| **Payments** | Square Web Payments SDK & Payments API SDK + Webhooks |
 | **Email** | Resend (transactional HTML emails) |
 | **Deployment** | Vercel |
 

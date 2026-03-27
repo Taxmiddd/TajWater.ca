@@ -101,7 +101,7 @@ function InvoicePDF({ order, companyInfo }: { order: InvoiceOrderData; companyIn
           React.createElement(Text, { style: styles.billingTitle }, 'Payment Info'),
           React.createElement(Text, { style: { ...styles.billingText, color: statusColor[payStatus] ?? '#0c2340', fontFamily: 'Helvetica-Bold' } },
             payStatus.charAt(0).toUpperCase() + payStatus.slice(1)),
-          React.createElement(Text, { style: styles.billingMuted }, 'Paid via Stripe'),
+          React.createElement(Text, { style: styles.billingMuted }, 'Paid via Square'),
         ),
       ),
       // Table header
