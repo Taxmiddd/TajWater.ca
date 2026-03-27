@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSquareClient } from '@/lib/square'
 import { createServerClient } from '@/lib/supabase'
 import { rateLimit } from '@/lib/ratelimit'
-import { Resend } from 'resend'
-import { buildOrderConfirmationEmail, buildAdminOrderNotificationEmail } from '@/lib/email'
+import { resend, buildOrderConfirmationEmail, buildAdminOrderNotificationEmail } from '@/lib/email'
 import { generateInvoicePDF, type InvoiceOrderData } from '@/lib/generateInvoice'
 
 export async function POST(req: NextRequest) {
@@ -248,7 +247,7 @@ export async function POST(req: NextRequest) {
         const adminEmail = contentMap['settings_email'] || process.env.NEXT_PUBLIC_COMPANY_EMAIL
 
         if (toEmail && confirmNotifEnabled) {
-          const resend = new Resend(process.env.RESEND_API_KEY)
+          // resend proxy from @/lib/email is used here
           const fromEmail = process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev'
           type RawItem = { quantity: number; price: number; products: { name: string } | null }
           const subject = contentMap['email_confirmation_subject'] || `Your TajWater Order #${fullOrder.id.slice(0, 8).toUpperCase()} is Confirmed`

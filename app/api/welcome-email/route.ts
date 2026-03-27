@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
-import { Resend } from 'resend'
-import { buildWelcomeEmail } from '@/lib/email'
+import { buildWelcomeEmail, resend } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,7 +34,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ skipped: true, reason: 'already sent' })
     }
 
-    const resend = new Resend(process.env.RESEND_API_KEY)
+    // resend is imported from @/lib/email proxy
     const fromEmail = process.env.RESEND_FROM_EMAIL ?? 'TajWater <orders@tajwater.ca>'
     const customerName = name || 'there'
 
