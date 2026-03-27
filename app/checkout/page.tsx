@@ -471,7 +471,7 @@ export default function CheckoutPage() {
                          <div className="min-h-[40px]">
                            <Ach 
                              accountHolderName={address.name || 'Customer'} 
-                             redirectURL={typeof window !== 'undefined' ? `${window.location.origin}/checkout` : ''}
+                             redirectURI={typeof window !== 'undefined' ? `${window.location.origin}/checkout` : ''}
                            />
                          </div>
                          <p className="text-[10px] text-[#8caab8] mt-2 italic">
