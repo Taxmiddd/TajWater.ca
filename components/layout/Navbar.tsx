@@ -56,24 +56,23 @@ export default function Navbar() {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          transparent
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${transparent
             ? 'bg-transparent'
             : 'glass shadow-lg shadow-aqua/10 border-b border-white/30'
-        }`}
+          }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 lg:h-20">
 
             {/* Logo */}
-            <Link href="/" className="flex items-center">
+            <Link href="/" className="flex items-center shrink-0">
               <Image
                 src={transparent ? '/logo/tajwhite.svg' : '/logo/tajcyan.svg'}
                 alt="TajWater"
                 width={140}
                 height={44}
                 priority
-                className="h-10 w-auto transition-opacity duration-300"
+                className="h-8 sm:h-10 w-auto transition-all duration-300"
               />
             </Link>
 
@@ -85,13 +84,12 @@ export default function Navbar() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                      active
+                    className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${active
                         ? 'text-[#0097a7] bg-[#e0f7fa]'
                         : transparent
-                        ? 'text-white/90 hover:text-white hover:bg-white/15'
-                        : 'text-[#0c2340] hover:text-[#0097a7] hover:bg-[#e0f7fa]'
-                    }`}
+                          ? 'text-white/90 hover:text-white hover:bg-white/15'
+                          : 'text-[#0c2340] hover:text-[#0097a7] hover:bg-[#e0f7fa]'
+                      }`}
                   >
                     {link.label}
                     {active && (
@@ -170,7 +168,8 @@ export default function Navbar() {
             transition={{ duration: 0.18 }}
             className="fixed inset-x-0 top-16 z-40 glass border-b border-white/30 shadow-2xl lg:hidden"
           >
-            <div className="px-4 py-6 flex flex-col gap-2">
+            <div className="px-5 py-8 flex flex-col gap-3">
+              <p className="px-4 text-[10px] font-bold text-[#0097a7] uppercase tracking-widest mb-1">Navigation</p>
               {navLinks.map((link) => {
                 const active = link.href === '/' ? pathname === '/' : pathname.startsWith(link.href)
                 return (
@@ -178,30 +177,33 @@ export default function Navbar() {
                     key={link.href}
                     href={link.href}
                     onClick={() => setMobileOpen(false)}
-                    className={`px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                      active
-                        ? 'bg-[#0097a7] text-white'
+                    className={`px-4 py-3.5 rounded-2xl text-base font-semibold transition-all flex items-center justify-between group ${active
+                        ? 'bg-[#0097a7] text-white shadow-lg shadow-[#0097a7]/20'
                         : 'text-[#0c2340] hover:bg-[#e0f7fa] hover:text-[#0097a7]'
-                    }`}
+                      }`}
                   >
                     {link.label}
+                    {!active && <div className="w-1.5 h-1.5 rounded-full bg-[#0097a7] opacity-0 group-hover:opacity-100 transition-opacity" />}
                   </Link>
                 )
               })}
-              <div className="flex gap-3 mt-4 pt-4 border-t border-[#cce7f0]">
-                <Link href={cartHydrated && count > 0 ? '/checkout' : '/shop'} className="flex-none">
-                  <Button variant="outline" size="icon" className="border-[#cce7f0] text-[#0097a7] relative" onClick={() => setMobileOpen(false)}>
-                    <ShoppingCart className="w-4 h-4" />
-                    {cartHydrated && count > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 text-[10px] font-bold bg-[#0097a7] text-white rounded-full flex items-center justify-center">{count}</span>}
-                  </Button>
-                </Link>
-                <Link href={isLoggedIn ? '/dashboard' : '/auth/login'} className="flex-1">
-                  <Button variant="outline" className="w-full border-[#0097a7] text-[#0097a7]" onClick={() => setMobileOpen(false)}>
-                    {isLoggedIn ? 'My Account' : 'Login'}
-                  </Button>
-                </Link>
-                <Link href="/shop" className="flex-1">
-                  <Button className="w-full bg-gradient-to-r from-[#0097a7] to-[#1565c0] text-white" onClick={() => setMobileOpen(false)}>
+              <div className="mt-6 pt-6 border-t border-[#cce7f0] flex flex-col gap-3">
+                <div className="flex gap-3">
+                  <Link href={cartHydrated && count > 0 ? '/checkout' : '/shop'} className="flex-1" onClick={() => setMobileOpen(false)}>
+                    <Button variant="outline" className="w-full h-12 rounded-2xl border-[#cce7f0] text-[#0c2340] gap-2 font-semibold">
+                      <ShoppingCart className="w-4 h-4 text-[#0097a7]" />
+                      Cart {count > 0 && `(${count})`}
+                    </Button>
+                  </Link>
+                  <Link href={isLoggedIn ? '/dashboard' : '/auth/login'} className="flex-1" onClick={() => setMobileOpen(false)}>
+                    <Button variant="outline" className="w-full h-12 rounded-2xl border-[#cce7f0] text-[#0c2340] gap-2 font-semibold">
+                      <User className="w-4 h-4 text-[#0097a7]" />
+                      {isLoggedIn ? 'Account' : 'Login'}
+                    </Button>
+                  </Link>
+                </div>
+                <Link href="/shop" onClick={() => setMobileOpen(false)}>
+                  <Button className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#0097a7] to-[#1565c0] text-white font-bold text-lg shadow-xl shadow-[#0097a7]/20 active:scale-[0.98] transition-transform">
                     Order Now
                   </Button>
                 </Link>

@@ -59,28 +59,28 @@ export default function Footer() {
       </div>
 
       <div className="relative pt-20 pb-10 px-4 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 mb-16">
 
           {/* Brand */}
           <div className="lg:col-span-1">
-            <div className="mb-4">
+            <div className="mb-6 flex justify-center sm:justify-start">
               <Image src="/logo/tajwhite.svg" alt="TajWater" width={150} height={48} className="h-11 w-auto" />
             </div>
-            <p className="text-[#b3e5fc] text-sm leading-relaxed mb-5">
+            <p className="text-[#b3e5fc] text-sm leading-relaxed mb-6 text-center sm:text-left">
               Delivering pure, fresh water across Metro Vancouver. Trusted by thousands of households and businesses since 2023.
             </p>
-            <div className="flex gap-3">
+            <div className="flex gap-4 justify-center sm:justify-start">
               {[
                 { icon: Facebook, href: socials.facebook || null },
                 { icon: Instagram, href: socials.instagram || null },
                 { icon: Twitter, href: socials.twitter || null },
               ].filter(s => s.href).map(({ icon: Icon, href }, i) => (
-                <a key={i} href={href!} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-lg bg-white/10 hover:bg-[#00bcd4] flex items-center justify-center text-white transition-all duration-200 hover:scale-110">
-                  <Icon className="w-4 h-4" />
+                <a key={i} href={href!} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-xl bg-white/10 hover:bg-[#00bcd4] flex items-center justify-center text-white transition-all duration-200 hover:scale-110">
+                  <Icon className="w-5 h-5" />
                 </a>
               ))}
-              <a href={`https://wa.me/${whatsapp}`} className="w-9 h-9 rounded-lg bg-[#25d366]/20 hover:bg-[#25d366] flex items-center justify-center text-white transition-all duration-200 hover:scale-110">
-                <MessageCircle className="w-4 h-4" />
+              <a href={`https://wa.me/${whatsapp}`} className="w-10 h-10 rounded-xl bg-[#25d366]/20 hover:bg-[#25d366] flex items-center justify-center text-white transition-all duration-200 hover:scale-110">
+                <MessageCircle className="w-5 h-5" />
               </a>
             </div>
           </div>
