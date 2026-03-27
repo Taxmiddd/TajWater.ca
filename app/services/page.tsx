@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Droplets, Settings, Building2, Clock, Shield, CheckCircle2, ChevronDown, Phone, ArrowRight, LucideIcon } from 'lucide-react'
+import { Droplets, Settings, Building2, RefreshCw, Clock, Shield, CheckCircle2, ChevronDown, Phone, ArrowRight, LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
