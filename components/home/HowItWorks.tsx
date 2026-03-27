@@ -49,7 +49,7 @@ export default function HowItWorks() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-10 relative">
           {/* Connecting line */}
-          <div className="hidden md:block absolute top-16 left-[calc(16.66%+2rem)] right-[calc(16.66%+2rem)] h-0.5 bg-gradient-to-r from-[#0097a7] via-[#1565c0] to-[#006064] opacity-30" />
+          <div className="hidden lg:block absolute top-16 left-[calc(16.66%+2rem)] right-[calc(16.66%+2rem)] h-0.5 bg-gradient-to-r from-[#0097a7] via-[#1565c0] to-[#006064] opacity-30" />
 
           {steps.map((step, i) => {
             const Icon = step.icon

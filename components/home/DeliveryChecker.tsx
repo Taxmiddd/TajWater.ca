@@ -104,8 +104,8 @@ export default function DeliveryChecker() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="flex gap-3 mb-6"
+            transition={{ delay: 0.2 }}
+            className="flex flex-col sm:flex-row gap-3 mb-6"
           >
             <div className="relative flex-1">
               <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#0097a7] z-10 pointer-events-none" />
@@ -166,22 +166,21 @@ export default function DeliveryChecker() {
                 initial={{ opacity: 0, scale: 0.9, y: -10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                className={`rounded-2xl p-5 mb-6 border ${
-                  result.found
+                className={`rounded-2xl p-5 mb-6 border ${result.found
                     ? 'bg-[#e0f7fa] border-[#0097a7]/30'
                     : 'bg-[#fff3f0] border-red-200'
-                }`}
+                  }`}
               >
                 {result.found ? (
-                  <div className="flex items-center gap-3">
-                    <CheckCircle2 className="w-6 h-6 text-[#0097a7] shrink-0" />
-                    <div className="text-left">
-                      <p className="font-semibold text-[#006064]">Great news! We deliver to {result.zone} ✓</p>
-                      <p className="text-sm text-[#0097a7]">Same-day and scheduled delivery available in your area.</p>
+                  <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
+                    <CheckCircle2 className="w-8 h-8 text-[#0097a7] shrink-0" />
+                    <div className="text-center sm:text-left">
+                      <p className="font-semibold text-[#006064]">We deliver to {result.zone} ✓</p>
+                      <p className="text-sm text-[#0097a7]">Same-day delivery available in your area.</p>
                     </div>
-                    <Link href="/shop" className="ml-auto shrink-0">
-                      <Button size="sm" className="bg-[#0097a7] hover:bg-[#006064] text-white rounded-lg gap-1">
-                        Order <ArrowRight className="w-3 h-3" />
+                    <Link href="/shop" className="w-full sm:w-auto sm:ml-auto shrink-0 mt-2 sm:mt-0">
+                      <Button size="sm" className="w-full sm:w-auto bg-[#0097a7] hover:bg-[#006064] text-white rounded-xl py-5 sm:py-2 gap-2">
+                        Start Shopping <ArrowRight className="w-4 h-4" />
                       </Button>
                     </Link>
                   </div>
@@ -195,25 +194,25 @@ export default function DeliveryChecker() {
                       </div>
                     </div>
                     {coverageSubmitted ? (
-                      <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 rounded-xl px-4 py-2.5">
+                      <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 rounded-xl px-4 py-3 mt-3">
                         <CheckCircle2 className="w-4 h-4 shrink-0" />
-                        Got it! We&apos;ll let you know when {result.zone} is covered.
+                        Got it! We&apos;ll notify you when {result.zone} is covered.
                       </div>
                     ) : (
-                      <form onSubmit={handleCoverageRequest} className="flex gap-2 mt-1">
+                      <form onSubmit={handleCoverageRequest} className="flex flex-col sm:flex-row gap-2 mt-4">
                         <Input
                           type="email"
                           value={coverageEmail}
                           onChange={(e) => setCoverageEmail(e.target.value)}
                           placeholder="your@email.com"
                           required
-                          className="flex-1 h-10 rounded-lg border-red-200 text-sm focus:border-red-400"
+                          className="flex-1 h-12 rounded-xl border-red-200 text-base sm:text-sm focus:border-red-400 focus:ring-red-400/20"
                         />
                         <Button
                           type="submit"
-                          size="sm"
+                          size="lg"
                           disabled={coverageSubmitting}
-                          className="h-10 bg-red-500 hover:bg-red-600 text-white rounded-lg px-4"
+                          className="h-12 bg-red-500 hover:bg-red-600 text-white rounded-xl px-6 font-semibold"
                         >
                           {coverageSubmitting ? 'Sending…' : 'Notify Me'}
                         </Button>
