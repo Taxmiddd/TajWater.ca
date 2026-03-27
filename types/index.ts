@@ -27,7 +27,7 @@ export interface Product {
   stock: number
   category: string
   active: boolean
-  featured: boolean
+  featured?: boolean
 }
 
 export interface Order {
