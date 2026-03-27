@@ -6,7 +6,8 @@ import { usePathname, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, ShoppingBag, Users, Package, Truck, CreditCard,
-  Settings, Menu, X, Shield, LogOut, Bell, FileEdit, BarChart2, MessageSquare, Droplets, UserCog, RefreshCw, Tag, ClipboardList
+  Settings, Menu, X, Shield, LogOut, Bell, FileEdit, BarChart2, MessageSquare, Droplets, UserCog, RefreshCw, Tag, ClipboardList,
+  Sun, Moon
 } from 'lucide-react'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
@@ -137,6 +138,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [mounted,   setMounted]   = useState(false)
   const [notifs,    setNotifs]    = useState<Notif[]>([])
   const [bellOpen,  setBellOpen]  = useState(false)
+  const [theme,     setTheme]     = useState<'light' | 'dark'>('light')
   const bellRef                   = useRef<HTMLDivElement>(null)
   const unread = notifs.filter(n => !n.read).length
 
@@ -150,6 +152,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     const storedRole = localStorage.getItem('admin_role') as Role
     const storedName = localStorage.getItem('admin_name') || 'Admin'
+    const storedTheme = localStorage.getItem('admin_theme') as 'light' | 'dark' | null
 
     // No role stored → not logged in → redirect
     if (!storedRole) {
@@ -157,13 +160,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       return
     }
 
-     
+    if (storedTheme) setTheme(storedTheme)
     setRole(storedRole)
-     
     setAdminName(storedName)
-     
     setMounted(true)
   }, [pathname, router])
+
+  const toggleTheme = () => {
+    const next = theme === 'light' ? 'dark' : 'light'
+    setTheme(next)
+    localStorage.setItem('admin_theme', next)
+  }
 
   // Realtime: subscribe to new orders + new tickets
   useEffect(() => {
@@ -237,7 +244,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="min-h-screen bg-[#f0f9ff] flex">
+    <div className={`min-h-screen flex transition-colors duration-300 ${
+      theme === 'dark' ? 'bg-[#0f172a] dark' : 'bg-[#f0f9ff]'
+    }`}>
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex w-56 flex-col fixed top-0 bottom-0 left-0 z-30 shadow-xl">
         <AdminSidebar navItems={navItems} pathname={pathname} role={role} adminName={adminName} setSidebarOpen={setSidebarOpen} handleLogout={handleLogout} />
@@ -270,7 +279,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Main content */}
       <div className="flex-1 lg:ml-56 min-w-0">
         {/* Top bar */}
-        <header className="h-14 bg-white border-b border-[#cce7f0] flex items-center px-4 sm:px-6 gap-3 sticky top-0 z-20 shadow-sm">
+        <header className="h-14 bg-white dark:bg-[#1e293b] border-b border-[#cce7f0] dark:border-white/10 flex items-center px-4 sm:px-6 gap-3 sticky top-0 z-20 shadow-sm transition-colors">
           <button
             onClick={() => setSidebarOpen(true)}
             className="lg:hidden p-2 rounded-lg hover:bg-[#e0f7fa] transition-colors"
@@ -279,8 +288,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
 
           <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-[#0097a7]" />
-            <span className="font-semibold text-[#0c2340] text-sm hidden sm:block">TajWater Admin</span>
+            <Shield className="w-4 h-4 text-[#0097a7] dark:text-[#b3e5fc]" />
+            <span className="font-semibold text-[#0c2340] dark:text-[#f8fafc] text-sm hidden sm:block">TajWater Admin</span>
           </div>
 
           {/* Page breadcrumb */}
@@ -292,10 +301,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
 
           <div className="ml-auto flex items-center gap-2">
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="w-8 h-8 rounded-lg hover:bg-[#e0f7fa] dark:hover:bg-white/10 flex items-center justify-center text-[#4a7fa5] dark:text-[#b3e5fc] transition-colors"
+              title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+            >
+              {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+            </button>
+
             <div ref={bellRef} className="relative">
               <button
                 onClick={() => { setBellOpen(v => !v); setNotifs(prev => prev.map(n => ({ ...n, read: true }))) }}
-                className="w-8 h-8 rounded-lg hover:bg-[#e0f7fa] flex items-center justify-center text-[#4a7fa5] relative transition-colors"
+                className="w-8 h-8 rounded-lg hover:bg-[#e0f7fa] dark:hover:bg-white/10 flex items-center justify-center text-[#4a7fa5] dark:text-[#b3e5fc] relative transition-colors"
               >
                 <Bell className="w-4 h-4" />
                 {unread > 0 && (
@@ -311,26 +329,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -8, scale: 0.95 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute right-0 top-10 w-80 bg-white rounded-2xl border border-[#cce7f0] shadow-xl z-50 overflow-hidden"
+                    className="absolute right-0 top-10 w-80 bg-white dark:bg-[#1e293b] rounded-2xl border border-[#cce7f0] dark:border-white/10 shadow-xl z-50 overflow-hidden"
                   >
-                    <div className="px-4 py-3 border-b border-[#f0f9ff] flex items-center justify-between">
-                      <span className="text-sm font-bold text-[#0c2340]">Notifications</span>
+                    <div className="px-4 py-3 border-b border-[#f0f9ff] dark:border-white/5 flex items-center justify-between">
+                      <span className="text-sm font-bold text-[#0c2340] dark:text-[#f8fafc]">Notifications</span>
                       {notifs.length > 0 && (
-                        <button onClick={() => setNotifs([])} className="text-xs text-[#4a7fa5] hover:text-red-500">Clear all</button>
+                        <button onClick={() => setNotifs([])} className="text-xs text-[#4a7fa5] dark:text-[#b3e5fc]/60 hover:text-red-500">Clear all</button>
                       )}
                     </div>
-                    <div className="max-h-72 overflow-y-auto divide-y divide-[#f0f9ff]">
+                    <div className="max-h-72 overflow-y-auto divide-y divide-[#f0f9ff] dark:divide-white/5">
                       {notifs.length === 0 ? (
-                        <p className="text-sm text-[#4a7fa5] text-center py-8">No new notifications</p>
+                        <p className="text-sm text-[#4a7fa5] dark:text-[#b3e5fc]/40 text-center py-8">No new notifications</p>
                       ) : notifs.map(n => (
                         <Link key={n.id} href={n.href} onClick={() => setBellOpen(false)}
-                          className="flex items-start gap-3 px-4 py-3 hover:bg-[#f0f9ff] transition-colors">
-                          <div className="w-7 h-7 rounded-lg bg-[#e0f7fa] flex items-center justify-center shrink-0 mt-0.5">
-                            <Bell className="w-3.5 h-3.5 text-[#0097a7]" />
+                          className="flex items-start gap-3 px-4 py-3 hover:bg-[#f0f9ff] dark:hover:bg-white/5 transition-colors">
+                          <div className="w-7 h-7 rounded-lg bg-[#e0f7fa] dark:bg-white/10 flex items-center justify-center shrink-0 mt-0.5">
+                            <Bell className="w-3.5 h-3.5 text-[#0097a7] dark:text-[#b3e5fc]" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs text-[#0c2340] font-medium leading-snug">{n.text}</p>
-                            <p className="text-[10px] text-[#4a7fa5] mt-0.5">{n.time}</p>
+                            <p className="text-xs text-[#0c2340] dark:text-[#f8fafc] font-medium leading-snug">{n.text}</p>
+                            <p className="text-[10px] text-[#4a7fa5] dark:text-[#b3e5fc]/60 mt-0.5">{n.time}</p>
                           </div>
                         </Link>
                       ))}
@@ -339,13 +357,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 )}
               </AnimatePresence>
             </div>
-            <div className="flex items-center gap-2 pl-2 border-l border-[#cce7f0]">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#0097a7] to-[#1565c0] flex items-center justify-center text-white text-xs font-bold">
+            <div className="flex items-center gap-2 pl-2 border-l border-[#cce7f0] dark:border-white/10">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#0097a7] to-[#1565c0] flex items-center justify-center text-white text-xs font-bold shadow-sm">
                 {adminName ? adminName.charAt(0).toUpperCase() : '?'}
               </div>
               <div className="hidden sm:block">
-                <p className="text-xs font-semibold text-[#0c2340] leading-none">{adminName}</p>
-                <p className="text-[10px] text-[#4a7fa5] mt-0.5">{role ? ROLE_LABEL[role] : ''}</p>
+                <p className="text-xs font-semibold text-[#0c2340] dark:text-[#f8fafc] leading-none">{adminName}</p>
+                <p className="text-[10px] text-[#4a7fa5] dark:text-[#b3e5fc]/60 mt-0.5">{role ? ROLE_LABEL[role] : ''}</p>
               </div>
             </div>
           </div>

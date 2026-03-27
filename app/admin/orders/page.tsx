@@ -284,18 +284,18 @@ export default function AdminOrdersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-extrabold text-[#0c2340]">Order Management</h2>
-          <p className="text-sm text-[#4a7fa5]">{orders.length} total orders · live from Supabase</p>
+          <h2 className="text-2xl font-extrabold text-[#0c2340] dark:text-[#f8fafc]">Order Management</h2>
+          <p className="text-sm text-[#4a7fa5] dark:text-[#94a3b8]">{orders.length} total orders · live from Supabase</p>
         </div>
         <div className="flex gap-2">
-          <Button size="sm" variant="outline" onClick={handleCleanup} className="border-red-200 text-red-500 hover:bg-red-50 gap-2">
+          <Button size="sm" variant="outline" onClick={handleCleanup} className="border-red-200 dark:border-red-900/40 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 gap-2">
             <Trash2 className="w-4 h-4" /> Cleanup Pending
           </Button>
-          <Button size="sm" variant="outline" onClick={fetchOrders} className="border-[#cce7f0] text-[#4a7fa5]">
+          <Button size="sm" variant="outline" onClick={fetchOrders} className="border-[#cce7f0] dark:border-white/10 text-[#4a7fa5] dark:text-[#b3e5fc] hover:bg-white/10 transition-colors">
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </Button>
           <Button
-            size="sm" variant="outline" className="border-[#cce7f0] text-[#4a7fa5] gap-2"
+            size="sm" variant="outline" className="border-[#cce7f0] dark:border-white/10 text-[#4a7fa5] dark:text-[#b3e5fc] hover:bg-white/10 transition-colors gap-2"
             onClick={() => exportCSV('orders.csv', filtered.map(o => ({
               id: shortId(o.id),
               customer: o.profile?.name ?? o.customer_name ?? 'Guest',
@@ -320,7 +320,7 @@ export default function AdminOrdersPage() {
             placeholder="Search by customer, order ID, or zone..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="pl-10 border-[#cce7f0] bg-white"
+            className="pl-10 border-[#cce7f0] dark:border-white/10 bg-white dark:bg-[#1e293b] text-[#0c2340] dark:text-[#f8fafc] transition-colors"
           />
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -329,7 +329,7 @@ export default function AdminOrdersPage() {
               key={s}
               onClick={() => setFilter(s)}
               className={`px-3 py-2 rounded-xl text-xs font-medium transition-all ${
-                filter === s ? 'bg-[#0097a7] text-white' : 'bg-white border border-[#cce7f0] text-[#4a7fa5] hover:border-[#0097a7]'
+                filter === s ? 'bg-[#0097a7] text-white' : 'bg-white dark:bg-[#1e293b] border border-[#cce7f0] dark:border-white/10 text-[#4a7fa5] dark:text-[#94a3b8] hover:border-[#0097a7] dark:hover:border-[#0097a7]'
               }`}
             >
               {s === 'all' ? 'All' : s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
@@ -350,7 +350,7 @@ export default function AdminOrdersPage() {
             initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
-            className="flex items-center gap-3 bg-[#0c2340] text-white px-5 py-3 rounded-2xl shadow-lg"
+            className="flex items-center gap-3 bg-[#0c2340] dark:bg-[#1e293b] text-white px-5 py-3 rounded-2xl shadow-lg border border-white/5"
           >
             <span className="text-sm font-semibold">{selectedIds.size} selected</span>
             <div className="flex-1" />
@@ -383,17 +383,17 @@ export default function AdminOrdersPage() {
           <p className="text-xs text-[#4a7fa5] mt-1">Orders placed through the shop will appear here in real time</p>
         </div>
       ) : (
-        <div className="bg-white rounded-3xl border border-[#cce7f0] shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-[#1e293b] rounded-3xl border border-[#cce7f0] dark:border-white/10 shadow-sm overflow-hidden transition-colors">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-[#f0f9ff] border-b border-[#cce7f0]">
+              <thead className="bg-[#f0f9ff] dark:bg-white/5 border-b border-[#cce7f0] dark:border-white/10 transition-colors">
                 <tr>
                   <th className="px-4 py-3 text-left w-10">
                     <input
                       type="checkbox"
                       checked={selectedIds.size === filtered.length && filtered.length > 0}
                       onChange={toggleSelectAll}
-                      className="rounded border-[#cce7f0] accent-[#0097a7] cursor-pointer"
+                      className="rounded border-[#cce7f0] dark:border-white/20 accent-[#0097a7] cursor-pointer"
                     />
                   </th>
                   {[
@@ -408,11 +408,11 @@ export default function AdminOrdersPage() {
                     { label: 'Date',      cls: 'hidden md:table-cell' },
                     { label: 'Actions',   cls: '' },
                   ].map(h => (
-                    <th key={h.label} className={`px-4 py-3 text-left text-xs font-semibold text-[#4a7fa5] uppercase tracking-wider whitespace-nowrap ${h.cls}`}>{h.label}</th>
+                    <th key={h.label} className={`px-4 py-3 text-left text-xs font-semibold text-[#4a7fa5] dark:text-[#b3e5fc]/60 uppercase tracking-wider whitespace-nowrap ${h.cls}`}>{h.label}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#f0f9ff]">
+              <tbody className="divide-y divide-[#f0f9ff] dark:divide-white/5 transition-colors">
                 {filtered.map((order, i) => {
                   const s = STATUS_STYLE[order.status] ?? STATUS_STYLE.pending
                   const StatusIcon = s.icon
@@ -423,23 +423,23 @@ export default function AdminOrdersPage() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: i * 0.02 }}
-                      className={`hover:bg-[#f0f9ff] transition-colors ${selectedIds.has(order.id) ? 'bg-[#e0f7fa]/40' : ''}`}
+                      className={`hover:bg-[#f0f9ff] dark:hover:bg-white/5 transition-colors ${selectedIds.has(order.id) ? 'bg-[#0097a7]/10' : ''}`}
                     >
                       <td className="px-4 py-3 w-10">
                         <input
                           type="checkbox"
                           checked={selectedIds.has(order.id)}
                           onChange={() => toggleSelect(order.id)}
-                          className="rounded border-[#cce7f0] accent-[#0097a7] cursor-pointer"
+                          className="rounded border-[#cce7f0] dark:border-white/20 accent-[#0097a7] cursor-pointer"
                         />
                       </td>
-                      <td className="px-4 py-3 font-mono text-xs font-bold text-[#0097a7]">{shortId(order.id)}</td>
+                      <td className="px-4 py-3 font-mono text-xs font-bold text-[#0097a7] dark:text-[#b3e5fc]">{shortId(order.id)}</td>
                       <td className="px-4 py-3">
-                        <p className="font-medium text-[#0c2340] max-w-[100px] truncate">{order.profile?.name ?? order.customer_name ?? 'Guest'}</p>
-                        <p className="text-xs text-[#4a7fa5]">{order.profile?.phone ?? order.customer_phone ?? '—'}</p>
+                        <p className="font-medium text-[#0c2340] dark:text-[#f8fafc] max-w-[100px] truncate">{order.profile?.name ?? order.customer_name ?? 'Guest'}</p>
+                        <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8]">{order.profile?.phone ?? order.customer_phone ?? '—'}</p>
                       </td>
-                      <td className="hidden md:table-cell px-4 py-3 text-[#4a7fa5] whitespace-nowrap text-xs">{(Array.isArray(order.zones) ? order.zones[0]?.name : order.zones?.name) ?? '—'}</td>
-                      <td className="hidden lg:table-cell px-4 py-3 text-[#4a7fa5] text-xs max-w-[130px] truncate">{itemsSummary(order.order_items)}</td>
+                      <td className="hidden md:table-cell px-4 py-3 text-[#4a7fa5] dark:text-[#94a3b8] whitespace-nowrap text-xs">{(Array.isArray(order.zones) ? order.zones[0]?.name : order.zones?.name) ?? '—'}</td>
+                      <td className="hidden lg:table-cell px-4 py-3 text-[#4a7fa5] dark:text-[#94a3b8] text-xs max-w-[130px] truncate">{itemsSummary(order.order_items)}</td>
                       <td className="px-4 py-3">
                         <Badge className={`text-[10px] flex items-center gap-1 w-fit ${s.color}`}>
                           <StatusIcon className="w-2.5 h-2.5" />
@@ -459,17 +459,17 @@ export default function AdminOrdersPage() {
                           </Badge>
                         )}
                       </td>
-                      <td className="px-4 py-3 font-bold text-[#0c2340] whitespace-nowrap">${order.total.toFixed(2)}</td>
+                      <td className="px-4 py-3 font-bold text-[#0c2340] dark:text-[#f8fafc] whitespace-nowrap">${order.total.toFixed(2)}</td>
                       <td className="hidden lg:table-cell px-4 py-3">
                         <button
                           onClick={() => openDriverDialog(order.id, order.driver_name)}
-                          className="text-xs text-[#4a7fa5] hover:text-[#0097a7] flex items-center gap-1 transition-colors"
+                          className="text-xs text-[#4a7fa5] dark:text-[#b3e5fc]/60 hover:text-[#0097a7] flex items-center gap-1 transition-colors"
                         >
                           <UserCheck className="w-3 h-3" />
                           {order.driver_name ?? 'Assign…'}
                         </button>
                       </td>
-                      <td className="hidden md:table-cell px-4 py-3 text-xs text-[#4a7fa5] whitespace-nowrap">{fmtDate(order.created_at)}</td>
+                      <td className="hidden md:table-cell px-4 py-3 text-xs text-[#4a7fa5] dark:text-[#94a3b8] whitespace-nowrap">{fmtDate(order.created_at)}</td>
                       <td className="px-4 py-3">
                         <div className="flex gap-1.5">
                           {s.next && (
@@ -530,14 +530,14 @@ export default function AdminOrdersPage() {
       {/* Assign Driver Dialog */}
       <Dialog open={!!driverDialog} onOpenChange={() => setDriverDialog(null)}>
         <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="text-[#0c2340]">Assign Driver</DialogTitle>
+           <DialogHeader>
+            <DialogTitle className="text-[#0c2340] dark:text-[#f8fafc]">Assign Driver</DialogTitle>
           </DialogHeader>
           <Input
             placeholder="Driver name"
             value={driverInput}
             onChange={e => setDriverInput(e.target.value)}
-            className="border-[#cce7f0]"
+            className="border-[#cce7f0] dark:border-white/10 dark:bg-white/5 dark:text-white"
             onKeyDown={e => { if (e.key === 'Enter' && driverDialog) assignDriver(driverDialog.orderId, driverInput) }}
             autoFocus
           />
@@ -560,7 +560,7 @@ export default function AdminOrdersPage() {
             <>
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-3 pr-6">
-                  <span className="text-[#0c2340]">Order {shortId(selected.id)}</span>
+                  <span className="text-[#0c2340] dark:text-[#f8fafc]">Order {shortId(selected.id)}</span>
                   <Badge className={`text-[11px] ${(STATUS_STYLE[selected.status] ?? STATUS_STYLE.pending).color}`}>
                     {selected.status.replace(/_/g, ' ')}
                   </Badge>
@@ -577,42 +577,42 @@ export default function AdminOrdersPage() {
                 </DialogTitle>
               </DialogHeader>
 
-              <div className="space-y-4 mt-2">
+              <div className="space-y-4">
                 {/* Customer */}
-                <div className="bg-[#f0f9ff] rounded-2xl p-4">
+                <div className="bg-[#f0f9ff] dark:bg-white/5 rounded-2xl p-4 transition-colors">
                   <div className="flex items-center gap-2 mb-2">
-                    <User className="w-4 h-4 text-[#0097a7]" />
-                    <p className="text-xs font-semibold text-[#4a7fa5] uppercase tracking-wider">Customer</p>
+                    <User className="w-4 h-4 text-[#0097a7] dark:text-[#b3e5fc]" />
+                    <p className="text-xs font-semibold text-[#4a7fa5] dark:text-[#94a3b8] uppercase tracking-wider">Customer</p>
                   </div>
-                  <p className="font-bold text-[#0c2340]">{selected.profile?.name ?? selected.customer_name ?? 'Guest Customer'}</p>
-                  <p className="text-sm text-[#4a7fa5]">{selected.profile?.phone ?? selected.customer_phone ?? '—'}</p>
+                  <p className="font-bold text-[#0c2340] dark:text-[#f8fafc]">{selected.profile?.name ?? selected.customer_name ?? 'Guest Customer'}</p>
+                  <p className="text-sm text-[#4a7fa5] dark:text-[#94a3b8]">{selected.profile?.phone ?? selected.customer_phone ?? '—'}</p>
                 </div>
 
                 {/* Delivery */}
-                <div className="bg-[#f0f9ff] rounded-2xl p-4">
+                <div className="bg-[#f0f9ff] dark:bg-white/5 rounded-2xl p-4 transition-colors">
                   <div className="flex items-center gap-2 mb-2">
-                    <MapPin className="w-4 h-4 text-[#0097a7]" />
-                    <p className="text-xs font-semibold text-[#4a7fa5] uppercase tracking-wider">Delivery Info</p>
+                    <MapPin className="w-4 h-4 text-[#0097a7] dark:text-[#b3e5fc]" />
+                    <p className="text-xs font-semibold text-[#4a7fa5] dark:text-[#94a3b8] uppercase tracking-wider">Delivery Info</p>
                   </div>
-                  <p className="font-medium text-[#0c2340]">{(Array.isArray(selected.zones) ? selected.zones[0]?.name : selected.zones?.name) ?? '—'}</p>
-                  <p className="text-sm text-[#4a7fa5]">{selected.delivery_address ?? 'No address on file'}</p>
-                  <p className="text-xs text-[#4a7fa5] mt-1">Placed: {fmtDate(selected.created_at)}</p>
+                  <p className="font-medium text-[#0c2340] dark:text-[#f8fafc]">{(Array.isArray(selected.zones) ? selected.zones[0]?.name : selected.zones?.name) ?? '—'}</p>
+                  <p className="text-sm text-[#4a7fa5] dark:text-[#94a3b8]">{selected.delivery_address ?? 'No address on file'}</p>
+                  <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8] mt-1">Placed: {fmtDate(selected.created_at)}</p>
                   {selected.driver_name && (
-                    <p className="text-xs text-[#0097a7] font-medium mt-1">Driver: {selected.driver_name}</p>
+                    <p className="text-xs text-[#0097a7] dark:text-[#b3e5fc] font-medium mt-1">Driver: {selected.driver_name}</p>
                   )}
                   {selected.notes && (
-                    <div className="mt-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
-                      <p className="text-xs font-semibold text-amber-700 mb-0.5">Delivery Instructions</p>
-                      <p className="text-xs text-amber-800 whitespace-pre-wrap">{selected.notes}</p>
+                    <div className="mt-2 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded-xl px-3 py-2">
+                      <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 mb-0.5">Delivery Instructions</p>
+                      <p className="text-xs text-amber-800 dark:text-amber-200/80 whitespace-pre-wrap">{selected.notes}</p>
                     </div>
                   )}
                 </div>
 
                 {/* Items */}
-                <div className="bg-[#f0f9ff] rounded-2xl p-4">
+                <div className="bg-[#f0f9ff] dark:bg-white/5 rounded-2xl p-4 transition-colors">
                   <div className="flex items-center gap-2 mb-3">
-                    <ShoppingBag className="w-4 h-4 text-[#0097a7]" />
-                    <p className="text-xs font-semibold text-[#4a7fa5] uppercase tracking-wider">Items Ordered</p>
+                    <ShoppingBag className="w-4 h-4 text-[#0097a7] dark:text-[#b3e5fc]" />
+                    <p className="text-xs font-semibold text-[#4a7fa5] dark:text-[#94a3b8] uppercase tracking-wider">Items Ordered</p>
                   </div>
                   {selected.order_items.length === 0 ? (
                     <p className="text-sm text-[#4a7fa5]">No items found</p>
@@ -621,7 +621,7 @@ export default function AdminOrdersPage() {
                       {selected.order_items.map(item => (
                         <div key={item.id} className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-lg bg-[#e0f7fa] flex items-center justify-center text-sm overflow-hidden shrink-0">
+                            <div className="w-7 h-7 rounded-lg bg-[#e0f7fa] dark:bg-white/10 flex items-center justify-center text-sm overflow-hidden shrink-0">
                               {item.products?.image_url ? (
                                 <Image src={item.products.image_url} alt={item.products.name} width={28} height={28} className="w-full h-full object-cover" />
                               ) : (
@@ -629,16 +629,16 @@ export default function AdminOrdersPage() {
                               )}
                             </div>
                             <div>
-                              <p className="text-sm font-medium text-[#0c2340]">{item.products?.name ?? 'Product'}</p>
-                              <p className="text-xs text-[#4a7fa5]">Qty: {item.quantity} × ${item.price.toFixed(2)}</p>
+                              <p className="text-sm font-medium text-[#0c2340] dark:text-[#f8fafc]">{item.products?.name ?? 'Product'}</p>
+                              <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8]">Qty: {item.quantity} × ${item.price.toFixed(2)}</p>
                             </div>
                           </div>
-                          <p className="font-bold text-[#0c2340]">${(item.price * item.quantity).toFixed(2)}</p>
+                          <p className="font-bold text-[#0c2340] dark:text-[#f8fafc]">${(item.price * item.quantity).toFixed(2)}</p>
                         </div>
                       ))}
-                      <div className="border-t border-[#cce7f0] pt-2 flex justify-between mt-2">
-                        <p className="font-bold text-[#0c2340]">Order Total</p>
-                        <p className="font-extrabold text-[#0097a7] text-lg">${selected.total.toFixed(2)}</p>
+                      <div className="border-t border-[#cce7f0] dark:border-white/10 pt-2 flex justify-between mt-2">
+                        <p className="font-bold text-[#0c2340] dark:text-[#f8fafc]">Order Total</p>
+                        <p className="font-extrabold text-[#0097a7] dark:text-[#b3e5fc] text-lg">${selected.total.toFixed(2)}</p>
                       </div>
                     </div>
                   )}

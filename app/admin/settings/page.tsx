@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Building2, MapPin, DollarSign, Bell, CheckCircle2, RefreshCw, Mail, Download, Share2, FileText, Plus } from 'lucide-react'
+import { Building2, MapPin, DollarSign, Bell, CheckCircle2, RefreshCw, Mail, Download, Share2, FileText, Plus, Users } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -241,84 +241,95 @@ export default function SettingsPage() {
       <AnimatePresence>
         {toast && (
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-            className="fixed top-20 right-6 z-50 flex items-center gap-2 bg-[#0097a7] text-white px-4 py-3 rounded-2xl shadow-xl text-sm font-medium">
+            className="fixed top-20 right-6 z-50 flex items-center gap-2 bg-[#0097a7] text-white px-4 py-3 rounded-2xl shadow-xl text-sm font-medium dark:bg-[#0097a7]/80">
             <CheckCircle2 className="w-4 h-4" /> {toast}
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-extrabold text-[#0c2340]">Settings</h2>
-        <Button size="sm" variant="outline" onClick={fetchAll} className="border-[#cce7f0] text-[#4a7fa5]">
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-extrabold text-[#0c2340] dark:text-[#f8fafc]">Settings</h2>
+          <p className="text-sm text-[#4a7fa5] dark:text-[#94a3b8]">Configure your business profile, zones, and notifications</p>
+        </div>
+        <Button onClick={() => fetchAll()} variant="outline" className="border-[#cce7f0] dark:border-white/10 dark:text-white hover:bg-white/5 transition-colors shrink-0">
+          <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} /> Refresh
         </Button>
       </div>
 
-      <Tabs defaultValue="business">
-        <TabsList className="bg-[#e0f7fa] text-[#0097a7] mb-6">
-          <TabsTrigger value="business" className="data-[state=active]:bg-[#0097a7] data-[state=active]:text-white text-xs">Business</TabsTrigger>
-          <TabsTrigger value="zones" className="data-[state=active]:bg-[#0097a7] data-[state=active]:text-white text-xs">Zones & Fees</TabsTrigger>
-          <TabsTrigger value="notifications" className="data-[state=active]:bg-[#0097a7] data-[state=active]:text-white text-xs">Notifications</TabsTrigger>
-          <TabsTrigger value="subscribers" className="data-[state=active]:bg-[#0097a7] data-[state=active]:text-white text-xs">Subscribers</TabsTrigger>
-          <TabsTrigger value="socials" className="data-[state=active]:bg-[#0097a7] data-[state=active]:text-white text-xs">Socials</TabsTrigger>
-          <TabsTrigger value="email-templates" className="data-[state=active]:bg-[#0097a7] data-[state=active]:text-white text-xs">Emails</TabsTrigger>
+      <Tabs defaultValue="business" className="w-full">
+        <TabsList className="bg-white dark:bg-[#1e293b] border border-[#cce7f0] dark:border-white/10 p-1 rounded-2xl mb-4 transition-colors">
+          <TabsTrigger value="business" className="rounded-xl px-5 py-2 text-sm font-bold data-[state=active]:bg-[#e0f7fa] dark:data-[state=active]:bg-[#0097a7]/20 data-[state=active]:text-[#0097a7] dark:data-[state=active]:text-[#b3e5fc] transition-all">
+            <Building2 className="w-4 h-4 mr-2" /> Business
+          </TabsTrigger>
+          <TabsTrigger value="zones" className="rounded-xl px-5 py-2 text-sm font-bold data-[state=active]:bg-[#e0f7fa] dark:data-[state=active]:bg-[#0097a7]/20 data-[state=active]:text-[#0097a7] dark:data-[state=active]:text-[#b3e5fc] transition-all">
+            <MapPin className="w-4 h-4 mr-2" /> Zones
+          </TabsTrigger>
+          <TabsTrigger value="notifs" className="rounded-xl px-5 py-2 text-sm font-bold data-[state=active]:bg-[#e0f7fa] dark:data-[state=active]:bg-[#0097a7]/20 data-[state=active]:text-[#0097a7] dark:data-[state=active]:text-[#b3e5fc] transition-all">
+            <Bell className="w-4 h-4 mr-2" /> Notifications
+          </TabsTrigger>
+          <TabsTrigger value="email" className="rounded-xl px-5 py-2 text-sm font-bold data-[state=active]:bg-[#e0f7fa] dark:data-[state=active]:bg-[#0097a7]/20 data-[state=active]:text-[#0097a7] dark:data-[state=active]:text-[#b3e5fc] transition-all">
+            <Mail className="w-4 h-4 mr-2" /> Emails
+          </TabsTrigger>
+          <TabsTrigger value="subscribers" className="rounded-xl px-5 py-2 text-sm font-bold data-[state=active]:bg-[#e0f7fa] dark:data-[state=active]:bg-[#0097a7]/20 data-[state=active]:text-[#0097a7] dark:data-[state=active]:text-[#b3e5fc] transition-all">
+            <Users className="w-4 h-4 mr-2" /> Subscribers
+          </TabsTrigger>
         </TabsList>
 
         {/* ── Business tab ────────────────────────────────────────────── */}
         <TabsContent value="business">
           <motion.form initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
             onSubmit={saveBusiness}
-            className="bg-white rounded-3xl border border-[#cce7f0] shadow-sm p-6 space-y-4">
+            className="bg-white dark:bg-[#1e293b] rounded-3xl border border-[#cce7f0] dark:border-white/10 shadow-sm p-6 space-y-4 transition-colors">
             <div className="flex items-center gap-2 mb-2">
-              <Building2 className="w-5 h-5 text-[#0097a7]" />
-              <h3 className="font-bold text-[#0c2340]">Business Information</h3>
-              <span className="ml-auto text-xs text-[#4a7fa5]">Saved to Supabase</span>
+              <Building2 className="w-5 h-5 text-[#0097a7] dark:text-[#b3e5fc]" />
+              <h3 className="font-bold text-[#0c2340] dark:text-[#f8fafc]">Business Information</h3>
+              <span className="ml-auto text-xs text-[#4a7fa5] dark:text-[#94a3b8]">Saved to Supabase</span>
             </div>
 
             {loading ? (
               <div className="space-y-3">
-                {[...Array(4)].map((_, i) => <div key={i} className="h-10 bg-[#f0f9ff] rounded-xl animate-pulse" />)}
+                {[...Array(4)].map((_, i) => <div key={i} className="h-10 bg-[#f0f9ff] dark:bg-white/5 rounded-xl animate-pulse" />)}
               </div>
             ) : (
-              <>
-                {[
+              <div className="space-y-4">
+                {([
                   { label: 'Company Name', field: 'company' as const },
-                  { label: 'Phone Number', field: 'phone' as const },
-                  { label: 'Email', field: 'email' as const },
+                  { label: 'Business Phone', field: 'phone' as const },
+                  { label: 'Business Email', field: 'email' as const },
                   { label: 'Address', field: 'address' as const },
-                ].map(({ label, field }) => (
+                ] as const).map(({ label, field }) => (
                   <div key={field}>
-                    <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">{label}</label>
+                    <label className="text-sm font-bold text-[#0c2340] dark:text-[#f8fafc] mb-1.5 block">{label}</label>
                     <Input
                       value={business[field]}
                       onChange={e => setBusiness(prev => ({ ...prev, [field]: e.target.value }))}
-                      className="border-[#cce7f0]"
+                      className="border-[#cce7f0] dark:border-white/10 dark:bg-white/5 dark:text-white transition-colors"
                     />
                   </div>
                 ))}
                 <div>
-                  <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Business Hours</label>
+                  <label className="text-sm font-bold text-[#0c2340] dark:text-[#f8fafc] mb-1.5 block">Business Hours</label>
                   <Textarea
                     value={business.hours}
                     onChange={e => setBusiness(prev => ({ ...prev, hours: e.target.value }))}
-                    className="border-[#cce7f0] resize-none"
+                    className="border-[#cce7f0] dark:border-white/10 dark:bg-white/5 dark:text-white resize-none transition-colors"
                     rows={3}
                   />
                 </div>
-              </>
+                <div>
+                  <label className="text-sm font-bold text-[#0c2340] dark:text-[#f8fafc] mb-1.5 block">Monthly Revenue Goal ($)</label>
+                  <Input
+                    type="number" min="0" step="100"
+                    value={revenueGoal}
+                    onChange={e => setRevenueGoal(e.target.value)}
+                    placeholder="e.g. 5000"
+                    className="border-[#cce7f0] dark:border-white/10 dark:bg-white/5 dark:text-white max-w-xs transition-colors"
+                  />
+                  <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8] mt-1">Shown as a progress bar on the Analytics page.</p>
+                </div>
+              </div>
             )}
-
-            <div>
-              <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Monthly Revenue Goal ($)</label>
-              <Input
-                type="number" min="0" step="100"
-                value={revenueGoal}
-                onChange={e => setRevenueGoal(e.target.value)}
-                placeholder="e.g. 5000"
-                className="border-[#cce7f0] max-w-xs"
-              />
-              <p className="text-xs text-[#4a7fa5] mt-1">Shown as a progress bar on the Analytics page.</p>
-            </div>
 
             <Button type="submit" disabled={saving || loading} className="bg-gradient-to-r from-[#0097a7] to-[#1565c0] text-white gap-2">
               {saving ? 'Saving...' : <><CheckCircle2 className="w-4 h-4" /> Save Business Info</>}
@@ -329,44 +340,44 @@ export default function SettingsPage() {
         {/* ── Zones tab ───────────────────────────────────────────────── */}
         <TabsContent value="zones">
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-3xl border border-[#cce7f0] shadow-sm overflow-hidden">
-            <div className="p-5 border-b border-[#cce7f0] flex items-center justify-between">
+            className="bg-white dark:bg-[#1e293b] rounded-3xl border border-[#cce7f0] dark:border-white/10 shadow-sm overflow-hidden transition-colors">
+            <div className="p-5 border-b border-[#cce7f0] dark:border-white/10 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-[#0097a7]" />
-                <h3 className="font-bold text-[#0c2340]">Delivery Zones</h3>
+                <MapPin className="w-4 h-4 text-[#0097a7] dark:text-[#b3e5fc]" />
+                <h3 className="font-bold text-[#0c2340] dark:text-[#f8fafc]">Delivery Zones</h3>
               </div>
-              <span className="text-xs text-[#4a7fa5]">Saved to Supabase</span>
+              <span className="text-xs text-[#4a7fa5] dark:text-[#94a3b8]">Saved to Supabase</span>
             </div>
 
             {loading ? (
               <div className="p-4 space-y-2">
-                {[...Array(6)].map((_, i) => <div key={i} className="h-10 bg-[#f0f9ff] rounded-xl animate-pulse" />)}
+                {[...Array(6)].map((_, i) => <div key={i} className="h-10 bg-[#f0f9ff] dark:bg-white/5 rounded-xl animate-pulse" />)}
               </div>
             ) : (
               <>
-                <div className="p-5 border-b border-[#cce7f0] bg-[#f0f9ff]/50">
-                  <h4 className="text-sm font-bold text-[#0c2340] mb-3">Add New Zone</h4>
+                <div className="p-5 border-b border-[#cce7f0] dark:border-white/10 bg-[#f0f9ff]/50 dark:bg-white/5">
+                  <h4 className="text-sm font-bold text-[#0c2340] dark:text-[#f8fafc] mb-3">Add New Zone</h4>
                   <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
                     <div className="sm:col-span-2">
-                      <label className="text-xs font-medium text-[#4a7fa5] mb-1.5 block">City Name</label>
+                      <label className="text-xs font-bold text-[#4a7fa5] dark:text-[#94a3b8] mb-1.5 block">City Name</label>
                       <Input
                         placeholder="e.g. Surrey"
                         value={newZone.name}
                         onChange={e => setNewZone(p => ({ ...p, name: e.target.value }))}
-                        className="border-[#cce7f0] bg-white h-9"
+                        className="border-[#cce7f0] dark:border-white/10 bg-white dark:bg-white/5 dark:text-white h-9"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-[#4a7fa5] mb-1.5 block">Schedule</label>
+                      <label className="text-xs font-bold text-[#4a7fa5] dark:text-[#94a3b8] mb-1.5 block">Schedule</label>
                       <Input
                         placeholder="e.g. Wed & Fri"
                         value={newZone.schedule}
                         onChange={e => setNewZone(p => ({ ...p, schedule: e.target.value }))}
-                        className="border-[#cce7f0] bg-white h-9"
+                        className="border-[#cce7f0] dark:border-white/10 bg-white dark:bg-white/5 dark:text-white h-9"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-[#4a7fa5] mb-1.5 flex justify-between">
+                      <label className="text-xs font-bold text-[#4a7fa5] dark:text-[#94a3b8] mb-1.5 flex justify-between">
                         Fee
                         {!newZone.name.trim() && <span className="text-red-400">Required</span>}
                       </label>
@@ -375,7 +386,7 @@ export default function SettingsPage() {
                           type="number" min="0" step="0.50"
                           value={newZone.delivery_fee}
                           onChange={e => setNewZone(p => ({ ...p, delivery_fee: parseFloat(e.target.value) || 0 }))}
-                          className="border-[#cce7f0] bg-white h-9"
+                          className="border-[#cce7f0] dark:border-white/10 bg-white dark:bg-white/5 dark:text-white h-9"
                         />
                         <Button
                           onClick={handleAddZone}
@@ -389,13 +400,13 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <div className="divide-y divide-[#f0f9ff]">
+                <div className="divide-y divide-[#f0f9ff] dark:divide-white/5">
                   {/* Column headers */}
-                  <div className="flex items-center gap-4 px-5 py-2 bg-[#f0f9ff]">
-                    <span className="flex-1 text-xs font-semibold text-[#4a7fa5] uppercase">Zone</span>
-                    <span className="w-32 text-xs font-semibold text-[#4a7fa5] uppercase">Schedule</span>
-                    <span className="w-28 text-xs font-semibold text-[#4a7fa5] uppercase">Fee ($)</span>
-                    <span className="w-16 text-xs font-semibold text-[#4a7fa5] uppercase text-center">Active</span>
+                  <div className="flex items-center gap-4 px-5 py-2 bg-[#f0f9ff] dark:bg-white/5">
+                    <span className="flex-1 text-xs font-bold text-[#4a7fa5] dark:text-[#94a3b8] uppercase">Zone</span>
+                    <span className="w-32 text-xs font-bold text-[#4a7fa5] dark:text-[#94a3b8] uppercase">Schedule</span>
+                    <span className="w-28 text-xs font-bold text-[#4a7fa5] dark:text-[#94a3b8] uppercase">Fee ($)</span>
+                    <span className="w-16 text-xs font-bold text-[#4a7fa5] dark:text-[#94a3b8] uppercase text-center">Active</span>
                   </div>
 
                   {zones.map(z => (
@@ -403,22 +414,22 @@ export default function SettingsPage() {
                       <Input
                         value={z.name}
                         onChange={e => updateZone(z.id, 'name', e.target.value)}
-                        className="flex-1 border-transparent hover:border-[#cce7f0] focus:border-[#0097a7] h-8 text-sm font-medium text-[#0c2340] px-2 -ml-2"
+                        className="flex-1 border-transparent hover:border-[#cce7f0] dark:hover:border-white/20 focus:border-[#0097a7] dark:focus:border-[#0097a7] bg-transparent dark:text-white h-8 text-sm font-bold px-2 -ml-2 transition-colors"
                       />
                       <Input
                         value={z.schedule}
                         onChange={e => updateZone(z.id, 'schedule', e.target.value)}
-                        className="w-32 border-transparent hover:border-[#cce7f0] focus:border-[#0097a7] h-8 text-xs text-[#4a7fa5] px-2 -ml-2"
+                        className="w-32 border-transparent hover:border-[#cce7f0] dark:hover:border-white/20 focus:border-[#0097a7] dark:focus:border-[#0097a7] bg-transparent dark:text-[#94a3b8] h-8 text-xs px-2 -ml-2 transition-colors"
                       />
                       <div className="w-28 flex items-center gap-1 ml-2">
-                        <DollarSign className="w-3.5 h-3.5 text-[#4a7fa5] shrink-0" />
+                        <DollarSign className="w-3.5 h-3.5 text-[#4a7fa5] dark:text-[#94a3b8] shrink-0" />
                         <Input
                           type="number"
                           min="0"
                           step="0.50"
                           value={z.delivery_fee}
                           onChange={e => updateZone(z.id, 'delivery_fee', parseFloat(e.target.value) || 0)}
-                          className="border-[#cce7f0] h-7 w-20 text-xs text-right"
+                          className="border-[#cce7f0] dark:border-white/10 dark:bg-white/5 dark:text-white h-7 w-20 text-xs text-right transition-colors"
                         />
                       </div>
                       <div className="w-16 flex justify-center">
@@ -433,7 +444,7 @@ export default function SettingsPage() {
                   ))}
                 </div>
 
-                <div className="p-5 border-t border-[#cce7f0]">
+                <div className="p-5 border-t border-[#cce7f0] dark:border-white/10">
                   <Button
                     onClick={saveZones}
                     disabled={saving}
@@ -448,27 +459,27 @@ export default function SettingsPage() {
         </TabsContent>
 
         {/* ── Notifications tab ───────────────────────────────────────── */}
-        <TabsContent value="notifications">
+        <TabsContent value="notifs">
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-3xl border border-[#cce7f0] shadow-sm p-6 space-y-4">
+            className="bg-white dark:bg-[#1e293b] rounded-3xl border border-[#cce7f0] dark:border-white/10 shadow-sm p-6 space-y-4 transition-colors">
             <div className="flex items-center gap-2 mb-2">
-              <Bell className="w-5 h-5 text-[#0097a7]" />
-              <h3 className="font-bold text-[#0c2340]">Email Notifications</h3>
+              <Bell className="w-5 h-5 text-[#0097a7] dark:text-[#b3e5fc]" />
+              <h3 className="font-bold text-[#0c2340] dark:text-[#f8fafc]">Email Notifications</h3>
             </div>
-            <p className="text-xs text-[#4a7fa5] bg-[#f0f9ff] rounded-xl px-4 py-3 border border-[#cce7f0]">
+            <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8] bg-[#f0f9ff] dark:bg-white/5 rounded-xl px-4 py-3 border border-[#cce7f0] dark:border-white/10 transition-colors">
               Toggle which events trigger emails via Resend. Preferences are saved to Supabase and read by the webhook handler.
             </p>
             {loading ? (
-              <div className="space-y-2">{[...Array(6)].map((_, i) => <div key={i} className="h-10 bg-[#f0f9ff] rounded-xl animate-pulse" />)}</div>
+              <div className="space-y-2">{[...Array(6)].map((_, i) => <div key={i} className="h-10 bg-[#f0f9ff] dark:bg-white/5 rounded-xl animate-pulse" />)}</div>
             ) : (
               NOTIF_KEYS.map(n => (
-                <label key={n.key} className="flex items-center justify-between py-2.5 border-b border-[#f0f9ff] last:border-0 cursor-pointer">
-                  <span className="text-sm text-[#0c2340]">{n.label}</span>
+                <label key={n.key} className="flex items-center justify-between py-2.5 border-b border-[#f0f9ff] dark:border-white/5 last:border-0 cursor-pointer">
+                  <span className="text-sm text-[#0c2340] dark:text-[#f8fafc] font-bold">{n.label}</span>
                   <input
                     type="checkbox"
                     checked={notifs[n.key] ?? n.defaultOn}
                     onChange={e => setNotifs(prev => ({ ...prev, [n.key]: e.target.checked }))}
-                    className="w-4 h-4 accent-[#0097a7]"
+                    className="w-4 h-4 accent-[#0097a7] cursor-pointer"
                   />
                 </label>
               ))
@@ -561,13 +572,13 @@ export default function SettingsPage() {
         {/* ── Socials tab ──────────────────────────────────────────────── */}
         <TabsContent value="socials">
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-3xl border border-[#cce7f0] shadow-sm p-6 space-y-4">
+            className="bg-white dark:bg-[#1e293b] rounded-3xl border border-[#cce7f0] dark:border-white/10 shadow-sm p-6 space-y-4 transition-colors">
             <div className="flex items-center gap-2 mb-2">
-              <Share2 className="w-5 h-5 text-[#0097a7]" />
-              <h3 className="font-bold text-[#0c2340]">Social Links</h3>
-              <span className="ml-auto text-xs text-[#4a7fa5]">Shown in Footer</span>
+              <Share2 className="w-5 h-5 text-[#0097a7] dark:text-[#b3e5fc]" />
+              <h3 className="font-bold text-[#0c2340] dark:text-[#f8fafc]">Social Links</h3>
+              <span className="ml-auto text-xs text-[#4a7fa5] dark:text-[#94a3b8]">Shown in Footer</span>
             </div>
-            <p className="text-xs text-[#4a7fa5]">Leave a field blank to hide that icon from the footer.</p>
+            <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8]">Leave a field blank to hide that icon from the footer.</p>
 
             {[
               { label: 'Facebook URL', field: 'facebook' as const, placeholder: 'https://facebook.com/yourpage' },
@@ -575,12 +586,12 @@ export default function SettingsPage() {
               { label: 'Twitter / X URL', field: 'twitter' as const, placeholder: 'https://x.com/yourhandle' },
             ].map(({ label, field, placeholder }) => (
               <div key={field}>
-                <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">{label}</label>
+                <label className="text-sm font-bold text-[#0c2340] dark:text-[#f8fafc] mb-1.5 block">{label}</label>
                 <Input
                   value={socials[field]}
                   onChange={e => setSocialsState(prev => ({ ...prev, [field]: e.target.value }))}
                   placeholder={placeholder}
-                  className="border-[#cce7f0]"
+                  className="border-[#cce7f0] dark:border-white/10 dark:bg-white/5 dark:text-white"
                 />
               </div>
             ))}
@@ -591,16 +602,16 @@ export default function SettingsPage() {
           </motion.div>
         </TabsContent>
         {/* ── Email Templates tab ──────────────────────────────────────── */}
-        <TabsContent value="email-templates">
+        <TabsContent value="email">
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-3xl border border-[#cce7f0] shadow-sm p-6 space-y-6">
+            className="bg-white dark:bg-[#1e293b] rounded-3xl border border-[#cce7f0] dark:border-white/10 shadow-sm p-6 space-y-6 transition-colors">
             <div className="flex items-center gap-2">
-              <FileText className="w-5 h-5 text-[#0097a7]" />
-              <h3 className="font-bold text-[#0c2340]">Email Templates</h3>
-              <span className="ml-auto text-xs text-[#4a7fa5]">Saved to Supabase · Used by Resend</span>
+              <FileText className="w-5 h-5 text-[#0097a7] dark:text-[#b3e5fc]" />
+              <h3 className="font-bold text-[#0c2340] dark:text-[#f8fafc]">Email Templates</h3>
+              <span className="ml-auto text-xs text-[#4a7fa5] dark:text-[#94a3b8]">Saved to Supabase · Used by Resend</span>
             </div>
-            <p className="text-xs text-[#4a7fa5] bg-[#f0f9ff] rounded-xl px-4 py-3 border border-[#cce7f0]">
-              Edit subject lines and greeting text for automated emails. Use <code className="bg-[#e0f7fa] px-1 rounded">{'{{customer_name}}'}</code>, <code className="bg-[#e0f7fa] px-1 rounded">{'{{order_id}}'}</code>, <code className="bg-[#e0f7fa] px-1 rounded">{'{{total}}'}</code> as variables.
+            <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8] bg-[#f0f9ff] dark:bg-white/5 rounded-xl px-4 py-3 border border-[#cce7f0] dark:border-white/10 transition-colors">
+              Edit subject lines and greeting text for automated emails. Use <code className="bg-[#e0f7fa] dark:bg-[#0097a7]/20 dark:text-[#b3e5fc] px-1 rounded">{'{{customer_name}}'}</code>, <code className="bg-[#e0f7fa] dark:bg-[#0097a7]/20 dark:text-[#b3e5fc] px-1 rounded">{'{{order_id}}'}</code>, <code className="bg-[#e0f7fa] dark:bg-[#0097a7]/20 dark:text-[#b3e5fc] px-1 rounded">{'{{total}}'}</code> as variables.
             </p>
 
             {/* Order Confirmation */}

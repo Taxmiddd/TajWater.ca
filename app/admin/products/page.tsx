@@ -143,10 +143,10 @@ export default function AdminProductsPage() {
 
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-extrabold text-[#0c2340]">Products & Inventory</h2>
-          <p className="text-sm text-[#4a7fa5]">{products.length} products · changes reflect on the shop immediately</p>
+          <h2 className="text-2xl font-extrabold text-[#0c2340] dark:text-[#f8fafc]">Products & Inventory</h2>
+          <p className="text-sm text-[#4a7fa5] dark:text-[#94a3b8]">{products.length} products · changes reflect on the shop immediately</p>
         </div>
-        <Button onClick={openAdd} className="bg-gradient-to-r from-[#0097a7] to-[#1565c0] text-white gap-2">
+        <Button onClick={openAdd} className="bg-gradient-to-r from-[#0097a7] to-[#1565c0] text-white gap-2 shadow-lg shadow-blue-500/20">
           <Plus className="w-4 h-4" /> Add Product
         </Button>
       </div>
@@ -160,13 +160,13 @@ export default function AdminProductsPage() {
             { label: 'Out of Stock', value: outOfStockCount, color: '#dc2626', bg: '#fef2f2' },
           ].map((s, i) => (
             <motion.div key={s.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
-              className="bg-white rounded-2xl p-4 border border-[#cce7f0] shadow-sm flex items-center gap-3">
+              className="bg-white dark:bg-[#1e293b] rounded-2xl p-4 border border-[#cce7f0] dark:border-white/10 shadow-sm flex items-center gap-3 transition-colors">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: s.bg }}>
                 <Package className="w-5 h-5" style={{ color: s.color }} />
               </div>
               <div>
-                <p className="text-xl font-extrabold text-[#0c2340]">{s.value}</p>
-                <p className="text-xs text-[#4a7fa5]">{s.label}</p>
+                <p className="text-xl font-extrabold text-[#0c2340] dark:text-[#f8fafc]">{s.value}</p>
+                <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8]">{s.label}</p>
               </div>
             </motion.div>
           ))}
@@ -177,23 +177,23 @@ export default function AdminProductsPage() {
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#0097a7]" />
-          <Input placeholder="Search products..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 border-[#cce7f0] bg-white" />
+          <Input placeholder="Search products..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 border-[#cce7f0] dark:border-white/10 bg-white dark:bg-[#1e293b] text-[#0c2340] dark:text-[#f8fafc] transition-colors" />
         </div>
         <div className="flex gap-2">
           {(['all', 'low', 'out'] as const).map(f => (
             <button key={f} onClick={() => setStockFilter(f)}
-              className={`px-3 py-2 rounded-xl text-xs font-medium transition-all capitalize ${stockFilter === f ? 'bg-[#0097a7] text-white' : 'bg-white border border-[#cce7f0] text-[#4a7fa5] hover:border-[#0097a7]'
+              className={`px-3 py-2 rounded-xl text-xs font-medium transition-all capitalize ${stockFilter === f ? 'bg-[#0097a7] text-white' : 'bg-white dark:bg-[#1e293b] border border-[#cce7f0] dark:border-white/10 text-[#4a7fa5] dark:text-[#b3e5fc]/60 hover:border-[#0097a7] transition-colors'
                 }`}>
               {f === 'all' ? 'All' : f === 'low' ? 'Low Stock' : 'Out of Stock'}
             </button>
           ))}
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <label className="text-xs text-[#4a7fa5] whitespace-nowrap">Low stock threshold:</label>
+          <label className="text-xs text-[#4a7fa5] dark:text-[#94a3b8] whitespace-nowrap">Low stock threshold:</label>
           <Input
             type="number" min="1" value={lowThreshold}
             onChange={e => saveLowThreshold(parseInt(e.target.value) || 20)}
-            className="w-20 h-8 text-xs border-[#cce7f0]"
+            className="w-20 h-8 text-xs border-[#cce7f0] dark:border-white/10 dark:bg-white/5 dark:text-white"
           />
         </div>
       </div>
@@ -206,7 +206,7 @@ export default function AdminProductsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((product, i) => (
             <motion.div key={product.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-              className={`bg-white rounded-2xl border shadow-sm p-5 ${product.stock > 0 && product.stock < 20 ? 'border-amber-300' : 'border-[#cce7f0]'}`}>
+              className={`bg-white dark:bg-[#1e293b] rounded-2xl border shadow-sm p-5 transition-colors ${product.stock > 0 && product.stock < lowThreshold ? 'border-amber-400 dark:border-amber-400/40' : 'border-[#cce7f0] dark:border-white/10'}`}>
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <div className="w-10 h-10 rounded-xl bg-[#e0f7fa] flex items-center justify-center text-xl">
@@ -225,54 +225,54 @@ export default function AdminProductsPage() {
                 </div>
                 <div className="flex gap-1">
                   <Link href={`/admin/products/${product.id}`}>
-                    <button className="w-8 h-8 rounded-lg border border-[#cce7f0] flex items-center justify-center text-[#4a7fa5] hover:border-[#0097a7] hover:text-[#0097a7] transition-colors" title="Edit product">
+                    <button className="w-8 h-8 rounded-lg border border-[#cce7f0] dark:border-white/10 flex items-center justify-center text-[#4a7fa5] dark:text-[#b3e5fc]/60 hover:border-[#0097a7] hover:text-[#0097a7] transition-colors" title="Edit product">
                       <Edit className="w-3.5 h-3.5" />
                     </button>
                   </Link>
-                  <button onClick={() => handleDelete(product.id)} className="w-8 h-8 rounded-lg border border-[#cce7f0] flex items-center justify-center text-[#4a7fa5] hover:border-red-400 hover:text-red-500 transition-colors">
+                  <button onClick={() => handleDelete(product.id)} className="w-8 h-8 rounded-lg border border-[#cce7f0] dark:border-white/10 flex items-center justify-center text-[#4a7fa5] dark:text-[#b3e5fc]/60 hover:border-red-400 hover:text-red-500 transition-colors">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
 
-              <h3 className="font-bold text-[#0c2340] text-sm mb-1 leading-tight">{product.name}</h3>
-              <p className="text-xs text-[#4a7fa5] line-clamp-2 mb-3">{product.description}</p>
+              <h3 className="font-bold text-[#0c2340] dark:text-[#f8fafc] text-sm mb-1 leading-tight">{product.name}</h3>
+              <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8] line-clamp-2 mb-3">{product.description}</p>
 
               <div className="flex items-center justify-between mb-2">
-                <p className="text-xl font-extrabold text-[#0097a7]">${product.price.toFixed(2)}</p>
-                <div className={`flex items-center gap-1 text-xs font-medium ${product.stock < 20 ? 'text-amber-600' : 'text-[#4a7fa5]'}`}>
-                  {product.stock < 20 && product.stock > 0 && <AlertTriangle className="w-3.5 h-3.5" />}
+                <p className="text-xl font-extrabold text-[#0097a7] dark:text-[#b3e5fc]">${product.price.toFixed(2)}</p>
+                <div className={`flex items-center gap-1 text-xs font-bold ${product.stock < lowThreshold ? 'text-amber-500' : 'text-[#4a7fa5] dark:text-[#94a3b8]'}`}>
+                  {product.stock < lowThreshold && product.stock > 0 && <AlertTriangle className="w-3.5 h-3.5" />}
                   <Package className="w-3.5 h-3.5" />
                   {product.stock} in stock
                 </div>
               </div>
 
               {/* Stock bar */}
-              <div className="w-full h-1.5 bg-[#f0f9ff] rounded-full mb-3">
-                <div className={`h-full rounded-full ${product.stock === 0 ? 'bg-red-400' : product.stock < lowThreshold ? 'bg-amber-400' : 'bg-[#0097a7]'}`}
+              <div className="w-full h-1.5 bg-[#f0f9ff] dark:bg-white/5 rounded-full mb-3 overflow-hidden">
+                <div className={`h-full rounded-full transition-all ${product.stock === 0 ? 'bg-red-500' : product.stock < lowThreshold ? 'bg-amber-500' : 'bg-[#0097a7]'}`}
                   style={{ width: `${Math.min(100, (product.stock / maxStock) * 100)}%` }} />
               </div>
 
-              {/* Quick stock adjust */}
+               {/* Quick stock adjust */}
               <div className="flex items-center gap-2 mb-3">
                 <button onClick={() => adjustStock(product, -1)} disabled={product.stock === 0}
-                  className="w-7 h-7 rounded-lg border border-[#cce7f0] flex items-center justify-center text-[#4a7fa5] hover:border-red-400 hover:text-red-500 disabled:opacity-30 transition-colors">
+                  className="w-7 h-7 rounded-lg border border-[#cce7f0] dark:border-white/10 flex items-center justify-center text-[#4a7fa5] dark:text-[#b3e5fc]/60 hover:border-red-400 hover:text-red-500 disabled:opacity-30 transition-colors">
                   <Minus className="w-3 h-3" />
                 </button>
-                <span className="text-xs font-bold text-[#0c2340] min-w-[40px] text-center">{product.stock}</span>
+                <span className="text-xs font-bold text-[#0c2340] dark:text-[#f8fafc] min-w-[30px] text-center">{product.stock}</span>
                 <button onClick={() => adjustStock(product, 1)}
-                  className="w-7 h-7 rounded-lg border border-[#cce7f0] flex items-center justify-center text-[#4a7fa5] hover:border-green-400 hover:text-green-600 transition-colors">
+                  className="w-7 h-7 rounded-lg border border-[#cce7f0] dark:border-white/10 flex items-center justify-center text-[#4a7fa5] dark:text-[#b3e5fc]/60 hover:border-green-500 hover:text-green-500 transition-colors">
                   <Plus className="w-3 h-3" />
                 </button>
-                <span className="text-[10px] text-[#4a7fa5] ml-1">units</span>
+                <span className="text-[10px] text-[#4a7fa5] dark:text-[#94a3b8] ml-1">units</span>
               </div>
 
               <button onClick={() => toggleFeatured(product)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${product.featured ? 'bg-amber-50 border-amber-200 text-amber-600' : 'border-[#cce7f0] text-[#4a7fa5] hover:border-amber-300'}`}>
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${product.featured ? 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/30 text-amber-700 dark:text-amber-400' : 'border-[#cce7f0] dark:border-white/10 text-[#4a7fa5] dark:text-[#b3e5fc]/60 hover:border-amber-400 hover:text-amber-500'}`}>
                 {product.featured ? 'Unfeature' : 'Feature'}
               </button>
               <button onClick={() => toggleActive(product)}
-                className={`w-full py-1.5 rounded-xl text-xs font-medium border transition-colors ${product.active ? 'border-amber-200 text-amber-600 hover:bg-amber-50' : 'border-green-200 text-green-600 hover:bg-green-50'}`}>
+                className={`w-full py-1.5 rounded-xl text-xs font-bold border transition-colors ${product.active ? 'border-amber-200 dark:border-amber-900/30 text-amber-600 dark:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/10' : 'border-green-200 dark:border-green-900/30 text-green-600 dark:text-green-500 hover:bg-green-50 dark:hover:bg-green-900/10'}`}>
                 {product.active ? 'Deactivate' : 'Activate'}
               </button>
             </motion.div>
@@ -282,50 +282,50 @@ export default function AdminProductsPage() {
 
       {/* Add / Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto bg-white dark:bg-[#1e293b] border-[#cce7f0] dark:border-white/10 transition-colors">
           <DialogHeader>
-            <DialogTitle className="text-[#0c2340]">{editing ? 'Edit Product' : 'Add New Product'}</DialogTitle>
+            <DialogTitle className="text-[#0c2340] dark:text-[#f8fafc]">{editing ? 'Edit Product' : 'Add New Product'}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSave} className="space-y-4 mt-2">
             <div>
-              <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Product Name *</label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. 20L Spring Water Jug" className="border-[#cce7f0]" required />
+              <label className="text-sm font-semibold text-[#0c2340] dark:text-[#f8fafc] mb-1.5 block">Product Name *</label>
+              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. 20L Spring Water Jug" className="border-[#cce7f0] dark:border-white/10 dark:bg-white/5 dark:text-white" required />
             </div>
             <div>
-              <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Description</label>
-              <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Brief description shown on the shop..." rows={3} className="border-[#cce7f0] resize-none" />
+              <label className="text-sm font-semibold text-[#0c2340] dark:text-[#f8fafc] mb-1.5 block">Description</label>
+              <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Brief description shown on the shop..." rows={3} className="border-[#cce7f0] dark:border-white/10 dark:bg-white/5 dark:text-white resize-none" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Price ($) *</label>
-                <Input type="number" step="0.01" min="0" value={form.price} onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) || 0 })} className="border-[#cce7f0]" required />
+                <label className="text-sm font-semibold text-[#0c2340] dark:text-[#f8fafc] mb-1.5 block">Price ($) *</label>
+                <Input type="number" step="0.01" min="0" value={form.price} onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) || 0 })} className="border-[#cce7f0] dark:border-white/10 dark:bg-white/5 dark:text-white" required />
               </div>
               <div>
-                <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Stock (units) *</label>
-                <Input type="number" min="0" value={form.stock} onChange={(e) => setForm({ ...form, stock: parseInt(e.target.value) || 0 })} className="border-[#cce7f0]" required />
+                <label className="text-sm font-semibold text-[#0c2340] dark:text-[#f8fafc] mb-1.5 block">Stock (units) *</label>
+                <Input type="number" min="0" value={form.stock} onChange={(e) => setForm({ ...form, stock: parseInt(e.target.value) || 0 })} className="border-[#cce7f0] dark:border-white/10 dark:bg-white/5 dark:text-white" required />
               </div>
             </div>
             <div>
-              <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Category *</label>
+              <label className="text-sm font-semibold text-[#0c2340] dark:text-[#f8fafc] mb-1.5 block">Category *</label>
               <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
-                className="w-full h-10 px-3 rounded-xl border border-[#cce7f0] text-sm focus:border-[#0097a7] focus:outline-none text-[#0c2340]" required>
-                {categories.map((c) => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
+                className="w-full h-10 px-3 rounded-xl border border-[#cce7f0] dark:border-white/10 bg-white dark:bg-white/5 text-[#0c2340] dark:text-white text-sm focus:border-[#0097a7] focus:outline-none transition-colors" required>
+                {categories.map((c) => <option key={c} value={c} className="dark:bg-[#1e293b]">{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Product Image</label>
+              <label className="text-sm font-semibold text-[#0c2340] dark:text-[#f8fafc] mb-1.5 block">Product Image</label>
               {form.image_url ? (
-                <div className="relative w-full h-36 rounded-xl overflow-hidden border border-[#cce7f0] mb-2">
+                <div className="relative w-full h-36 rounded-xl overflow-hidden border border-[#cce7f0] dark:border-white/10 mb-2 transition-colors">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={form.image_url} alt="Product" className="w-full h-full object-contain bg-[#f0f9ff]" />
+                  <img src={form.image_url} alt="Product" className="w-full h-full object-contain bg-[#f0f9ff] dark:bg-white/5" />
                   <button type="button" onClick={() => setForm({ ...form, image_url: '' })}
-                    className="absolute top-2 right-2 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600">
+                    className="absolute top-2 right-2 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 shadow-lg">
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
               ) : (
                 <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading}
-                  className="w-full h-24 border-2 border-dashed border-[#cce7f0] rounded-xl flex flex-col items-center justify-center gap-2 text-[#4a7fa5] hover:border-[#0097a7] hover:text-[#0097a7] transition-colors mb-2 disabled:opacity-60">
+                  className="w-full h-24 border-2 border-dashed border-[#cce7f0] dark:border-white/10 rounded-xl flex flex-col items-center justify-center gap-2 text-[#4a7fa5] dark:text-[#b3e5fc]/60 hover:border-[#0097a7] hover:text-[#0097a7] transition-colors mb-2 disabled:opacity-60">
                   {uploading ? (
                     <div className="w-5 h-5 border-2 border-[#cce7f0] border-t-[#0097a7] rounded-full animate-spin" />
                   ) : (
@@ -334,19 +334,19 @@ export default function AdminProductsPage() {
                 </button>
               )}
               <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-              <Input value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="Or paste image URL..." className="border-[#cce7f0] text-xs" />
+              <Input value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="Or paste image URL..." className="border-[#cce7f0] dark:border-white/10 dark:bg-white/5 dark:text-white text-xs" />
             </div>
             <div className="flex items-center gap-3 pt-1">
               <input type="checkbox" id="active" checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} className="w-4 h-4 accent-[#0097a7]" />
-              <label htmlFor="active" className="text-sm text-[#0c2340]">Active (visible on shop)</label>
+              <label htmlFor="active" className="text-sm font-medium text-[#0c2340] dark:text-[#f8fafc]">Active (visible on shop)</label>
             </div>
             <div className="flex items-center gap-3">
               <input type="checkbox" id="featured" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} className="w-4 h-4 accent-amber-500" />
-              <label htmlFor="featured" className="text-sm text-[#0c2340]">Featured (shown on home page)</label>
+              <label htmlFor="featured" className="text-sm font-medium text-[#0c2340] dark:text-[#f8fafc]">Featured (shown on home page)</label>
             </div>
             <div className="flex gap-3 pt-2">
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="flex-1 border-[#cce7f0]">Cancel</Button>
-              <Button type="submit" disabled={saving} className="flex-1 bg-gradient-to-r from-[#0097a7] to-[#1565c0] text-white">
+              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="flex-1 border-[#cce7f0] dark:border-white/10 dark:text-white hover:bg-white/5 transition-colors">Cancel</Button>
+              <Button type="submit" disabled={saving} className="flex-1 bg-gradient-to-r from-[#0097a7] to-[#1565c0] text-white shadow-lg shadow-blue-500/20">
                 {saving ? 'Saving...' : editing ? 'Save Changes' : 'Add Product'}
               </Button>
             </div>

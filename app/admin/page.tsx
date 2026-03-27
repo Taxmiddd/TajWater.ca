@@ -179,10 +179,10 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold text-[#0c2340]">Admin Dashboard</h1>
-          <p className="text-sm text-[#4a7fa5]">{today}</p>
+          <h1 className="text-2xl font-extrabold text-[#0c2340] dark:text-[#f8fafc]">Admin Dashboard</h1>
+          <p className="text-sm text-[#4a7fa5] dark:text-[#94a3b8]">{today}</p>
         </div>
-        <Button size="sm" variant="outline" onClick={fetchData} className="border-[#cce7f0] text-[#4a7fa5] gap-2">
+        <Button size="sm" variant="outline" onClick={fetchData} className="border-[#cce7f0] dark:border-white/10 text-[#4a7fa5] dark:text-[#b3e5fc] hover:bg-white/5 gap-2">
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           Refresh
         </Button>
@@ -198,13 +198,13 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.07 }}
-              className="bg-white rounded-2xl p-4 border border-[#cce7f0] shadow-sm"
+              className="bg-white dark:bg-[#1e293b] rounded-2xl p-4 border border-[#cce7f0] dark:border-white/10 shadow-sm transition-colors"
             >
               <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-2" style={{ background: kpi.bg }}>
                 <Icon className="w-4 h-4" style={{ color: kpi.color }} />
               </div>
-              <p className={`text-xl font-extrabold text-[#0c2340] ${loading ? 'opacity-40' : ''}`}>{kpi.value}</p>
-              <p className="text-[11px] text-[#4a7fa5] mt-0.5 leading-tight">{kpi.label}</p>
+              <p className={`text-xl font-extrabold text-[#0c2340] dark:text-[#f8fafc] ${loading ? 'opacity-40' : ''}`}>{kpi.value}</p>
+              <p className="text-[11px] text-[#4a7fa5] dark:text-[#94a3b8] mt-0.5 leading-tight">{kpi.label}</p>
               {kpi.sub && <div className="mt-1">{kpi.sub}</div>}
             </motion.div>
           )
@@ -213,8 +213,8 @@ export default function AdminDashboard() {
 
       {/* Quick Actions */}
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-        className="bg-white rounded-3xl border border-[#cce7f0] shadow-sm p-5">
-        <h3 className="font-bold text-[#0c2340] text-sm mb-4">Quick Actions</h3>
+        className="bg-white dark:bg-[#1e293b] rounded-3xl border border-[#cce7f0] dark:border-white/10 shadow-sm p-5 transition-colors">
+        <h3 className="font-bold text-[#0c2340] dark:text-[#f8fafc] text-sm mb-4">Quick Actions</h3>
         <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
           {QUICK_ACTIONS.map((action) => {
             const Icon = action.icon
@@ -225,7 +225,7 @@ export default function AdminDashboard() {
                   style={{ background: action.bg }}>
                   <Icon className="w-5 h-5" style={{ color: action.color }} />
                 </div>
-                <span className="text-[10px] text-[#4a7fa5] text-center font-medium leading-tight group-hover:text-[#0097a7]">{action.label}</span>
+                <span className="text-[10px] text-[#4a7fa5] dark:text-[#94a3b8] text-center font-medium leading-tight group-hover:text-[#0097a7] transition-colors">{action.label}</span>
               </Link>
             )
           })}
@@ -240,7 +240,7 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 + i * 0.06 }}
-            className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-amber-50 border-amber-200"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/30 transition-colors"
           >
             <AlertTriangle className="w-4 h-4 shrink-0 text-amber-600" />
             <p className="text-sm font-medium text-amber-600 flex-1">
@@ -257,7 +257,7 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.45 }}
-            className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-blue-50 border-blue-200"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900/30 transition-colors"
           >
             <Clock className="w-4 h-4 shrink-0 text-blue-600" />
             <p className="text-sm font-medium text-blue-600 flex-1">
@@ -274,7 +274,7 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
-            className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-green-50 border-green-200"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900/30 transition-colors"
           >
             <CheckCircle2 className="w-4 h-4 shrink-0 text-green-600" />
             <p className="text-sm font-medium text-green-600">All systems normal — no alerts right now</p>
@@ -287,10 +287,10 @@ export default function AdminDashboard() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="bg-white rounded-3xl border border-[#cce7f0] shadow-sm overflow-hidden"
+        className="bg-white dark:bg-[#1e293b] rounded-3xl border border-[#cce7f0] dark:border-white/10 shadow-sm overflow-hidden transition-colors"
       >
-        <div className="flex items-center justify-between p-5 border-b border-[#cce7f0]">
-          <h3 className="font-bold text-[#0c2340]">Recent Orders</h3>
+        <div className="flex items-center justify-between p-5 border-b border-[#cce7f0] dark:border-white/5">
+          <h3 className="font-bold text-[#0c2340] dark:text-[#f8fafc]">Recent Orders</h3>
           <Link href="/admin/orders" className="text-xs text-[#0097a7] hover:underline font-medium">
             View all →
           </Link>
@@ -310,7 +310,7 @@ export default function AdminDashboard() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-[#f0f9ff] border-b border-[#cce7f0]">
+              <thead className="bg-[#f0f9ff] dark:bg-white/5 border-b border-[#cce7f0] dark:border-white/5 transition-colors">
                 <tr>
                   {[
                     { label: 'Order',    cls: '' },
@@ -320,23 +320,23 @@ export default function AdminDashboard() {
                     { label: 'Total',    cls: '' },
                     { label: 'Time',     cls: 'hidden sm:table-cell' },
                   ].map(h => (
-                    <th key={h.label} className={`px-4 py-3 text-left text-xs font-semibold text-[#4a7fa5] uppercase tracking-wider ${h.cls}`}>{h.label}</th>
+                    <th key={h.label} className={`px-4 py-3 text-left text-xs font-semibold text-[#4a7fa5] dark:text-[#b3e5fc]/60 uppercase tracking-wider ${h.cls}`}>{h.label}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#f0f9ff]">
+              <tbody className="divide-y divide-[#f0f9ff] dark:divide-white/5 transition-colors">
                 {recentOrders.map(order => (
-                  <tr key={order.id} className="hover:bg-[#f0f9ff] transition-colors">
-                    <td className="px-4 py-3 font-mono text-xs font-bold text-[#0097a7]">{shortId(order.id)}</td>
-                    <td className="px-4 py-3 font-medium text-[#0c2340] max-w-[120px] truncate">{order.profile?.name ?? order.customer_name ?? 'Guest'}</td>
-                    <td className="hidden sm:table-cell px-4 py-3 text-[#4a7fa5] text-xs">{(Array.isArray(order.zones) ? order.zones[0]?.name : order.zones?.name) ?? '—'}</td>
+                  <tr key={order.id} className="hover:bg-[#f0f9ff] dark:hover:bg-white/5 transition-colors">
+                    <td className="px-4 py-3 font-mono text-xs font-bold text-[#0097a7] dark:text-[#b3e5fc]">{shortId(order.id)}</td>
+                    <td className="px-4 py-3 font-medium text-[#0c2340] dark:text-[#f8fafc] max-w-[120px] truncate">{order.profile?.name ?? order.customer_name ?? 'Guest'}</td>
+                    <td className="hidden sm:table-cell px-4 py-3 text-[#4a7fa5] dark:text-[#b3e5fc]/60 text-xs text-nowrap">{(Array.isArray(order.zones) ? order.zones[0]?.name : order.zones?.name) ?? '—'}</td>
                     <td className="px-4 py-3">
-                      <Badge className={`text-[10px] ${STATUS_COLOR[order.status] ?? 'bg-gray-100 text-gray-600'}`}>
+                      <Badge className={`text-[10px] ${STATUS_COLOR[order.status] ?? 'bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-gray-400'}`}>
                         {order.status.replace(/_/g, ' ')}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 font-bold text-[#0c2340] whitespace-nowrap">${order.total.toFixed(2)}</td>
-                    <td className="hidden sm:table-cell px-4 py-3 text-xs text-[#4a7fa5]">{timeAgo(order.created_at)}</td>
+                    <td className="px-4 py-3 font-bold text-[#0c2340] dark:text-[#f8fafc] whitespace-nowrap">${order.total.toFixed(2)}</td>
+                    <td className="hidden sm:table-cell px-4 py-3 text-xs text-[#4a7fa5] dark:text-[#b3e5fc]/60">{timeAgo(order.created_at)}</td>
                   </tr>
                 ))}
               </tbody>

@@ -201,19 +201,19 @@ export default function PaymentsPage() {
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => !refundDlg.loading && setRefundDlg(null)}
-              className="fixed inset-0 bg-black/40 z-40" />
+              className="fixed inset-0 bg-black/40 dark:bg-black/60 z-40 transition-colors" />
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-white rounded-2xl shadow-2xl border border-[#cce7f0] p-6 w-full max-w-sm">
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-white dark:bg-[#1e293b] rounded-2xl shadow-2xl border border-[#cce7f0] dark:border-white/10 p-6 w-full max-w-sm transition-colors">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
-                  <RotateCcw className="w-5 h-5 text-red-500" />
+                <div className="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center transition-colors">
+                  <RotateCcw className="w-5 h-5 text-red-500 dark:text-red-400" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-[#0c2340]">Issue Refund</h3>
-                  <p className="text-xs text-[#4a7fa5]">Order total: ${refundDlg.total.toFixed(2)}</p>
+                  <h3 className="font-bold text-[#0c2340] dark:text-[#f8fafc]">Issue Refund</h3>
+                  <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8]">Order total: ${refundDlg.total.toFixed(2)}</p>
                 </div>
               </div>
-              <label className="text-xs font-medium text-[#4a7fa5] mb-1.5 block">Refund amount ($)</label>
+              <label className="text-xs font-medium text-[#4a7fa5] dark:text-[#b3e5fc]/60 mb-1.5 block">Refund amount ($)</label>
               <Input
                 type="number"
                 min="0.01"
@@ -221,7 +221,7 @@ export default function PaymentsPage() {
                 step="0.01"
                 value={refundDlg.amount}
                 onChange={e => setRefundDlg(d => d ? { ...d, amount: e.target.value, error: '' } : null)}
-                className="border-[#cce7f0] mb-3"
+                className="border-[#cce7f0] dark:border-white/10 dark:bg-white/5 dark:text-white mb-3 transition-colors"
               />
               {refundDlg.error && (
                 <p className="text-xs text-red-500 mb-3 flex items-center gap-1"><AlertTriangle className="w-3 h-3" />{refundDlg.error}</p>
@@ -242,18 +242,18 @@ export default function PaymentsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-extrabold text-[#0c2340]">Payments</h2>
-          <p className="text-sm text-[#4a7fa5]">Square-powered · auto-updated via webhooks · live from Supabase</p>
+          <h2 className="text-2xl font-extrabold text-[#0c2340] dark:text-[#f8fafc]">Payments</h2>
+          <p className="text-sm text-[#4a7fa5] dark:text-[#94a3b8]">Square-powered · auto-updated via webhooks · live from Supabase</p>
         </div>
         <div className="flex gap-2">
-          <Button size="sm" variant="outline" onClick={handleCleanup} className="border-red-200 text-red-500 hover:bg-red-50 gap-2">
+          <Button size="sm" variant="outline" onClick={handleCleanup} className="border-red-200 dark:border-red-900/40 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 gap-2">
             <Trash2 className="w-4 h-4" /> Cleanup Pending
           </Button>
-          <Button size="sm" variant="outline" onClick={fetchData} className="border-[#cce7f0] text-[#4a7fa5]">
+          <Button size="sm" variant="outline" onClick={fetchData} className="border-[#cce7f0] dark:border-white/10 text-[#4a7fa5] dark:text-[#b3e5fc] hover:bg-white/10 transition-colors">
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </Button>
           <Button
-            size="sm" variant="outline" className="border-[#cce7f0] text-[#4a7fa5] gap-2"
+            size="sm" variant="outline" className="border-[#cce7f0] dark:border-white/10 text-[#4a7fa5] dark:text-[#b3e5fc] hover:bg-white/10 transition-colors gap-2"
             onClick={() => exportCSV('payments.csv', filtered.map(t => ({
               id: shortId(t.id),
               customer: t.profile?.name ?? t.customer_name ?? 'Guest',
@@ -280,32 +280,32 @@ export default function PaymentsPage() {
           const Icon = s.icon
           return (
             <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
-              className="bg-white rounded-2xl p-4 border border-[#cce7f0] shadow-sm">
+              className="bg-white dark:bg-[#1e293b] rounded-2xl p-4 border border-[#cce7f0] dark:border-white/10 shadow-sm transition-colors">
               <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-2" style={{ background: s.bg }}>
                 <Icon className="w-4 h-4" style={{ color: s.color }} />
               </div>
-              <p className={`text-xl font-extrabold text-[#0c2340] ${loading ? 'opacity-40' : ''}`}>{loading ? '—' : s.value}</p>
-              <p className="text-xs text-[#4a7fa5]">{s.label}</p>
+              <p className={`text-xl font-extrabold text-[#0c2340] dark:text-[#f8fafc] ${loading ? 'opacity-40' : ''}`}>{loading ? '—' : s.value}</p>
+              <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8]">{s.label}</p>
             </motion.div>
           )
         })}
       </div>
 
       {/* Square note */}
-      <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#f0f9ff] border border-[#cce7f0] text-xs text-[#4a7fa5]">
-        <CreditCard className="w-4 h-4 text-[#0097a7] shrink-0" />
-        Payment statuses update automatically when Square fires webhooks (<code className="bg-white px-1 py-0.5 rounded text-[#0097a7]">payment.completed</code>, <code className="bg-white px-1 py-0.5 rounded text-[#0097a7]">refund.created</code>). Configure your webhook at <strong className="text-[#0c2340]">squareup.com/dashboard</strong> → Webhooks → endpoint: <code className="text-[#0097a7]">/api/square/webhook</code>
+      <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#f0f9ff] dark:bg-white/5 border border-[#cce7f0] dark:border-white/10 text-xs text-[#4a7fa5] dark:text-[#94a3b8] transition-colors">
+        <CreditCard className="w-4 h-4 text-[#0097a7] dark:text-[#b3e5fc] shrink-0" />
+        Payment statuses update automatically when Square fires webhooks (<code className="bg-white dark:bg-white/10 px-1 py-0.5 rounded text-[#0097a7] dark:text-[#b3e5fc]">payment.completed</code>, <code className="bg-white dark:bg-white/10 px-1 py-0.5 rounded text-[#0097a7] dark:text-[#b3e5fc]">refund.created</code>). Configure your webhook at <strong className="text-[#0c2340] dark:text-[#f8fafc]">squareup.com/dashboard</strong> → Webhooks → endpoint: <code className="text-[#0097a7] dark:text-[#b3e5fc]">/api/square/webhook</code>
       </div>
 
       {/* Disputes alert */}
       {txns.filter(t => t.payment_status === 'disputed').length > 0 && (
-        <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-orange-50 border border-orange-200 text-xs text-orange-700">
+        <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/30 text-xs text-orange-700 dark:text-orange-400 transition-colors">
           <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
           <div>
-            <p className="font-semibold">
+            <p className="font-semibold text-orange-800 dark:text-orange-300">
               {txns.filter(t => t.payment_status === 'disputed').length} disputed payment{txns.filter(t => t.payment_status === 'disputed').length > 1 ? 's' : ''} require attention
             </p>
-            <p className="mt-0.5 text-orange-600">
+            <p className="mt-0.5 text-orange-600 dark:text-orange-400/80">
               Use the &quot;Square&quot; button on each disputed row to submit evidence in the Square Dashboard. Disputes must be responded to within 7–10 days.
             </p>
           </div>
@@ -320,14 +320,14 @@ export default function PaymentsPage() {
             placeholder="Search by order ID, customer, zone, or Square ID..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="pl-10 border-[#cce7f0] bg-white"
+            className="pl-10 border-[#cce7f0] dark:border-white/10 bg-white dark:bg-[#1e293b] text-[#0c2340] dark:text-[#f8fafc] transition-colors"
           />
         </div>
         <div className="flex gap-2 flex-wrap">
           {FILTER_OPTIONS.map(f => (
             <button key={f} onClick={() => setFilter(f)}
               className={`px-3 py-2 rounded-xl text-xs font-medium transition-all capitalize ${
-                filter === f ? 'bg-[#0097a7] text-white' : 'bg-white border border-[#cce7f0] text-[#4a7fa5] hover:border-[#0097a7]'
+                filter === f ? 'bg-[#0097a7] text-white' : 'bg-white dark:bg-[#1e293b] border border-[#cce7f0] dark:border-white/10 text-[#4a7fa5] dark:text-[#94a3b8] hover:border-[#0097a7] focus:border-[#0097a7]'
               }`}>
               {f}
               {filterCounts[f] > 0 && (
@@ -346,16 +346,16 @@ export default function PaymentsPage() {
           {[...Array(6)].map((_, i) => <div key={i} className="h-12 bg-white rounded-2xl border border-[#cce7f0] animate-pulse" />)}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="bg-white rounded-3xl border border-[#cce7f0] p-16 text-center">
-          <Package className="w-10 h-10 text-[#cce7f0] mx-auto mb-3" />
-          <p className="text-[#4a7fa5] font-medium">No transactions yet</p>
-          <p className="text-xs text-[#4a7fa5] mt-1">Transactions appear here automatically once customers place orders and pay via Square</p>
+        <div className="bg-white dark:bg-[#1e293b] rounded-3xl border border-[#cce7f0] dark:border-white/10 p-16 text-center transition-colors">
+          <Package className="w-10 h-10 text-[#cce7f0] dark:text-white/10 mx-auto mb-3" />
+          <p className="text-[#4a7fa5] dark:text-[#94a3b8] font-medium">No transactions yet</p>
+          <p className="text-xs text-[#4a7fa5] dark:text-white/40 mt-1">Transactions appear here automatically once customers place orders and pay via Square</p>
         </div>
       ) : (
-        <div className="bg-white rounded-3xl border border-[#cce7f0] shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-[#1e293b] rounded-3xl border border-[#cce7f0] dark:border-white/10 shadow-sm overflow-hidden transition-colors">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-[#f0f9ff] border-b border-[#cce7f0]">
+              <thead className="bg-[#f0f9ff] dark:bg-white/5 border-b border-[#cce7f0] dark:border-white/10 transition-colors">
                 <tr>
                   {[
                     { label: 'Order',     cls: '' },
@@ -367,32 +367,32 @@ export default function PaymentsPage() {
                     { label: 'Date',      cls: 'hidden sm:table-cell' },
                     { label: 'Actions',   cls: '' },
                   ].map(h => (
-                    <th key={h.label} className={`px-4 py-3 text-left text-xs font-semibold text-[#4a7fa5] uppercase tracking-wider whitespace-nowrap ${h.cls}`}>{h.label}</th>
+                    <th key={h.label} className={`px-4 py-3 text-left text-xs font-semibold text-[#4a7fa5] dark:text-[#b3e5fc]/60 uppercase tracking-wider whitespace-nowrap ${h.cls}`}>{h.label}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#f0f9ff]">
+              <tbody className="divide-y divide-[#f0f9ff] dark:divide-white/5 transition-colors">
                 {filtered.map((txn, i) => {
                   const pb = paymentBadge(txn.payment_status)
                   const customerName = txn.profile?.name ?? txn.customer_name ?? 'Guest'
                   return (
                     <motion.tr key={txn.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.02 }}
-                      className="hover:bg-[#f0f9ff] transition-colors">
-                      <td className="px-4 py-3 font-mono text-xs font-bold text-[#0097a7]">{shortId(txn.id)}</td>
-                      <td className="px-4 py-3 font-medium text-[#0c2340] max-w-[110px] truncate">{customerName}</td>
-                      <td className="hidden sm:table-cell px-4 py-3 text-[#4a7fa5] text-xs">{getZoneName(txn.zones)}</td>
-                      <td className="px-4 py-3 font-bold text-[#0c2340] whitespace-nowrap">${txn.total.toFixed(2)}</td>
+                      className="hover:bg-[#f0f9ff] dark:hover:bg-white/5 transition-colors">
+                      <td className="px-4 py-3 font-mono text-xs font-bold text-[#0097a7] dark:text-[#b3e5fc]">{shortId(txn.id)}</td>
+                      <td className="px-4 py-3 font-medium text-[#0c2340] dark:text-[#f8fafc] max-w-[110px] truncate">{customerName}</td>
+                      <td className="hidden sm:table-cell px-4 py-3 text-[#4a7fa5] dark:text-[#94a3b8] text-xs">{getZoneName(txn.zones)}</td>
+                      <td className="px-4 py-3 font-bold text-[#0c2340] dark:text-[#f8fafc] whitespace-nowrap">${txn.total.toFixed(2)}</td>
                       <td className="px-4 py-3">
-                        <Badge className={`text-[10px] ${pb.color}`}>{pb.label}</Badge>
+                        <Badge className={`text-[10px] ${pb.color} dark:bg-opacity-20`}>{pb.label}</Badge>
                       </td>
-                      <td className="hidden lg:table-cell px-4 py-3 font-mono text-[10px] text-[#4a7fa5] max-w-[140px] truncate">
+                      <td className="hidden lg:table-cell px-4 py-3 font-mono text-[10px] text-[#4a7fa5] dark:text-[#94a3b8] max-w-[140px] truncate">
                         {txn.square_payment_id ?? '—'}
                       </td>
-                      <td className="hidden sm:table-cell px-4 py-3 text-xs text-[#4a7fa5] whitespace-nowrap">{fmtDate(txn.created_at)}</td>
+                      <td className="hidden sm:table-cell px-4 py-3 text-xs text-[#4a7fa5] dark:text-[#94a3b8] whitespace-nowrap">{fmtDate(txn.created_at)}</td>
                       <td className="px-4 py-3 flex gap-2">
                         {txn.payment_status === 'paid' && (
                           <Button size="sm" variant="outline" onClick={() => openRefund(txn)}
-                            className="border-red-200 text-red-500 hover:bg-red-50 h-7 text-xs gap-1">
+                            className="border-red-200 dark:border-red-900/40 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 h-7 text-xs gap-1 transition-colors">
                             <RotateCcw className="w-3 h-3" /> Refund
                           </Button>
                         )}
@@ -400,7 +400,7 @@ export default function PaymentsPage() {
                           <a href={`https://squareup.com/dashboard/sales/transactions/${txn.square_payment_id}`}
                             target="_blank" rel="noreferrer">
                             <Button size="sm" variant="outline"
-                              className="border-[#0097a7]/30 text-[#0097a7] hover:bg-[#e0f7fa] h-7 text-xs gap-1">
+                              className="border-[#0097a7]/30 dark:border-[#b3e5fc]/20 text-[#0097a7] dark:text-[#b3e5fc] hover:bg-[#e0f7fa] dark:hover:bg-white/5 h-7 text-xs gap-1 transition-colors">
                               <ExternalLink className="w-3 h-3" /> Square
                             </Button>
                           </a>
@@ -414,10 +414,10 @@ export default function PaymentsPage() {
           </div>
 
           {/* Footer totals */}
-          <div className="px-5 py-3 border-t border-[#cce7f0] bg-[#f0f9ff] flex items-center justify-between">
-            <p className="text-xs text-[#4a7fa5]">{filtered.length} transactions</p>
-            <p className="text-sm font-bold text-[#0c2340]">
-              Shown total: <span className="text-[#0097a7]">
+          <div className="px-5 py-3 border-t border-[#cce7f0] dark:border-white/10 bg-[#f0f9ff] dark:bg-white/5 flex items-center justify-between transition-colors">
+            <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8]">{filtered.length} transactions</p>
+            <p className="text-sm font-bold text-[#0c2340] dark:text-[#f8fafc]">
+              Shown total: <span className="text-[#0097a7] dark:text-[#b3e5fc]">
                 ${filtered.reduce((s, t) => s + t.total, 0).toFixed(2)}
               </span>
             </p>

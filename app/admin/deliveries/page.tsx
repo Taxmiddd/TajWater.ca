@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
 import { exportCSV } from '@/lib/csv'
+import { div } from 'framer-motion/client'
 
 type DeliveryOrder = {
   id: string
@@ -149,8 +150,8 @@ export default function DeliveriesPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3 print:hidden">
         <div>
-          <h2 className="text-2xl font-extrabold text-[#0c2340]">Delivery Management</h2>
-          <p className="text-sm text-[#4a7fa5]">Live order pipeline · {orders.length} active orders tracked</p>
+          <h2 className="text-2xl font-extrabold text-[#0c2340] dark:text-[#f8fafc]">Delivery Management</h2>
+          <p className="text-sm text-[#4a7fa5] dark:text-[#94a3b8]">Live order pipeline · {orders.length} active orders tracked</p>
         </div>
         <div className="flex gap-2 flex-wrap">
           <Button size="sm" variant="outline" onClick={() => setTodayOnly(v => !v)}
@@ -261,12 +262,12 @@ export default function DeliveriesPage() {
           const Icon = s.icon
           return (
             <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
-              className="bg-white rounded-2xl p-4 border border-[#cce7f0] shadow-sm">
+              className="bg-white dark:bg-[#1e293b] rounded-2xl p-4 border border-[#cce7f0] dark:border-white/10 shadow-sm transition-colors">
               <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-2" style={{ background: s.bg }}>
                 <Icon className="w-4 h-4" style={{ color: s.color }} />
               </div>
-              <p className={`text-2xl font-extrabold text-[#0c2340] ${loading ? 'opacity-40' : ''}`}>{loading ? '—' : s.value}</p>
-              <p className="text-xs text-[#4a7fa5]">{s.label}</p>
+              <p className={`text-2xl font-extrabold text-[#0c2340] dark:text-[#f8fafc] ${loading ? 'opacity-40' : ''}`}>{loading ? '—' : s.value}</p>
+              <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8]">{s.label}</p>
             </motion.div>
           )
         })}
@@ -274,60 +275,60 @@ export default function DeliveriesPage() {
 
       {/* Unassigned alert */}
       {!loading && unassigned.length > 0 && (
-        <div className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-amber-50 border-amber-200 print:hidden">
-          <Clock className="w-4 h-4 shrink-0 text-amber-600" />
-          <p className="text-sm font-medium text-amber-600">
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/30 print:hidden transition-colors">
+          <Clock className="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-500" />
+          <p className="text-sm font-bold text-amber-700 dark:text-amber-300">
             {unassigned.length} order{unassigned.length > 1 ? 's' : ''} with no driver assigned —
-            go to <a href="/admin/orders" className="underline">Orders</a> to assign drivers
+            go to <a href="/admin/orders" className="underline hover:text-amber-900 dark:hover:text-amber-100">Orders</a> to assign drivers
           </p>
         </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 print:hidden">
         {/* Zone breakdown */}
-        <div className="lg:col-span-2 bg-white rounded-3xl border border-[#cce7f0] shadow-sm overflow-hidden">
-          <div className="p-5 border-b border-[#cce7f0]">
-            <h3 className="font-bold text-[#0c2340]">Zone Breakdown</h3>
-            <p className="text-xs text-[#4a7fa5] mt-0.5">All active & pending orders per zone</p>
+        <div className="lg:col-span-2 bg-white dark:bg-[#1e293b] rounded-3xl border border-[#cce7f0] dark:border-white/10 shadow-sm overflow-hidden transition-colors">
+          <div className="p-5 border-b border-[#cce7f0] dark:border-white/10">
+            <h3 className="font-bold text-[#0c2340] dark:text-[#f8fafc]">Zone Breakdown</h3>
+            <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8] mt-0.5">All active & pending orders per zone</p>
           </div>
           {loading ? (
             <div className="p-4 space-y-2">
-              {[...Array(5)].map((_, i) => <div key={i} className="h-12 bg-[#f0f9ff] rounded-xl animate-pulse" />)}
+              {[...Array(5)].map((_, i) => <div key={i} className="h-12 bg-[#f0f9ff] dark:bg-white/5 rounded-xl animate-pulse" />)}
             </div>
           ) : zones.length === 0 ? (
             <div className="p-12 text-center">
               <Package className="w-8 h-8 text-[#cce7f0] mx-auto mb-2" />
-              <p className="text-sm text-[#4a7fa5]">No orders in pipeline yet</p>
+              <p className="text-sm text-[#4a7fa5] dark:text-[#94a3b8]">No orders in pipeline yet</p>
             </div>
           ) : (
-            <div className="divide-y divide-[#f0f9ff]">
+            <div className="divide-y divide-[#f0f9ff] dark:divide-white/5">
               {zones.map((zone, i) => {
                 const pct = zone.total > 0 ? Math.round((zone.delivered / zone.total) * 100) : 0
                 return (
                   <motion.div key={zone.name} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.04 }}
-                    className="flex items-center gap-4 px-5 py-3.5">
-                    <div className="w-8 h-8 rounded-lg bg-[#e0f7fa] flex items-center justify-center shrink-0">
-                      <MapPin className="w-4 h-4 text-[#0097a7]" />
+                    className="flex items-center gap-4 px-5 py-3.5 hover:bg-[#f0f9ff] dark:hover:bg-white/5 transition-colors">
+                    <div className="w-8 h-8 rounded-lg bg-[#e0f7fa] dark:bg-[#0097a7]/20 flex items-center justify-center shrink-0">
+                      <MapPin className="w-4 h-4 text-[#0097a7] dark:text-[#b3e5fc]" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-[#0c2340] text-sm">{zone.name}</p>
-                      <p className="text-xs text-[#4a7fa5] truncate">
+                      <p className="font-bold text-[#0c2340] dark:text-[#f8fafc] text-sm">{zone.name}</p>
+                      <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8] truncate">
                         {zone.drivers.length > 0 ? zone.drivers.join(', ') : 'No driver assigned'}
                       </p>
-                      <div className="w-full h-1 bg-[#e0f7fa] rounded-full mt-1.5">
+                      <div className="w-full h-1 bg-[#e0f7fa] dark:bg-white/5 rounded-full mt-1.5 overflow-hidden">
                         <div className="h-full bg-[#0097a7] rounded-full transition-all" style={{ width: `${pct}%` }} />
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="font-bold text-[#0c2340] text-sm">{zone.delivered}/{zone.total}</p>
-                      <p className="text-xs text-[#4a7fa5]">{pct}% done</p>
+                      <p className="font-bold text-[#0c2340] dark:text-[#f8fafc] text-sm">{zone.delivered}/{zone.total}</p>
+                      <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8]">{pct}% done</p>
                     </div>
                     <div className="flex gap-1 flex-col items-end shrink-0">
                       {zone.inTransit > 0 && (
-                        <Badge className="text-[10px] bg-[#e0f7fa] text-[#0097a7]">{zone.inTransit} transit</Badge>
+                        <Badge className="text-[10px] bg-[#e0f7fa] dark:bg-[#0097a7]/20 text-[#0097a7] dark:text-[#b3e5fc] font-bold">{zone.inTransit} transit</Badge>
                       )}
                       {zone.pending > 0 && (
-                        <Badge className="text-[10px] bg-amber-100 text-amber-700">{zone.pending} pending</Badge>
+                        <Badge className="text-[10px] bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 font-bold">{zone.pending} pending</Badge>
                       )}
                     </div>
                   </motion.div>
@@ -338,35 +339,35 @@ export default function DeliveriesPage() {
         </div>
 
         {/* Driver summary */}
-        <div className="bg-white rounded-3xl border border-[#cce7f0] shadow-sm overflow-hidden">
-          <div className="p-5 border-b border-[#cce7f0]">
-            <h3 className="font-bold text-[#0c2340] flex items-center gap-2">
-              <Users className="w-4 h-4 text-[#0097a7]" /> Drivers
+        <div className="bg-white dark:bg-[#1e293b] rounded-3xl border border-[#cce7f0] dark:border-white/10 shadow-sm overflow-hidden transition-colors">
+          <div className="p-5 border-b border-[#cce7f0] dark:border-white/10">
+            <h3 className="font-bold text-[#0c2340] dark:text-[#f8fafc] flex items-center gap-2">
+              <Users className="w-4 h-4 text-[#0097a7] dark:text-[#b3e5fc]" /> Drivers
             </h3>
-            <p className="text-xs text-[#4a7fa5] mt-0.5">Assigned via Orders page</p>
+            <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8] mt-0.5">Assigned via Orders page</p>
           </div>
           <div className="p-4 space-y-3">
             {loading ? (
-              [...Array(3)].map((_, i) => <div key={i} className="h-14 bg-[#f0f9ff] rounded-xl animate-pulse" />)
+              [...Array(3)].map((_, i) => <div key={i} className="h-14 bg-[#f0f9ff] dark:bg-white/5 rounded-xl animate-pulse" />)
             ) : drivers.length === 0 ? (
-              <p className="text-sm text-[#4a7fa5] p-2">No drivers assigned yet. Assign drivers from the Orders page.</p>
+              <p className="text-sm text-[#4a7fa5] dark:text-[#94a3b8] p-2">No drivers assigned yet. Assign drivers from the Orders page.</p>
             ) : (
               drivers.map((d, i) => {
                 const total = d.delivered + d.inTransit + d.pending
                 const pct = total > 0 ? Math.round((d.delivered / total) * 100) : 0
                 return (
                   <motion.div key={d.name} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + i * 0.07 }}
-                    className="p-3 rounded-xl bg-[#f0f9ff]">
+                    className="p-3 rounded-xl bg-[#f0f9ff] dark:bg-white/5 border border-transparent dark:border-white/5 shadow-sm transition-colors">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#0097a7] to-[#1565c0] flex items-center justify-center text-white text-xs font-bold shrink-0">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#0097a7] to-[#1565c0] flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-sm">
                         {d.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-[#0c2340] text-sm truncate">{d.name}</p>
-                        <p className="text-xs text-[#4a7fa5]">{d.delivered} done · {d.inTransit} transit · {d.pending} pending</p>
+                        <p className="font-bold text-[#0c2340] dark:text-[#f8fafc] text-sm truncate">{d.name}</p>
+                        <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8]">{d.delivered} done · {d.inTransit} transit · {d.pending} pending</p>
                       </div>
                     </div>
-                    <div className="w-full h-1.5 bg-[#e0f7fa] rounded-full">
+                    <div className="w-full h-1.5 bg-[#e0f7fa] dark:bg-white/10 rounded-full overflow-hidden">
                       <div className="h-full bg-[#0097a7] rounded-full transition-all" style={{ width: `${pct}%` }} />
                     </div>
                   </motion.div>
@@ -379,24 +380,24 @@ export default function DeliveriesPage() {
 
       {/* Orders in transit */}
       {!loading && displayOrders.filter(o => o.status === 'out_for_delivery').length > 0 && (
-        <div className="bg-white rounded-3xl border border-[#cce7f0] shadow-sm overflow-hidden print:hidden">
-          <div className="p-5 border-b border-[#cce7f0]">
-            <h3 className="font-bold text-[#0c2340] flex items-center gap-2">
-              <Truck className="w-4 h-4 text-[#0097a7]" /> Currently Out for Delivery
+        <div className="bg-white dark:bg-[#1e293b] rounded-3xl border border-[#cce7f0] dark:border-white/10 shadow-sm overflow-hidden print:hidden transition-colors">
+          <div className="p-5 border-b border-[#cce7f0] dark:border-white/10">
+            <h3 className="font-bold text-[#0c2340] dark:text-[#f8fafc] flex items-center gap-2">
+              <Truck className="w-4 h-4 text-[#0097a7] dark:text-[#b3e5fc]" /> Currently Out for Delivery
             </h3>
           </div>
-          <div className="divide-y divide-[#f0f9ff]">
+          <div className="divide-y divide-[#f0f9ff] dark:divide-white/5">
             {displayOrders.filter(o => o.status === 'out_for_delivery').map((o, i) => (
               <motion.div key={o.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.03 }}
-                className="flex items-center gap-4 px-5 py-3">
+                className="flex items-center gap-4 px-5 py-3 hover:bg-[#f0f9ff] dark:hover:bg-white/5 transition-colors">
                 <div className="flex-1 min-w-0">
-                  <p className="font-mono text-xs font-bold text-[#0097a7]">{shortId(o.id)}</p>
-                  <p className="text-xs text-[#4a7fa5]">{getZoneName(o.zones) === 'Unknown' ? '—' : getZoneName(o.zones)} · {o.delivery_address ?? 'No address'}</p>
-                  {o.notes && <p className="text-xs text-amber-700 bg-amber-50 rounded px-1.5 py-0.5 mt-0.5 truncate max-w-xs">📋 {o.notes}</p>}
+                  <p className="font-mono text-xs font-bold text-[#0097a7] dark:text-[#b3e5fc]">{shortId(o.id)}</p>
+                  <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8]">{getZoneName(o.zones) === 'Unknown' ? '—' : getZoneName(o.zones)} · {o.delivery_address ?? 'No address'}</p>
+                  {o.notes && <p className="text-xs text-amber-900 bg-amber-50 dark:bg-amber-950/20 rounded px-1.5 py-0.5 mt-0.5 truncate max-w-xs transition-colors">📋 {o.notes}</p>}
                 </div>
-                <p className="text-xs text-[#4a7fa5] shrink-0">{o.driver_name ?? 'Unassigned'}</p>
-                <p className="font-bold text-[#0c2340] text-sm shrink-0">${o.total.toFixed(2)}</p>
-                <Badge className="text-[10px] bg-[#e0f7fa] text-[#0097a7] shrink-0">In Transit</Badge>
+                <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8] shrink-0">{o.driver_name ?? 'Unassigned'}</p>
+                <p className="font-bold text-[#0c2340] dark:text-[#f8fafc] text-sm shrink-0">${o.total.toFixed(2)}</p>
+                <Badge className="text-[10px] bg-[#e0f7fa] dark:bg-[#0097a7]/20 text-[#0097a7] dark:text-[#b3e5fc] font-bold shrink-0">In Transit</Badge>
               </motion.div>
             ))}
           </div>

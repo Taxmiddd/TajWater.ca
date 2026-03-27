@@ -183,13 +183,13 @@ export default function AnalyticsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h2 className="text-2xl font-extrabold text-[#0c2340]">Analytics</h2>
-          <p className="text-sm text-[#4a7fa5]">Live data from Supabase · {totalOrders} orders in range</p>
+          <h2 className="text-2xl font-extrabold text-[#0c2340] dark:text-[#f8fafc]">Analytics</h2>
+          <p className="text-sm text-[#4a7fa5] dark:text-[#94a3b8]">Live data from Supabase · {totalOrders} orders in range</p>
         </div>
-        <Button size="sm" variant="outline" onClick={fetchData} className="border-[#cce7f0] text-[#4a7fa5]">
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+        <Button size="sm" variant="outline" onClick={fetchData} className="border-[#cce7f0] dark:border-white/10 text-[#4a7fa5] dark:text-[#94a3b8] hover:bg-white/5 transition-colors">
+          <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} /> Refresh
         </Button>
       </div>
 
@@ -199,10 +199,10 @@ export default function AnalyticsPage() {
           <button
             key={r.days}
             onClick={() => setRange(r.days)}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
               range === r.days
-                ? 'bg-[#0097a7] text-white'
-                : 'bg-white border border-[#cce7f0] text-[#4a7fa5] hover:border-[#0097a7]'
+                ? 'bg-[#0097a7] text-white shadow-md'
+                : 'bg-white dark:bg-[#1e293b] border border-[#cce7f0] dark:border-white/10 text-[#4a7fa5] dark:text-[#94a3b8] hover:border-[#0097a7] dark:hover:border-[#0097a7] transition-colors'
             }`}
           >
             {r.label}
@@ -224,17 +224,17 @@ export default function AnalyticsPage() {
               const DeltaIcon = s.d.neutral ? Minus : (s.d.up ? TrendingUp : TrendingDown)
               return (
                 <motion.div key={s.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
-                  className="bg-white rounded-2xl p-4 border border-[#cce7f0] shadow-sm flex items-center gap-3">
+                  className="bg-white dark:bg-[#1e293b] rounded-2xl p-4 border border-[#cce7f0] dark:border-white/10 shadow-sm flex items-center gap-3 transition-colors">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: s.bg }}>
                     <Icon className="w-5 h-5" style={{ color: s.color }} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xl font-extrabold text-[#0c2340]">{s.value}</p>
-                    <p className="text-xs text-[#4a7fa5]">{s.label}</p>
+                    <p className="text-xl font-extrabold text-[#0c2340] dark:text-[#f8fafc]">{s.value}</p>
+                    <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8] font-bold">{s.label}</p>
                     {!s.d.neutral && (
-                      <div className={`flex items-center gap-0.5 text-[10px] font-medium mt-0.5 ${s.d.up ? 'text-green-600' : 'text-red-500'}`}>
+                      <div className={`flex items-center gap-0.5 text-[10px] font-bold mt-0.5 ${s.d.up ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
                         <DeltaIcon className="w-3 h-3" />
-                        {s.d.pct.toFixed(1)}% vs prev
+                        {s.d.pct.toFixed(1)}%
                       </div>
                     )}
                   </div>
@@ -245,20 +245,20 @@ export default function AnalyticsPage() {
           {/* Revenue goal progress */}
           {revenueGoal && revenueGoal > 0 && (
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-2xl p-4 border border-[#cce7f0] shadow-sm">
+              className="bg-white dark:bg-[#1e293b] rounded-2xl p-4 border border-[#cce7f0] dark:border-white/10 shadow-sm transition-colors">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-semibold text-[#0c2340]">Monthly Revenue Goal</span>
-                <span className="text-sm font-bold text-[#0097a7]">
+                <span className="text-sm font-bold text-[#0c2340] dark:text-[#f8fafc]">Monthly Revenue Goal</span>
+                <span className="text-sm font-bold text-[#0097a7] dark:text-[#b3e5fc]">
                   ${totalRevenue.toFixed(0)} / ${revenueGoal.toFixed(0)}
                 </span>
               </div>
-              <div className="w-full h-3 bg-[#f0f9ff] rounded-full overflow-hidden">
+              <div className="w-full h-3 bg-[#f0f9ff] dark:bg-white/5 rounded-full overflow-hidden transition-colors">
                 <div
                   className="h-full bg-gradient-to-r from-[#0097a7] to-[#1565c0] rounded-full transition-all"
                   style={{ width: `${Math.min(100, (totalRevenue / revenueGoal) * 100).toFixed(1)}%` }}
                 />
               </div>
-              <p className="text-xs text-[#4a7fa5] mt-1.5">
+              <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8] mt-1.5 font-bold">
                 {((totalRevenue / revenueGoal) * 100).toFixed(1)}% of goal reached
                 {totalRevenue >= revenueGoal && ' 🎉 Goal achieved!'}
               </p>
@@ -278,10 +278,10 @@ export default function AnalyticsPage() {
 
           {/* 1 — Revenue trend */}
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="bg-white rounded-3xl border border-[#cce7f0] shadow-sm p-6">
+            className="bg-white dark:bg-[#1e293b] rounded-3xl border border-[#cce7f0] dark:border-white/10 shadow-sm p-6 transition-colors">
             <div className="flex items-center gap-2 mb-4">
-              <TrendingUp className="w-4 h-4 text-[#0097a7]" />
-              <h3 className="font-bold text-[#0c2340] text-sm">Revenue (paid orders)</h3>
+              <TrendingUp className="w-4 h-4 text-[#0097a7] dark:text-[#b3e5fc]" />
+              <h3 className="font-bold text-[#0c2340] dark:text-[#f8fafc] text-sm">Revenue (paid orders)</h3>
             </div>
             <ResponsiveContainer width="100%" height={220}>
               <AreaChart data={revenueData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
@@ -291,13 +291,14 @@ export default function AnalyticsPage() {
                     <stop offset="95%" stopColor="#0097a7" stopOpacity={0}    />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f9ff" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f9ff" opacity={0.1} />
                 <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#4a7fa5' }} tickLine={false} axisLine={false}
                   interval={Math.floor(days.length / 6)} />
                 <YAxis tick={{ fontSize: 10, fill: '#4a7fa5' }} tickLine={false} axisLine={false}
                   tickFormatter={v => `$${v}`} width={48} />
                 <Tooltip formatter={(v: number | undefined) => v !== undefined ? [`$${v.toFixed(2)}`, 'Revenue'] : ['—', 'Revenue']}
-                  contentStyle={{ borderRadius: 12, border: '1px solid #e0f7fa', fontSize: 12 }} />
+                  contentStyle={{ borderRadius: 12, border: 'none', background: '#1e293b', color: '#f8fafc', fontSize: 12, boxShadow: '0 10px 15px -3px rgba(0,0,0,0.3)' }}
+                  itemStyle={{ color: '#b3e5fc' }} />
                 <Area type="monotone" dataKey="revenue" stroke="#0097a7" strokeWidth={2}
                   fill="url(#revenueGrad)" dot={false} />
               </AreaChart>
@@ -306,20 +307,21 @@ export default function AnalyticsPage() {
 
           {/* 2 — Order volume */}
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-            className="bg-white rounded-3xl border border-[#cce7f0] shadow-sm p-6">
+            className="bg-white dark:bg-[#1e293b] rounded-3xl border border-[#cce7f0] dark:border-white/10 shadow-sm p-6 transition-colors">
             <div className="flex items-center gap-2 mb-4">
-              <BarChart2 className="w-4 h-4 text-[#1565c0]" />
-              <h3 className="font-bold text-[#0c2340] text-sm">Order Volume</h3>
+              <BarChart2 className="w-4 h-4 text-[#1565c0] dark:text-[#b3e5fc]" />
+              <h3 className="font-bold text-[#0c2340] dark:text-[#f8fafc] text-sm">Order Volume</h3>
             </div>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={volumeData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f9ff" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f9ff" opacity={0.1} />
                 <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#4a7fa5' }} tickLine={false} axisLine={false}
                   interval={Math.floor(days.length / 6)} />
                 <YAxis tick={{ fontSize: 10, fill: '#4a7fa5' }} tickLine={false} axisLine={false}
                   allowDecimals={false} width={32} />
                 <Tooltip formatter={(v: number | undefined) => [v ?? 0, 'Orders']}
-                  contentStyle={{ borderRadius: 12, border: '1px solid #e0f7fa', fontSize: 12 }} />
+                  contentStyle={{ borderRadius: 12, border: 'none', background: '#1e293b', color: '#f8fafc', fontSize: 12, boxShadow: '0 10px 15px -3px rgba(0,0,0,0.3)' }}
+                  itemStyle={{ color: '#b3e5fc' }} />
                 <Bar dataKey="orders" fill="#1565c0" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -327,22 +329,23 @@ export default function AnalyticsPage() {
 
           {/* 3 — Best-selling products */}
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="bg-white rounded-3xl border border-[#cce7f0] shadow-sm p-6">
+            className="bg-white dark:bg-[#1e293b] rounded-3xl border border-[#cce7f0] dark:border-white/10 shadow-sm p-6 transition-colors">
             <div className="flex items-center gap-2 mb-4">
-              <ShoppingBag className="w-4 h-4 text-[#0097a7]" />
-              <h3 className="font-bold text-[#0c2340] text-sm">Best-Selling Products (all time)</h3>
+              <ShoppingBag className="w-4 h-4 text-[#0097a7] dark:text-[#b3e5fc]" />
+              <h3 className="font-bold text-[#0c2340] dark:text-[#f8fafc] text-sm">Best-Selling Products (all time)</h3>
             </div>
             {topItems.length === 0 ? (
-              <div className="h-[220px] flex items-center justify-center text-[#4a7fa5] text-sm">No order item data yet</div>
+              <div className="h-[220px] flex items-center justify-center text-[#4a7fa5] dark:text-[#94a3b8] text-sm">No order item data yet</div>
             ) : (
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={topItems} layout="vertical" margin={{ top: 0, right: 12, bottom: 0, left: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f9ff" horizontal={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f9ff" opacity={0.1} horizontal={false} />
                   <XAxis type="number" tick={{ fontSize: 10, fill: '#4a7fa5' }} tickLine={false} axisLine={false} />
                   <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: '#4a7fa5' }} tickLine={false}
                     axisLine={false} width={110} />
                   <Tooltip formatter={(v: number | undefined) => [v ?? 0, 'Units sold']}
-                    contentStyle={{ borderRadius: 12, border: '1px solid #e0f7fa', fontSize: 12 }} />
+                    contentStyle={{ borderRadius: 12, border: 'none', background: '#1e293b', color: '#f8fafc', fontSize: 12, boxShadow: '0 10px 15px -3px rgba(0,0,0,0.3)' }}
+                    itemStyle={{ color: '#b3e5fc' }} />
                   <Bar dataKey="units" radius={[0, 4, 4, 0]}>
                     {topItems.map((_, index) => (
                       <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
@@ -355,13 +358,13 @@ export default function AnalyticsPage() {
 
           {/* 4 — Zone breakdown */}
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-            className="bg-white rounded-3xl border border-[#cce7f0] shadow-sm p-6">
+            className="bg-white dark:bg-[#1e293b] rounded-3xl border border-[#cce7f0] dark:border-white/10 shadow-sm p-6 transition-colors">
             <div className="flex items-center gap-2 mb-4">
-              <MapPin className="w-4 h-4 text-[#006064]" />
-              <h3 className="font-bold text-[#0c2340] text-sm">Orders by Zone</h3>
+              <MapPin className="w-4 h-4 text-[#006064] dark:text-[#b3e5fc]" />
+              <h3 className="font-bold text-[#0c2340] dark:text-[#f8fafc] text-sm">Orders by Zone</h3>
             </div>
             {zoneData.length === 0 ? (
-              <div className="h-[220px] flex items-center justify-center text-[#4a7fa5] text-sm">No zone data yet</div>
+              <div className="h-[220px] flex items-center justify-center text-[#4a7fa5] dark:text-[#94a3b8] text-sm">No zone data yet</div>
             ) : (
               <div className="flex flex-col sm:flex-row items-center gap-4">
                 <ResponsiveContainer width="100%" height={200}>
@@ -373,7 +376,8 @@ export default function AnalyticsPage() {
                       ))}
                     </Pie>
                     <Tooltip formatter={(v: number | undefined, name: string | undefined) => [(v ?? 0) + ' orders', name ?? '']}
-                      contentStyle={{ borderRadius: 12, border: '1px solid #e0f7fa', fontSize: 12 }} />
+                      contentStyle={{ borderRadius: 12, border: 'none', background: '#1e293b', color: '#f8fafc', fontSize: 12, boxShadow: '0 10px 15px -3px rgba(0,0,0,0.3)' }}
+                      itemStyle={{ color: '#b3e5fc' }} />
                     <Legend iconType="circle" iconSize={8}
                       formatter={(value: string) => <span style={{ fontSize: 11, color: '#4a7fa5' }}>{value}</span>} />
                   </PieChart>
@@ -384,14 +388,14 @@ export default function AnalyticsPage() {
             {zoneData.length > 0 && (
               <div className="mt-2 space-y-1">
                 {zoneData.slice(0, 5).map((z, i) => (
-                  <div key={z.name} className="flex items-center justify-between text-xs">
+                  <div key={z.name} className="flex items-center justify-between text-xs py-1 border-b border-[#f0f9ff] dark:border-white/5 last:border-0 transition-colors">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full shrink-0" style={{ background: CHART_COLORS[i % CHART_COLORS.length] }} />
-                      <span className="text-[#0c2340] font-medium">{z.name}</span>
+                      <span className="text-[#0c2340] dark:text-[#f8fafc] font-bold">{z.name}</span>
                     </div>
-                    <div className="flex gap-4 text-[#4a7fa5]">
-                      <span>{z.orders} orders</span>
-                      <span className="font-semibold text-[#0097a7]">${z.revenue.toFixed(2)}</span>
+                    <div className="flex gap-4 text-[#4a7fa5] dark:text-[#94a3b8]">
+                      <span className="font-bold">{z.orders} orders</span>
+                      <span className="font-extrabold text-[#0097a7] dark:text-[#b3e5fc]">${z.revenue.toFixed(2)}</span>
                     </div>
                   </div>
                 ))}
