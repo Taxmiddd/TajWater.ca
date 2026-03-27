@@ -180,7 +180,7 @@ export async function POST(req: NextRequest) {
     const amountCents = Math.round(serverTotal * 100)
     const idempotencyKey = crypto.randomUUID()
 
-    const { result } = await square.payments.create({
+    const payment = await square.payments.create({
       sourceId,
       idempotencyKey,
       amountMoney: {
@@ -192,7 +192,6 @@ export async function POST(req: NextRequest) {
       note: `TajWater order ${order.id.slice(-8).toUpperCase()}`,
     })
 
-    const payment = result.payment
     if (!payment || (payment.status !== 'COMPLETED' && payment.status !== 'APPROVED')) {
       // Payment failed — update order status
       await db.from('orders').update({ payment_status: 'failed' }).eq('id', order.id)
