@@ -63,6 +63,7 @@ export default function AdminProductDetailPage() {
         category: data.category,
         image_url: data.image_url,
         active: data.active,
+        featured: data.featured || false,
       })
       setLoading(false)
     }
@@ -187,6 +188,11 @@ export default function AdminProductDetailPage() {
         <Badge className="capitalize text-xs" style={{ background: color, color: '#fff' }}>
           {categoryEmoji[form.category] ?? '📦'} {form.category}
         </Badge>
+        {form.featured && (
+          <Badge className="bg-amber-100 text-amber-700 gap-1 border-amber-200">
+            ★ Featured
+          </Badge>
+        )}
         {currentStock === 0 && (
           <Badge className="bg-red-100 text-red-600">Out of Stock</Badge>
         )}
@@ -315,19 +321,28 @@ export default function AdminProductDetailPage() {
             <h3 className="font-bold text-[#0c2340] text-sm border-b border-[#f0f9ff] pb-3">Visibility</h3>
             <button
               onClick={() => setForm({ ...form, active: !form.active })}
-              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${
-                form.active
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${form.active
                   ? 'border-green-200 bg-green-50 text-green-700'
                   : 'border-[#cce7f0] bg-[#f0f9ff] text-[#4a7fa5]'
-              }`}
+                }`}
             >
               <span className="text-sm font-medium">{form.active ? 'Visible on shop' : 'Hidden from shop'}</span>
               {form.active ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
             </button>
+            <button
+              onClick={() => setForm({ ...form, featured: !form.featured })}
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${form.featured
+                  ? 'border-amber-200 bg-amber-50 text-amber-700'
+                  : 'border-[#cce7f0] bg-[#f0f9ff] text-[#4a7fa5]'
+                }`}
+            >
+              <span className="text-sm font-medium">{form.featured ? 'Featured on Home' : 'Not featured'}</span>
+              <span className="text-lg">★</span>
+            </button>
             <p className="text-[10px] text-[#4a7fa5]">
-              {form.active
-                ? 'Customers can see and purchase this product.'
-                : 'This product is hidden. Toggle on to make it live.'}
+              {form.featured
+                ? 'This product is highlighted on the home page.'
+                : 'This product is only visible in the shop.'}
             </p>
           </div>
 
