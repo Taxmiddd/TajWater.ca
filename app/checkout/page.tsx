@@ -428,14 +428,13 @@ export default function CheckoutPage() {
                   >
                     <div className="space-y-4">
                       {/* Express Checkout Options */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-                        <ApplePay />
-                        <GooglePay />
-                      </div>
-
-                      <div className="mb-6">
+                      <div className="space-y-3 mb-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <ApplePay />
+                          <GooglePay />
+                        </div>
                         <CashAppPay 
-                          redirectURL={window.location.href}
+                          redirectURL={typeof window !== 'undefined' ? `${window.location.origin}/checkout` : ''}
                           referenceId={userId || 'guest'}
                         />
                       </div>
@@ -465,9 +464,19 @@ export default function CheckoutPage() {
                         {processing ? 'Processing...' : `Pay $${displayTotal.toFixed(2)} with Card`}
                       </SquareCreditCard>
 
-                      <div className="mt-4">
-                         <p className="text-xs font-semibold text-[#0c2340] mb-2 uppercase tracking-wider">Bank Transfer (ACH)</p>
-                         <Ach accountHolderName={address.name} />
+                      <div className="mt-6 p-4 border border-[#cce7f0] rounded-2xl bg-[#fafdfe]">
+                         <p className="text-xs font-bold text-[#0097a7] mb-3 uppercase tracking-wider flex items-center gap-2">
+                           <MapPin className="w-3 h-3" /> Pay with Bank Account (ACH)
+                         </p>
+                         <div className="min-h-[40px]">
+                           <Ach 
+                             accountHolderName={address.name || 'Customer'} 
+                             redirectURL={typeof window !== 'undefined' ? `${window.location.origin}/checkout` : ''}
+                           />
+                         </div>
+                         <p className="text-[10px] text-[#8caab8] mt-2 italic">
+                           Secure bank verification via Plaid/Square.
+                         </p>
                       </div>
                     </div>
                   </PaymentForm>
