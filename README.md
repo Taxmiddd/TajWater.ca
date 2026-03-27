@@ -45,7 +45,7 @@ TajWater is a full-stack e-commerce platform built for a water delivery company 
 - Product catalog with category filtering and real-time stock display
 - Delivery zone checker — confirms coverage before checkout
 - Cart with persistent state across sessions
-- Checkout with Stripe card payments and order confirmation email
+- Checkout with Square card payments and order confirmation email
 
 ### Customer Dashboard
 - Order history with status tracking
@@ -64,7 +64,7 @@ TajWater is a full-stack e-commerce platform built for a water delivery company 
 - Customer CRM with order history
 - Product inventory management
 - Delivery schedule and zone management
-- Payments dashboard with Stripe integration
+- Payments dashboard with Square integration
 - Support ticket queue with reply system
 - Analytics overview (revenue, orders, customers)
 - Content editor for services and about page
@@ -88,7 +88,7 @@ components/
   home/           Hero, HowItWorks, ProductShowcase, DeliveryChecker, etc.
   ui/             shadcn primitives
 
-lib/              supabase.ts, stripe.ts, email.ts
+lib/              supabase.ts, square.ts, email.ts
 store/            cartStore.ts (Zustand)
 types/            index.ts (all shared interfaces)
 supabase/         migrations/
