@@ -17,6 +17,7 @@ export default function Footer() {
   const [socials, setSocials] = useState({ facebook: '', instagram: '', twitter: '' })
 
   useEffect(() => {
+    if (!supabase.from) return
     supabase
       .from('site_content')
       .select('key, value')
@@ -35,6 +36,7 @@ export default function Footer() {
         }
         setSocials(fb)
       })
+    if (!supabase.from) return
     supabase
       .from('zones')
       .select('name')
