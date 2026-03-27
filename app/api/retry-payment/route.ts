@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     const square = getSquareClient()
     const amountCents = Math.round(Number(order.total) * 100)
 
-    const payment = await square.payments.create({
+    const response = await square.payments.create({
       sourceId,
       idempotencyKey: crypto.randomUUID(),
       amountMoney: {
@@ -53,6 +53,7 @@ export async function POST(req: NextRequest) {
       note: `TajWater retry payment for order ${order.id.slice(-8).toUpperCase()}`,
     })
 
+    const payment = response.payment
     if (!payment || (payment.status !== 'COMPLETED' && payment.status !== 'APPROVED')) {
       return NextResponse.json({ error: 'Payment was declined. Please try again.' }, { status: 400 })
     }
