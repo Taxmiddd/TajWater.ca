@@ -8,13 +8,14 @@ let _supabase: SupabaseClient | undefined
 
 export const supabase = new Proxy({} as SupabaseClient, {
   get(_target, prop) {
+    if (typeof window === 'undefined') return undefined
     if (!_supabase) {
-      _supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      )
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      if (!url || !key) return undefined
+      _supabase = createBrowserClient(url, key)
     }
-    return (_supabase as unknown as Record<string | symbol, unknown>)[prop]
+    return (_supabase as any)?.[prop]
   },
 })
 

@@ -35,6 +35,7 @@ export default function Navbar() {
   }, [])
 
   useEffect(() => {
+    if (!supabase.auth) return
     supabase.auth.getSession().then(({ data: { session } }) => {
       setIsLoggedIn(!!session)
     })
@@ -57,8 +58,8 @@ export default function Navbar() {
     <>
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${transparent
-            ? 'bg-transparent'
-            : 'glass shadow-lg shadow-aqua/10 border-b border-white/30'
+          ? 'bg-transparent'
+          : 'glass shadow-lg shadow-aqua/10 border-b border-white/30'
           }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -85,10 +86,10 @@ export default function Navbar() {
                     key={link.href}
                     href={link.href}
                     className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${active
-                        ? 'text-[#0097a7] bg-[#e0f7fa]'
-                        : transparent
-                          ? 'text-white/90 hover:text-white hover:bg-white/15'
-                          : 'text-[#0c2340] hover:text-[#0097a7] hover:bg-[#e0f7fa]'
+                      ? 'text-[#0097a7] bg-[#e0f7fa]'
+                      : transparent
+                        ? 'text-white/90 hover:text-white hover:bg-white/15'
+                        : 'text-[#0c2340] hover:text-[#0097a7] hover:bg-[#e0f7fa]'
                       }`}
                   >
                     {link.label}
@@ -178,8 +179,8 @@ export default function Navbar() {
                     href={link.href}
                     onClick={() => setMobileOpen(false)}
                     className={`px-4 py-3.5 rounded-2xl text-base font-semibold transition-all flex items-center justify-between group ${active
-                        ? 'bg-[#0097a7] text-white shadow-lg shadow-[#0097a7]/20'
-                        : 'text-[#0c2340] hover:bg-[#e0f7fa] hover:text-[#0097a7]'
+                      ? 'bg-[#0097a7] text-white shadow-lg shadow-[#0097a7]/20'
+                      : 'text-[#0c2340] hover:bg-[#e0f7fa] hover:text-[#0097a7]'
                       }`}
                   >
                     {link.label}
