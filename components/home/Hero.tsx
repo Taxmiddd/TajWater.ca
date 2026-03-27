@@ -29,8 +29,8 @@ export default function Hero() {
   }, [])
 
   const description = services.length > 0
-    ? `${services.join(', ')} across Metro Vancouver. Fresh, clean, and on time — every time.`
-    : 'Premium 5 Gallon water delivery, filtration installation, and commercial supply across Metro Vancouver. Fresh, clean, and on time — every time.'
+    ? `${services.join(', ')} across Metro Vancouver. Cheap and competitive 5-gallon water delivery — fresh, clean, and on time.`
+    : 'Cheap and competitive 5-gallon water delivery, filtration installation, and commercial supply across Metro Vancouver. Your #1 drinking water supplier.'
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden hero-gradient">
@@ -86,13 +86,13 @@ export default function Hero() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.7 }}
-            className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-white leading-[1.15] mb-6"
+            className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-[1.15] mb-6"
           >
-            Pure Water,
+            Vancouver&apos;s Best
             <br />
-            <span className="gradient-text-light">Delivered Fresh</span>
+            <span className="gradient-text-light">Drinking Water Supplier</span>
             <br />
-            to Your Door
+            Delivered to Your Door
           </motion.h1>
 
           <motion.p

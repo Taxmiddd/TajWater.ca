@@ -1,19 +1,17 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Shop — Order Water Online | TajWater Vancouver',
-  description: 'Order 20L spring, alkaline, and distilled water jugs online. Plus dispensers, filtration systems, and accessories. Fast delivery across Metro Vancouver. Subscribe and save 15% on regular deliveries.',
+  title: 'Shop 5-Gallon Water Jugs — Best Prices in Vancouver | TajWater',
+  description: 'Order cheap and competitive 5-gallon spring, alkaline, and distilled water jugs online. Fast delivery across Metro Vancouver. Subscribe and save 15% on regular deliveries.',
   keywords: [
-    'buy water online Vancouver',
-    'order 20L water jug Vancouver',
-    'water dispenser buy Vancouver',
-    'alkaline water buy Metro Vancouver',
-    'distilled water delivery BC',
-    'spring water order online Vancouver',
-    'water subscription delivery Vancouver',
-    'buy water dispenser Vancouver',
-    'water filtration products BC',
-    'online water store Vancouver',
+    'buy 5 gallon water jug Vancouver',
+    'cheap water jug delivery Vancouver',
+    'bulk water jugs Vancouver',
+    'water dispenser store Vancouver',
+    'alkaline 5-gallon water Vancouver',
+    'distilled 5-gallon water delivery BC',
+    'best price water delivery Vancouver',
+    'water subscription Vancouver',
   ],
   openGraph: {
     title: 'Shop — Order Water Online | TajWater Vancouver',

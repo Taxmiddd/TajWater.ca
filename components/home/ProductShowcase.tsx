@@ -83,10 +83,10 @@ export default function ProductShowcase() {
         >
           <span className="inline-block px-4 py-1.5 rounded-full bg-[#e0f7fa] text-[#0097a7] text-sm font-semibold mb-3">Our Products</span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0c2340] mb-4">
-            Everything You Need to <span className="gradient-text">Stay Hydrated</span>
+            Cheap & Competitive <span className="gradient-text">5-Gallon Water</span>
           </h2>
           <p className="text-[#4a7fa5] text-lg max-w-xl mx-auto">
-            From individual households to large enterprises — we have the right water solution for you.
+            From individual households in Vancouver to large enterprises — the best prices for your water supply.
           </p>
         </motion.div>
 

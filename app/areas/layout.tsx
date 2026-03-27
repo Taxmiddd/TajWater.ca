@@ -2,17 +2,18 @@ import type { Metadata } from 'next'
 import Script from 'next/script'
 
 export const metadata: Metadata = {
-  title: 'Delivery Areas — TajWater Metro Vancouver',
-  description: 'TajWater delivers pure water to 10 zones across Metro Vancouver: North Vancouver, West Vancouver, Vancouver, Richmond, Burnaby, Coquitlam, Port Moody, Surrey, Delta, and Langley. Same-day & scheduled delivery available. Check your zone.',
+  title: 'Service Areas — 5-Gallon Water Delivery Across Metro Vancouver | TajWater',
+  description: 'Cheap and competitive 5-gallon water jug delivery in Vancouver, Burnaby, Richmond, Surrey, Langley and more. See our full service area and delivery schedule.',
   keywords: [
-    'water delivery North Vancouver',
-    'water delivery West Vancouver',
-    'water delivery Richmond BC',
+    'water delivery Vancouver',
     'water delivery Burnaby',
-    'water delivery Coquitlam',
-    'water delivery Surrey BC',
+    'water delivery Richmond',
+    'water delivery Surrey',
     'water delivery Langley',
-    'water delivery Delta BC',
+    'water delivery Coquitlam',
+    '5 gallon water delivery BC',
+    'drinking water delivery Metro Vancouver',
+    'cheap water delivery service BC',
     'water delivery Port Moody',
     'Metro Vancouver water delivery zones',
     'water delivery near me Vancouver',

@@ -57,10 +57,10 @@ export default function ServicesOverview() {
         >
           <span className="inline-block px-4 py-1.5 rounded-full bg-[#e0f7fa] text-[#0097a7] text-sm font-semibold mb-3">Our Services</span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0c2340] mb-4">
-            Complete Water <span className="gradient-text">Solutions</span>
+            Vancouver&apos;s Preferred <span className="gradient-text">Water Supplier</span>
           </h2>
           <p className="text-[#4a7fa5] text-lg max-w-xl mx-auto">
-            More than just delivery — we&apos;re your full-service water partner.
+            Cheap and competitive 5-gallon jug delivery, filtration, and commercial solutions for homes and workplaces.
           </p>
         </motion.div>
 

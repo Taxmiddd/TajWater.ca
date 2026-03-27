@@ -30,10 +30,10 @@ function Counter({ target, suffix = '' }: { target: number; suffix?: string }) {
 }
 
 const stats = [
-  { icon: Users, value: 5000, suffix: '+', label: 'Happy Customers', color: '#0097a7' },
-  { icon: MapPin, value: 10, suffix: '', label: 'Delivery Zones', color: '#1565c0' },
-  { icon: Droplets, value: 50000, suffix: '+', label: 'Jugs Delivered', color: '#00acc1' },
-  { icon: Award, value: 15, suffix: '+', label: 'Years in Business', color: '#006064' },
+  { icon: Users, value: 2000, suffix: '+', label: 'Happy Customers', color: '#0097a7' },
+  { icon: MapPin, value: 21, suffix: '', label: 'Delivery Zones', color: '#1565c0' },
+  { icon: Droplets, value: 30000, suffix: '+', label: 'Jugs Delivered', color: '#00acc1' },
+  { icon: Award, value: 5, suffix: '+', label: 'Years in Business', color: '#006064' },
   { icon: Star, value: 4.9, suffix: '★', label: 'Average Rating', color: '#0097a7' },
   { icon: Shield, value: 100, suffix: '%', label: 'Quality Certified', color: '#1565c0' },
 ]

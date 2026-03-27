@@ -2,19 +2,16 @@ import type { Metadata } from 'next'
 import Script from 'next/script'
 
 export const metadata: Metadata = {
-  title: 'Water Delivery Services — TajWater Vancouver',
-  description: 'Premium water delivery services in Metro Vancouver: 20L spring, alkaline & distilled jug delivery, whole-home filtration installation, and commercial bulk water supply. Flexible scheduling, competitive pricing. Order today.',
+  title: 'Water Services Vancouver — 5-Gallon Delivery & Filtration | TajWater',
+  description: 'Cheap and competitive water services in Metro Vancouver: 5-gallon jug delivery, water filtration installation, and commercial bulk water supply for offices and business.',
   keywords: [
-    'water delivery services Vancouver',
-    '20L water jug delivery Metro Vancouver',
-    'water filtration installation Vancouver',
-    'commercial water supply BC',
+    'water services Vancouver',
+    'filtration system installation BC',
+    'commercial water delivery Vancouver',
+    'office water supply Vancouver',
+    'water dispenser service BC',
     'bulk water delivery Vancouver',
-    'spring water delivery Vancouver',
-    'alkaline water delivery BC',
-    'water dispenser installation Vancouver',
-    'under-sink filtration Vancouver',
-    'residential water delivery BC',
+    'reverse osmosis installation Vancouver',
   ],
   openGraph: {
     title: 'Water Delivery Services — TajWater Vancouver',
