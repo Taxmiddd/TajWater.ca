@@ -9,7 +9,14 @@ import { useCart } from '@/store/cartStore'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { PaymentForm, CreditCard as SquareCreditCard } from 'react-square-web-payments-sdk'
+import { 
+  PaymentForm, 
+  CreditCard as SquareCreditCard, 
+  ApplePay, 
+  GooglePay, 
+  CashAppPay,
+  Ach
+} from 'react-square-web-payments-sdk'
 import { supabase } from '@/lib/supabase'
 
 type Step = 'cart' | 'address' | 'payment' | 'confirmed'
@@ -123,8 +130,8 @@ export default function CheckoutPage() {
     setCouponInput('')
   }
 
-  // Handle Square card tokenization — send nonce to server to create payment
-  const handleCardTokenized = useCallback(async (token: { token: string }) => {
+  // Handle Square tokenization from ALL payment methods
+  const handlePaymentMethodTokenized = useCallback(async (token: { token: string }) => {
     setProcessing(true)
     setIntentError('')
     try {
@@ -404,9 +411,10 @@ export default function CheckoutPage() {
                     locationId={process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID ?? ''}
                     cardTokenizeResponseReceived={async (token) => {
                       if (token.status === 'OK' && token.token) {
-                        await handleCardTokenized({ token: token.token })
+                        await handlePaymentMethodTokenized({ token: token.token })
                       } else {
-                        setIntentError('Card tokenization failed. Please check your card details and try again.')
+                        setIntentError('Payment failed. Please check your details and try again.')
+                        console.error('Tokenization failed:', token)
                       }
                     }}
                     createPaymentRequest={() => ({
@@ -418,23 +426,50 @@ export default function CheckoutPage() {
                       },
                     })}
                   >
-                    <SquareCreditCard
-                      buttonProps={{
-                        css: {
-                          backgroundColor: '#0097a7',
-                          color: '#fff',
-                          fontSize: '14px',
-                          fontWeight: '600',
-                          borderRadius: '12px',
-                          padding: '12px 0',
-                          '&:hover': {
-                            backgroundColor: '#00838f',
+                    <div className="space-y-4">
+                      {/* Express Checkout Options */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+                        <ApplePay />
+                        <GooglePay />
+                      </div>
+
+                      <div className="mb-6">
+                        <CashAppPay 
+                          redirectURL={window.location.href}
+                          referenceId={userId || 'guest'}
+                        />
+                      </div>
+
+                      <div className="relative flex py-3 items-center">
+                        <div className="flex-grow border-t border-[#cce7f0]"></div>
+                        <span className="flex-shrink mx-4 text-[#4a7fa5] text-xs">Or Pay by Card / Bank</span>
+                        <div className="flex-grow border-t border-[#cce7f0]"></div>
+                      </div>
+
+                      <SquareCreditCard
+                        buttonProps={{
+                          css: {
+                            backgroundColor: '#0097a7',
+                            color: '#fff',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            borderRadius: '12px',
+                            padding: '12px 0',
+                            marginTop: '10px',
+                            '&:hover': {
+                              backgroundColor: '#00838f',
+                            },
                           },
-                        },
-                      }}
-                    >
-                      {processing ? 'Processing...' : `Pay $${displayTotal.toFixed(2)}`}
-                    </SquareCreditCard>
+                        }}
+                      >
+                        {processing ? 'Processing...' : `Pay $${displayTotal.toFixed(2)} with Card`}
+                      </SquareCreditCard>
+
+                      <div className="mt-4">
+                         <p className="text-xs font-semibold text-[#0c2340] mb-2 uppercase tracking-wider">Bank Transfer (ACH)</p>
+                         <Ach accountHolderName={address.name} />
+                      </div>
+                    </div>
                   </PaymentForm>
 
                   <p className="text-xs text-[#4a7fa5]">
