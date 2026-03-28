@@ -137,9 +137,9 @@ export default function Hero() {
           {/* Quick stats */}
           <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-4 sm:gap-6 mt-12">
             {[
-              { value: '5,000+', label: 'Happy Customers' },
-              { value: '10', label: 'Delivery Zones' },
-              { value: '15+', label: 'Years Serving BC' },
+              { value: '2,000+', label: 'Happy Customers' },
+              { value: '21', label: 'Delivery Zones' },
+              { value: '5+', label: 'Years Serving BC' },
               { value: '24h', label: 'Delivery Window' },
             ].map((stat) => (
               <div key={stat.label} className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-0 sm:bg-transparent sm:backdrop-blur-none sm:text-center">
