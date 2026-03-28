@@ -28,10 +28,12 @@ export function buildOrderConfirmationEmail(order: {
   const discount   = order.discountAmount ?? 0
   const tax        = order.taxAmount ?? 0
   const delivery   = order.deliveryFee ?? Math.max(0, parseFloat((order.total - subtotal + discount - tax).toFixed(2)))
-  const greetText = (order.greeting ?? `Hi {{customer_name}}, your order has been received and we're getting it ready for delivery.`)
+  const greetText = order.greeting ?? `Dear ${order.customerName},\n\nWe are pleased to confirm that your order **${shortId}** has been successfully received and is now being processed by our team. Thank you for choosing TajWater for your premium hydration needs.`
+  const formalGreet = greetText
     .replace(/\{\{customer_name\}\}/g, order.customerName)
     .replace(/\{\{order_id\}\}/g, shortId)
     .replace(/\{\{total\}\}/g, `$${order.total.toFixed(2)}`)
+    .replace(/\n/g, '<br/>')
 
   const rows = order.items.map(i => `
     <tr>
@@ -56,73 +58,70 @@ export function buildOrderConfirmationEmail(order: {
 
   return `<!DOCTYPE html>
 <html lang="en">
-<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>TajWater Order Confirmed</title></head>
-<body style="margin:0;padding:0;background:#e8f4f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
-<div style="display:none;overflow:hidden;max-height:0;">Order ${shortId} confirmed &middot; $${order.total.toFixed(2)} &middot; Delivery in 1&ndash;2 business days&nbsp;&zwnj;</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e8f4f8;"><tr><td style="padding:32px 16px;" align="center">
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 4px 32px rgba(0,21,50,0.10);">
-  <tr><td style="padding:32px 48px 28px;text-align:center;background-color:#0097a7;background-image:linear-gradient(135deg,#0097a7 0%,#006db3 60%,#1565c0 100%);">
-    <p style="margin:0 0 6px;font-size:11px;font-weight:800;color:rgba(255,255,255,0.6);letter-spacing:4px;text-transform:uppercase;">TAJWATER</p>
-    <p style="margin:0 0 8px;font-size:32px;">&#128167;</p>
-    <p style="margin:0;font-size:12px;color:rgba(255,255,255,0.65);">Metro Vancouver&rsquo;s Premium Water Delivery</p>
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Order Confirmation - TajWater</title></head>
+<body style="margin:0;padding:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+<div style="display:none;overflow:hidden;max-height:0;">Order ${shortId} Confirmation &middot; $${order.total.toFixed(2)}&nbsp;&zwnj;</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;"><tr><td style="padding:40px 16px;" align="center">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,0.05);border:1px solid #e2e8f0;">
+  <tr><td style="padding:40px 48px 32px;text-align:center;background-color:#0c4a6e;background-image:linear-gradient(135deg,#0c4a6e 0%,#075985 100%);">
+    <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:rgba(255,255,255,0.7);letter-spacing:3px;text-transform:uppercase;">TajWater Premium</p>
+    <h1 style="margin:0;font-size:28px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">Order Confirmation</h1>
   </td></tr>
-  <tr><td style="padding:40px 48px 32px;">
-    <h1 style="margin:0 0 6px;font-size:26px;font-weight:900;color:#0c2340;">Order Confirmed! &#127881;</h1>
-    <p style="margin:0 0 28px;font-size:15px;color:#6b8c9e;line-height:1.7;">${greetText}</p>
+  <tr><td style="padding:48px 48px 32px;">
+    <p style="margin:0 0 24px;font-size:16px;color:#334155;line-height:1.6;">${formalGreet}</p>
 
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-radius:14px;overflow:hidden;margin-bottom:28px;background-color:#0097a7;background-image:linear-gradient(135deg,#0097a7,#1565c0);">
-      <tr>
-        <td style="padding:20px 24px;">
-          <p style="margin:0;font-size:10px;font-weight:800;color:rgba(255,255,255,0.65);letter-spacing:1.5px;text-transform:uppercase;">Order Number</p>
-          <p style="margin:4px 0 0;font-size:22px;font-weight:900;color:#ffffff;font-family:'Courier New',monospace;letter-spacing:2px;">${shortId}</p>
-        </td>
-        <td style="padding:20px 24px;text-align:right;vertical-align:middle;">
-          <a href="${_co.url}/dashboard/orders" style="display:inline-block;background:rgba(255,255,255,0.18);color:#ffffff;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;border:1px solid rgba(255,255,255,0.25);">Track Order &rarr;</a>
-        </td>
-      </tr>
-    </table>
+    <div style="background:#f1f5f9;border-radius:12px;padding:24px;margin-bottom:32px;border:1px solid #e2e8f0;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td>
+            <p style="margin:0;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Reference Number</p>
+            <p style="margin:4px 0 0;font-size:20px;font-weight:700;color:#0c4a6e;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;">${shortId}</p>
+          </td>
+          <td style="text-align:right;vertical-align:middle;">
+            <a href="${_co.url}/dashboard/orders" style="display:inline-block;background:#0c4a6e;color:#ffffff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">View Details &rarr;</a>
+          </td>
+        </tr>
+      </table>
+    </div>
 
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e5eff3;border-radius:14px;overflow:hidden;margin-bottom:20px;">
+    <h3 style="margin:0 0 16px;font-size:14px;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:1px;">Order Summary</h3>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #f1f5f9;border-radius:12px;overflow:hidden;margin-bottom:32px;">
       <thead>
-        <tr style="background:#f5fafb;">
-          <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:#8caab8;text-transform:uppercase;letter-spacing:0.6px;border-bottom:1px solid #e5eff3;">Item</th>
-          <th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:700;color:#8caab8;text-transform:uppercase;letter-spacing:0.6px;border-bottom:1px solid #e5eff3;">Qty</th>
-          <th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:700;color:#8caab8;text-transform:uppercase;letter-spacing:0.6px;border-bottom:1px solid #e5eff3;">Unit</th>
-          <th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:700;color:#8caab8;text-transform:uppercase;letter-spacing:0.6px;border-bottom:1px solid #e5eff3;">Total</th>
+        <tr style="background:#f8fafc;">
+          <th style="padding:12px 16px;text-align:left;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;border-bottom:1px solid #f1f5f9;">Description</th>
+          <th style="padding:12px 16px;text-align:center;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;border-bottom:1px solid #f1f5f9;">Qty</th>
+          <th style="padding:12px 16px;text-align:right;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;border-bottom:1px solid #f1f5f9;">Amount</th>
         </tr>
       </thead>
       <tbody>
-        ${rows}
-        ${extraRows}
-        <tr style="background:#f5fafb;">
-          <td colspan="3" style="padding:13px 14px;text-align:right;font-size:15px;font-weight:800;color:#0c2340;border-top:2px solid #e5eff3;">Total Charged</td>
-          <td style="padding:13px 14px;text-align:right;font-size:20px;font-weight:900;color:#0097a7;border-top:2px solid #e5eff3;">$${order.total.toFixed(2)}</td>
+        ${order.items.map(i => `
+          <tr>
+            <td style="padding:14px 16px;border-bottom:1px solid #f1f5f9;font-size:14px;color:#1e293b;">${i.name}</td>
+            <td style="padding:14px 16px;border-bottom:1px solid #f1f5f9;font-size:14px;color:#64748b;text-align:center;">${i.qty}</td>
+            <td style="padding:14px 16px;border-bottom:1px solid #f1f5f9;font-size:14px;font-weight:600;color:#1e293b;text-align:right;">$${(i.qty * i.price).toFixed(2)}</td>
+          </tr>`).join('')}
+        ${discount > 0 ? `<tr><td colspan="2" style="padding:10px 16px;text-align:right;font-size:13px;color:#059669;">Discount</td><td style="padding:10px 16px;text-align:right;font-size:13px;font-weight:600;color:#059669;">&#8722;$${discount.toFixed(2)}</td></tr>` : ''}
+        ${delivery > 0.01 ? `<tr><td colspan="2" style="padding:10px 16px;text-align:right;font-size:13px;color:#64748b;">Delivery Fee</td><td style="padding:10px 16px;text-align:right;font-size:13px;font-weight:600;color:#1e293b;">$${delivery.toFixed(2)}</td></tr>` : ''}
+        ${tax > 0 ? `<tr><td colspan="2" style="padding:10px 16px;text-align:right;font-size:13px;color:#64748b;">Tax (GST + PST)</td><td style="padding:10px 16px;text-align:right;font-size:13px;font-weight:600;color:#1e293b;">$${tax.toFixed(2)}</td></tr>` : ''}
+        <tr style="background:#f8fafc;">
+          <td colspan="2" style="padding:16px;text-align:right;font-size:15px;font-weight:700;color:#0f172a;border-top:1px solid #e2e8f0;">Total Amount</td>
+          <td style="padding:16px;text-align:right;font-size:20px;font-weight:800;color:#0c4a6e;border-top:1px solid #e2e8f0;">$${order.total.toFixed(2)}</td>
         </tr>
       </tbody>
     </table>
 
     ${order.deliveryAddress ? `
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5fafb;border:1px solid #e5eff3;border-radius:12px;margin-bottom:20px;">
-      <tr><td style="padding:16px 20px;">
-        <p style="margin:0 0 5px;font-size:11px;font-weight:700;color:#0097a7;letter-spacing:0.5px;text-transform:uppercase;">Delivery Address</p>
-        <p style="margin:0;font-size:14px;color:#1a3347;line-height:1.5;">${order.deliveryAddress}${order.zone ? `<br/><span style="font-size:12px;color:#8caab8;">Zone: ${order.zone}</span>` : ''}</p>
-      </td></tr>
-    </table>` : ''}
+    <h3 style="margin:0 0 12px;font-size:14px;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:1px;">Delivery Details</h3>
+    <div style="background:#f8fafc;border-radius:12px;padding:20px;margin-bottom:32px;border:1px solid #f1f5f9;">
+      <p style="margin:0;font-size:14px;color:#334155;line-height:1.6;">${order.deliveryAddress}${order.zone ? `<br/><span style="font-size:12px;color:#64748b;">Region: ${order.zone}</span>` : ''}</p>
+      <p style="margin:12px 0 0;font-size:13px;color:#64748b;">Estimated delivery: <strong>1&ndash;2 business days</strong></p>
+    </div>` : ''}
 
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fffbeb;border:1px solid #fde68a;border-radius:14px;margin-bottom:28px;">
-      <tr><td style="padding:18px 22px;">
-        <p style="margin:0 0 10px;font-size:13px;font-weight:700;color:#92400e;">What happens next</p>
-        <p style="margin:0 0 4px;font-size:13px;color:#78350f;">1&nbsp;&nbsp;We confirm and prepare your order</p>
-        <p style="margin:0 0 4px;font-size:13px;color:#78350f;">2&nbsp;&nbsp;Your driver will call ~30 min before arrival</p>
-        <p style="margin:0;font-size:13px;color:#78350f;">3&nbsp;&nbsp;Estimated delivery: <strong>1&ndash;2 business days</strong></p>
-      </td></tr>
-    </table>
-
-    <p style="margin:0;font-size:13px;color:#8caab8;line-height:1.7;">Questions? Email <a href="mailto:${_co.email}" style="color:#0097a7;font-weight:600;">${_co.email}</a>${_co.phone ? ` or call <a href="tel:${_co.phone}" style="color:#0097a7;font-weight:600;">${_co.phone}</a>` : ''}.</p>
+    <p style="margin:0;font-size:13px;color:#94a3b8;line-height:1.7;">If you have any questions, please contact our support team at <a href="mailto:${_co.email}" style="color:#0c4a6e;font-weight:600;text-decoration:none;">${_co.email}</a>.</p>
   </td></tr>
-  <tr><td style="background:#f5fafb;padding:20px 48px;border-top:1px solid #e5eff3;text-align:center;">
-    <p style="margin:0 0 5px;font-size:12px;color:#8caab8;"><a href="${_co.url}" style="color:#0097a7;text-decoration:none;font-weight:700;">tajwater.ca</a>&nbsp;&middot;&nbsp;<a href="mailto:${_co.email}" style="color:#8caab8;text-decoration:none;">${_co.email}</a></p>
-    <p style="margin:0;font-size:11px;color:#b0c4cf;">&copy; ${_co.year} TajWater &middot; Metro Vancouver, BC</p>
+  <tr><td style="background:#f1f5f9;padding:32px 48px;text-align:center;border-top:1px solid #e2e8f0;">
+    <p style="margin:0 0 8px;font-size:12px;color:#64748b;font-weight:600;"><a href="${_co.url}" style="color:#0c4a6e;text-decoration:none;">tajwater.ca</a>&nbsp;&middot;&nbsp;<a href="mailto:${_co.email}" style="color:#64748b;text-decoration:none;">Support</a></p>
+    <p style="margin:0;font-size:11px;color:#94a3b8;letter-spacing:0.5px;">&copy; ${_co.year} TajWater &middot; Metro Vancouver, BC</p>
   </td></tr>
 </table>
 </td></tr></table>
@@ -134,20 +133,19 @@ function shell(bodyHtml: string, preview = '', coEmail = process.env.NEXT_PUBLIC
   const yr = new Date().getFullYear()
   return `<!DOCTYPE html>
 <html lang="en">
-<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>TajWater</title></head>
-<body style="margin:0;padding:0;background:#e8f4f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>TajWater Premium</title></head>
+<body style="margin:0;padding:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
 ${preview ? `<div style="display:none;overflow:hidden;max-height:0;">${preview}&nbsp;&zwnj;</div>` : ''}
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e8f4f8;"><tr><td style="padding:32px 16px;" align="center">
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 4px 32px rgba(0,21,50,0.10);">
-  <tr><td style="padding:30px 48px 26px;text-align:center;background-color:#0097a7;background-image:linear-gradient(135deg,#0097a7 0%,#006db3 60%,#1565c0 100%);">
-    <p style="margin:0 0 5px;font-size:11px;font-weight:800;color:rgba(255,255,255,0.6);letter-spacing:4px;text-transform:uppercase;">TAJWATER</p>
-    <p style="margin:0 0 6px;font-size:30px;">&#128167;</p>
-    <p style="margin:0;font-size:12px;color:rgba(255,255,255,0.65);">Metro Vancouver&rsquo;s Premium Water Delivery</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;"><tr><td style="padding:40px 16px;" align="center">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,0.05);border:1px solid #e2e8f0;">
+  <tr><td style="padding:40px 48px 32px;text-align:center;background-color:#0c4a6e;background-image:linear-gradient(135deg,#0c4a6e 0%,#075985 100%);">
+    <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:rgba(255,255,255,0.7);letter-spacing:3px;text-transform:uppercase;">TajWater Premium</p>
+    <p style="margin:0;font-size:32px;">💧</p>
   </td></tr>
-  <tr><td style="padding:40px 48px 32px;">${bodyHtml}</td></tr>
-  <tr><td style="background:#f5fafb;padding:20px 48px;border-top:1px solid #e5eff3;text-align:center;">
-    <p style="margin:0 0 5px;font-size:12px;color:#8caab8;"><a href="${coUrl}" style="color:#0097a7;text-decoration:none;font-weight:700;">tajwater.ca</a>&nbsp;&middot;&nbsp;<a href="mailto:${coEmail}" style="color:#8caab8;text-decoration:none;">${coEmail}</a>${coPhone ? `&nbsp;&middot;&nbsp;<a href="tel:${coPhone}" style="color:#8caab8;text-decoration:none;">${coPhone}</a>` : ''}</p>
-    <p style="margin:0;font-size:11px;color:#b0c4cf;">&copy; ${yr} TajWater &middot; Metro Vancouver, BC</p>
+  <tr><td style="padding:48px 48px 32px;">${bodyHtml}</td></tr>
+  <tr><td style="background:#f1f5f9;padding:32px 48px;text-align:center;border-top:1px solid #e2e8f0;">
+    <p style="margin:0 0 8px;font-size:12px;color:#64748b;font-weight:600;"><a href="${coUrl}" style="color:#0c4a6e;text-decoration:none;">tajwater.ca</a>&nbsp;&middot;&nbsp;<a href="mailto:${coEmail}" style="color:#64748b;text-decoration:none;">Support</a>${coPhone ? `&nbsp;&middot;&nbsp;<a href="tel:${coPhone}" style="color:#64748b;text-decoration:none;">Contact</a>` : ''}</p>
+    <p style="margin:0;font-size:11px;color:#94a3b8;letter-spacing:0.5px;">&copy; ${yr} TajWater &middot; Metro Vancouver, BC</p>
   </td></tr>
 </table>
 </td></tr></table>
@@ -158,44 +156,34 @@ ${preview ? `<div style="display:none;overflow:hidden;max-height:0;">${preview}&
 export function buildWelcomeEmail({ customerName, message }: { customerName: string; message?: string }): string {
   const coEmail = process.env.NEXT_PUBLIC_COMPANY_EMAIL ?? 'info@tajwater.ca'
   const coUrl   = process.env.NEXT_PUBLIC_SITE_URL      ?? 'https://tajwater.ca'
-  const msgText = (message ?? `Hi {{customer_name}}, your account is ready. Fresh, pure water is just a few clicks away.`)
+  const msgText = (message ?? `Dear ${customerName},\n\nWelcome to TajWater. Your account is now active, and you are ready to experience Metro Vancouver's premium water delivery service.`)
     .replace(/\{\{customer_name\}\}/g, customerName)
+    .replace(/\n/g, '<br/>')
+
   return shell(`
-<h1 style="margin:0 0 6px;font-size:26px;font-weight:900;color:#0c2340;">Welcome to TajWater! &#128167;</h1>
-<p style="margin:0 0 28px;font-size:15px;color:#6b8c9e;line-height:1.7;">${msgText}</p>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
-  <tr><td style="padding-bottom:10px;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5fafb;border:1px solid #e5eff3;border-radius:12px;">
-      <tr>
-        <td style="padding:14px 16px;font-size:22px;width:44px;text-align:center;vertical-align:top;">&#128722;</td>
-        <td style="padding:14px 16px 14px 0;vertical-align:top;"><p style="margin:0 0 3px;font-size:14px;font-weight:700;color:#1a3347;">Shop Anytime</p><p style="margin:0;font-size:13px;color:#8caab8;line-height:1.5;">Browse jugs, dispensers &amp; accessories &mdash; delivered to your door.</p></td>
-      </tr>
-    </table>
+<h1 style="margin:0 0 16px;font-size:24px;font-weight:800;color:#0f172a;letter-spacing:-0.5px;">Welcome to TajWater Premium</h1>
+<p style="margin:0 0 32px;font-size:16px;color:#334155;line-height:1.6;">${msgText}</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
+  <tr><td style="padding-bottom:12px;">
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px;display:flex;align-items:start;gap:16px;">
+      <div style="font-size:24px;line-height:1;">🛒</div>
+      <div><p style="margin:0 0 4px;font-size:14px;font-weight:700;color:#0f172a;">Premium Selection</p><p style="margin:0;font-size:13px;color:#64748b;line-height:1.5;">Access our full range of jugs, dispensers, and accessories.</p></div>
+    </div>
   </td></tr>
-  <tr><td style="padding-bottom:10px;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5fafb;border:1px solid #e5eff3;border-radius:12px;">
-      <tr>
-        <td style="padding:14px 16px;font-size:22px;width:44px;text-align:center;vertical-align:top;">&#128260;</td>
-        <td style="padding:14px 16px 14px 0;vertical-align:top;"><p style="margin:0 0 3px;font-size:14px;font-weight:700;color:#1a3347;">Subscribe &amp; Save 15%</p><p style="margin:0;font-size:13px;color:#8caab8;line-height:1.5;">Weekly, biweekly or monthly auto-delivery. Cancel anytime.</p></td>
-      </tr>
-    </table>
-  </td></tr>
-  <tr><td>
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5fafb;border:1px solid #e5eff3;border-radius:12px;">
-      <tr>
-        <td style="padding:14px 16px;font-size:22px;width:44px;text-align:center;vertical-align:top;">&#128204;</td>
-        <td style="padding:14px 16px 14px 0;vertical-align:top;"><p style="margin:0 0 3px;font-size:14px;font-weight:700;color:#1a3347;">Track Every Order</p><p style="margin:0;font-size:13px;color:#8caab8;line-height:1.5;">Real-time status updates from order placed to doorstep.</p></td>
-      </tr>
-    </table>
+  <tr><td style="padding-bottom:12px;">
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px;display:flex;align-items:start;gap:16px;">
+      <div style="font-size:24px;line-height:1;">🔄</div>
+      <div><p style="margin:0 0 4px;font-size:14px;font-weight:700;color:#0f172a;">Seamless Subscriptions</p><p style="margin:0;font-size:13px;color:#64748b;line-height:1.5;">Automate your hydration with flexible weekly or monthly plans.</p></div>
+    </div>
   </td></tr>
 </table>
-<table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
-  <tr><td style="border-radius:12px;background-color:#0097a7;background-image:linear-gradient(135deg,#0097a7,#1565c0);">
-    <a href="${coUrl}/shop" style="display:inline-block;padding:14px 32px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;">Browse Products &rarr;</a>
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
+  <tr><td style="border-radius:8px;background:#0c4a6e;">
+    <a href="${coUrl}/shop" style="display:inline-block;padding:14px 32px;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;">Explore Collections &rarr;</a>
   </td></tr>
 </table>
-<p style="margin:0;font-size:13px;color:#8caab8;line-height:1.7;">Questions? Email <a href="mailto:${coEmail}" style="color:#0097a7;font-weight:600;">${coEmail}</a>.</p>
-`, `Welcome, ${customerName}! Your TajWater account is ready.`, coEmail, coUrl)
+<p style="margin:0;font-size:13px;color:#94a3b8;line-height:1.7;">Our team is here to assist you. Should you have any inquiries, please contact us at <a href="mailto:${coEmail}" style="color:#0c4a6e;font-weight:600;text-decoration:none;">${coEmail}</a>.</p>
+`, `Welcome to TajWater, ${customerName}. Your account is ready.`, coEmail, coUrl)
 }
 
 // ─── Out for Delivery ─────────────────────────────────────────────────────────
@@ -207,34 +195,40 @@ export function buildOutForDeliveryEmail({ orderId, customerName, zone, message 
   const coPhone = process.env.NEXT_PUBLIC_COMPANY_PHONE ?? ''
   const shortId = 'TW-' + orderId.slice(-8).toUpperCase()
   const msgText = message
-    ? message.replace(/\{\{customer_name\}\}/g, customerName).replace(/\{\{order_id\}\}/g, shortId)
-    : `Good news, ${customerName}! Your order <strong style="color:#0097a7;">${shortId}</strong> is out for delivery${zone ? ` to ${zone}` : ''}.`
+    ? message.replace(/\{\{customer_name\}\}/g, customerName).replace(/\{\{order_id\}\}/g, shortId).replace(/\n/g, '<br/>')
+    : `Dear ${customerName},\n\nWe are pleased to inform you that your order **${shortId}** is now out for delivery${zone ? ` to the **${zone}** region` : ''}. Our driver will be arriving shortly.`
+  
   return shell(`
-<h1 style="margin:0 0 6px;font-size:26px;font-weight:900;color:#0c2340;">Your water is on the way! &#128665;</h1>
-<p style="margin:0 0 28px;font-size:15px;color:#6b8c9e;line-height:1.7;">${msgText}</p>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-radius:14px;overflow:hidden;margin-bottom:24px;background-color:#0097a7;background-image:linear-gradient(135deg,#0097a7,#1565c0);">
-  <tr>
-    <td style="padding:18px 24px;"><p style="margin:0;font-size:10px;font-weight:800;color:rgba(255,255,255,0.65);letter-spacing:1.5px;text-transform:uppercase;">Now Delivering</p><p style="margin:4px 0 0;font-size:20px;font-weight:900;color:#ffffff;font-family:'Courier New',monospace;letter-spacing:2px;">${shortId}</p></td>
-    <td style="padding:18px 24px;text-align:right;vertical-align:middle;font-size:36px;">&#128205;</td>
-  </tr>
-</table>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5fafb;border:1px solid #e5eff3;border-radius:14px;margin-bottom:24px;">
-  <tr><td style="padding:20px 24px;">
-    <p style="margin:0 0 14px;font-size:14px;font-weight:700;color:#1a3347;">Delivery Progress</p>
-    <p style="margin:0 0 7px;font-size:13px;color:#0097a7;">&#10003;&nbsp;&nbsp;Order Received</p>
-    <p style="margin:0 0 7px;font-size:13px;color:#0097a7;">&#10003;&nbsp;&nbsp;Prepared &amp; Dispatched</p>
-    <p style="margin:0 0 7px;font-size:13px;font-weight:700;color:#1565c0;">&#128665;&nbsp;&nbsp;Out for Delivery &larr; <em>You are here</em></p>
-    <p style="margin:0;font-size:13px;color:#b0c4cf;">&#9744;&nbsp;&nbsp;Delivered</p>
-  </td></tr>
-</table>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fffbeb;border:1px solid #fde68a;border-radius:14px;margin-bottom:28px;">
-  <tr><td style="padding:18px 22px;">
-    <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#92400e;">&#128241; Driver calling ahead</p>
-    <p style="margin:0;font-size:13px;color:#78350f;line-height:1.6;">Our driver will call ~30 minutes before arriving. Please ensure someone is available or leave instructions.</p>
-  </td></tr>
-</table>
-<p style="margin:0;font-size:13px;color:#8caab8;line-height:1.7;">${coPhone ? `Issues? Call <a href="tel:${coPhone}" style="color:#0097a7;font-weight:600;">${coPhone}</a> or email ` : 'Issues? Email '}<a href="mailto:${coEmail}" style="color:#0097a7;font-weight:600;">${coEmail}</a>.</p>
-`, `${shortId} is on its way — expect your driver soon`, coEmail, coUrl, coPhone)
+<h1 style="margin:0 0 16px;font-size:24px;font-weight:800;color:#0f172a;letter-spacing:-0.5px;">Delivery Update</h1>
+<p style="margin:0 0 32px;font-size:16px;color:#334155;line-height:1.6;">${msgText.replace(/\n/g, '<br/>')}</p>
+
+<div style="background:#f1f5f9;border-radius:12px;padding:24px;margin-bottom:32px;border:1px solid #e2e8f0;">
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <div>
+      <p style="margin:0;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Now Delivering</p>
+      <p style="margin:4px 0 0;font-size:20px;font-weight:700;color:#0c4a6e;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;">${shortId}</p>
+    </div>
+    <div style="font-size:32px;">🚚</div>
+  </div>
+</div>
+
+<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:24px;margin-bottom:32px;">
+  <p style="margin:0 0 16px;font-size:14px;font-weight:700;color:#0f172a;">Delivery Progress</p>
+  <div style="font-size:13px;line-height:2.2;">
+    <div style="color:#059669;">● Order Received</div>
+    <div style="color:#059669;">● Dispatched for Delivery</div>
+    <div style="color:#0c4a6e;font-weight:700;">● Out for Delivery &larr; <i>Current Status</i></div>
+    <div style="color:#cbd5e1;">○ Delivered</div>
+  </div>
+</div>
+
+<div style="background:#fffbeb;border:1px solid #fef3c7;border-radius:12px;padding:20px;margin-bottom:32px;">
+  <p style="margin:0 0 8px;font-size:14px;font-weight:700;color:#92400e;">Driver Notification</p>
+  <p style="margin:0;font-size:13px;color:#b45309;line-height:1.6;">Our driver will typically provide a courtesy call approximately 30 minutes prior to arrival. Please ensure the delivery location is accessible.</p>
+</div>
+
+<p style="margin:0;font-size:13px;color:#94a3b8;line-height:1.7;">${coPhone ? `Should you need to reach us, please call <a href="tel:${coPhone}" style="color:#0c4a6e;font-weight:600;text-decoration:none;">${coPhone}</a> or email ` : 'Should you need to reach us, please email '}<a href="mailto:${coEmail}" style="color:#0c4a6e;font-weight:600;text-decoration:none;">${coEmail}</a>.</p>
+`, `Delivery Update: Order ${shortId} is on its way.`, coEmail, coUrl, coPhone)
 }
 
 // ─── Delivered ────────────────────────────────────────────────────────────────
@@ -245,39 +239,40 @@ export function buildDeliveredEmail({ orderId, customerName, message }: {
   const coUrl   = process.env.NEXT_PUBLIC_SITE_URL      ?? 'https://tajwater.ca'
   const shortId = 'TW-' + orderId.slice(-8).toUpperCase()
   const msgText = message
-    ? message.replace(/\{\{customer_name\}\}/g, customerName).replace(/\{\{order_id\}\}/g, shortId)
-    : `Great news, ${customerName}! Your order <strong style="color:#0097a7;">${shortId}</strong> has been delivered. Enjoy your fresh water!`
+    ? message.replace(/\{\{customer_name\}\}/g, customerName).replace(/\{\{order_id\}\}/g, shortId).replace(/\n/g, '<br/>')
+    : `Dear ${customerName},\n\nWe are pleased to inform you that your order **${shortId}** has been successfully delivered. We hope you enjoy our premium water services.`
+
   return shell(`
-<div style="text-align:center;margin-bottom:24px;">
-  <p style="margin:0 0 6px;font-size:44px;">&#9989;</p>
-  <h1 style="margin:0;font-size:26px;font-weight:900;color:#0c2340;">Delivered! Stay hydrated. &#128167;</h1>
+<div style="text-align:center;margin-bottom:32px;">
+  <div style="font-size:48px;margin-bottom:16px;">✅</div>
+  <h1 style="margin:0;font-size:24px;font-weight:800;color:#0f172a;letter-spacing:-0.5px;">Delivery Successful</h1>
 </div>
-<p style="margin:0 0 24px;font-size:15px;color:#6b8c9e;line-height:1.7;text-align:center;">${msgText}</p>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#dcfce7;border:1px solid #bbf7d0;border-radius:12px;margin-bottom:24px;">
-  <tr><td style="padding:14px 20px;">
-    <p style="margin:0 0 3px;font-size:11px;font-weight:700;color:#16a34a;letter-spacing:0.5px;text-transform:uppercase;">&#10003; Order Delivered</p>
-    <p style="margin:0;font-size:18px;font-weight:900;color:#14532d;font-family:'Courier New',monospace;letter-spacing:1px;">${shortId}</p>
-  </td></tr>
-</table>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+<p style="margin:0 0 32px;font-size:16px;color:#334155;line-height:1.6;text-align:center;">${msgText.replace(/\n/g, '<br/>')}</p>
+
+<div style="background:#f0fdf4;border:1px solid #dcfce7;border-radius:12px;padding:20px;margin-bottom:32px;text-align:center;">
+  <p style="margin:0 0 4px;font-size:11px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:1px;">Order Status</p>
+  <p style="margin:0;font-size:18px;font-weight:700;color:#14532d;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;">DELIVERED &middot; ${shortId}</p>
+</div>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
   <tr>
-    <td style="padding-right:8px;width:50%;vertical-align:top;">
-      <table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="border-radius:12px;background-color:#0097a7;background-image:linear-gradient(135deg,#0097a7,#1565c0);"><a href="${coUrl}/dashboard/orders" style="display:inline-block;padding:12px 20px;color:#ffffff;font-size:13px;font-weight:700;text-decoration:none;">View Order Details</a></td></tr></table>
+    <td style="padding-right:10px;width:50%;">
+      <a href="${coUrl}/dashboard/orders" style="display:block;padding:12px;background:#0c4a6e;color:#ffffff;font-size:13px;font-weight:600;text-decoration:none;border-radius:8px;text-align:center;">View Order Hub</a>
     </td>
-    <td style="padding-left:8px;width:50%;vertical-align:top;">
-      <table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="border-radius:12px;background:#f5fafb;border:1px solid #e5eff3;"><a href="${coUrl}/shop" style="display:inline-block;padding:12px 20px;color:#0097a7;font-size:13px;font-weight:700;text-decoration:none;">Order Again &rarr;</a></td></tr></table>
+    <td style="padding-left:10px;width:50%;">
+      <a href="${coUrl}/shop" style="display:block;padding:12px;background:#f8fafc;color:#0c4a6e;font-size:13px;font-weight:600;text-decoration:none;border-radius:8px;text-align:center;border:1px solid #e2e8f0;">Place New Order</a>
     </td>
   </tr>
 </table>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#e0f7fa;background-image:linear-gradient(135deg,#e0f7fa,#e3f2fd);border:1px solid #b3dce5;border-radius:14px;margin-bottom:28px;">
-  <tr><td style="padding:18px 22px;">
-    <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#0c2340;">&#128161; Never run out of water</p>
-    <p style="margin:0 0 10px;font-size:13px;color:#4a7fa5;line-height:1.5;">Set up auto-delivery and save up to 15% on every order. Cancel anytime.</p>
-    <a href="${coUrl}/shop" style="font-size:13px;font-weight:700;color:#0097a7;text-decoration:none;">Try a subscription &rarr;</a>
-  </td></tr>
-</table>
-<p style="margin:0;font-size:13px;color:#8caab8;line-height:1.7;text-align:center;">Thank you for choosing TajWater!</p>
-`, `${shortId} delivered — enjoy your fresh water!`, coEmail, coUrl)
+
+<div style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border:1px solid #bae6fd;border-radius:12px;padding:24px;margin-bottom:32px;">
+  <p style="margin:0 0 8px;font-size:15px;font-weight:700;color:#0c4a6e;">Maintain Your Hydration</p>
+  <p style="margin:0 0 16px;font-size:13px;color:#075985;line-height:1.6;">Ensure regular supply with our priority subscription service and save up to 15% on every delivery.</p>
+  <a href="${coUrl}/shop" style="font-size:13px;font-weight:700;color:#0c4a6e;text-decoration:none;">View Subscription Plans &rarr;</a>
+</div>
+
+<p style="margin:0;font-size:14px;color:#64748b;line-height:1.7;text-align:center;">Thank you for your continued patronage of TajWater.</p>
+`, `Confirmation: Order ${shortId} has been delivered.`, coEmail, coUrl)
 }
 
 // ─── Ticket Reply ─────────────────────────────────────────────────────────────
@@ -292,27 +287,21 @@ export function buildTicketReplyEmail({ ticketSubject, adminReply, customerName 
     .replace(/>/g, '&gt;')
     .replace(/\n/g, '<br/>')
   return shell(`
-<h1 style="margin:0 0 6px;font-size:26px;font-weight:900;color:#0c2340;">We replied to your ticket &#128172;</h1>
-<p style="margin:0 0 28px;font-size:15px;color:#6b8c9e;line-height:1.7;">Hi ${customerName}, our support team has responded to your request.</p>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5fafb;border:1px solid #e5eff3;border-radius:12px;margin-bottom:16px;">
-  <tr><td style="padding:14px 18px;">
-    <p style="margin:0 0 4px;font-size:11px;font-weight:700;color:#0097a7;letter-spacing:0.5px;text-transform:uppercase;">Your Ticket</p>
-    <p style="margin:0;font-size:14px;font-weight:600;color:#1a3347;">${ticketSubject}</p>
+<h1 style="margin:0 0 16px;font-size:24px;font-weight:800;color:#0f172a;letter-spacing:-0.5px;">Support Update</h1>
+<p style="margin:0 0 32px;font-size:16px;color:#334155;line-height:1.6;">Dear ${customerName}, our support team has provided a response to your inquiry regarding <strong>${ticketSubject}</strong>.</p>
+
+<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:24px;margin-bottom:32px;border-left:4px solid #0c4a6e;">
+  <p style="margin:0 0 12px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">TajWater Support Response</p>
+  <p style="margin:0;font-size:15px;color:#1e293b;line-height:1.7;">${safeReply}</p>
+</div>
+
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
+  <tr><td style="border-radius:8px;background:#0c4a6e;">
+    <a href="${coUrl}/dashboard/support" style="display:inline-block;padding:14px 28px;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;">View Ticket History &rarr;</a>
   </td></tr>
 </table>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5fafb;border-top:1px solid #e5eff3;border-right:1px solid #e5eff3;border-bottom:1px solid #e5eff3;border-left:4px solid #0097a7;border-radius:0 12px 12px 0;margin-bottom:28px;">
-  <tr><td style="padding:18px 22px;">
-    <p style="margin:0 0 8px;font-size:11px;font-weight:700;color:#0097a7;letter-spacing:0.5px;text-transform:uppercase;">TajWater Support</p>
-    <p style="margin:0;font-size:14px;color:#1a3347;line-height:1.7;">${safeReply}</p>
-  </td></tr>
-</table>
-<table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
-  <tr><td style="border-radius:12px;background-color:#0097a7;background-image:linear-gradient(135deg,#0097a7,#1565c0);">
-    <a href="${coUrl}/dashboard/support" style="display:inline-block;padding:14px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;">View Your Ticket &rarr;</a>
-  </td></tr>
-</table>
-<p style="margin:0;font-size:13px;color:#8caab8;line-height:1.7;text-align:center;">Still need help? Reply to this email or contact <a href="mailto:${coEmail}" style="color:#0097a7;font-weight:600;">${coEmail}</a>.</p>
-`, `Support reply: ${ticketSubject}`, coEmail, coUrl)
+<p style="margin:0;font-size:13px;color:#94a3b8;line-height:1.7;text-align:center;">Should you require further assistance, please reply to this message or contact us at <a href="mailto:${coEmail}" style="color:#0c4a6e;font-weight:600;text-decoration:none;">${coEmail}</a>.</p>
+`, `Support Update regarding: ${ticketSubject}`, coEmail, coUrl)
 }
 
 // ─── Admin Order Notification ─────────────────────────────────────────
@@ -331,39 +320,37 @@ export function buildAdminOrderNotificationEmail(order: {
   
   const rows = order.items.map(i => `
     <tr>
-      <td style="padding:8px 0;border-bottom:1px solid #edf4f7;font-size:14px;color:#1a3347;">${i.name}</td>
-      <td style="padding:8px 0;border-bottom:1px solid #edf4f7;font-size:14px;color:#6b8c9e;text-align:center;">&times;${i.qty}</td>
-      <td style="padding:8px 0;border-bottom:1px solid #edf4f7;font-size:14px;font-weight:700;color:#1a3347;text-align:right;">$${(i.qty * i.price).toFixed(2)}</td>
+      <td style="padding:10px 0;border-bottom:1px solid #f1f5f9;font-size:14px;color:#1e293b;">${i.name}</td>
+      <td style="padding:10px 0;border-bottom:1px solid #f1f5f9;font-size:14px;color:#64748b;text-align:center;">&times;${i.qty}</td>
+      <td style="padding:10px 0;border-bottom:1px solid #f1f5f9;font-size:14px;font-weight:600;color:#1e293b;text-align:right;">$${(i.qty * i.price).toFixed(2)}</td>
     </tr>`).join('')
 
   return shell(`
-<h1 style="margin:0 0 6px;font-size:24px;font-weight:900;color:#0c2340;">New Order Received! 🔔</h1>
-<p style="margin:0 0 20px;font-size:15px;color:#6b8c9e;line-height:1.6;">A new order has been placed on TajWater.</p>
+<h1 style="margin:0 0 16px;font-size:24px;font-weight:800;color:#0f172a;letter-spacing:-0.5px;">New Order Notification 🔔</h1>
+<p style="margin:0 0 24px;font-size:16px;color:#334155;line-height:1.6;">A new premium hydration order has been placed through the platform.</p>
 
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5fafb;border:1px solid #e5eff3;border-radius:12px;margin-bottom:20px;">
-  <tr><td style="padding:16px 20px;">
-    <p style="margin:0 0 4px;font-size:11px;font-weight:700;color:#0097a7;text-transform:uppercase;">Customer</p>
-    <p style="margin:0;font-size:15px;font-weight:700;color:#1a3347;">${order.customerName}</p>
-    <p style="margin:4px 0 0;font-size:13px;color:#6b8c9e;">${order.deliveryAddress ?? 'No address provided'}</p>
-    ${order.zone ? `<p style="margin:2px 0 0;font-size:12px;color:#0097a7;font-weight:600;">Zone: ${order.zone}</p>` : ''}
-  </td></tr>
-</table>
+<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:24px;margin-bottom:32px;">
+  <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Customer Details</p>
+  <p style="margin:0;font-size:16px;font-weight:700;color:#0c4a6e;">${order.customerName}</p>
+  <p style="margin:6px 0 0;font-size:14px;color:#334155;">${order.deliveryAddress ?? 'No address provided'}</p>
+  ${order.zone ? `<p style="margin:8px 0 0;font-size:12px;color:#0c4a6e;font-weight:700;">Region: ${order.zone}</p>` : ''}
+</div>
 
-<div style="margin-bottom:20px;">
-  <p style="margin:0 0 10px;font-size:11px;font-weight:700;color:#8caab8;text-transform:uppercase;">Order Details (${shortId})</p>
+<div style="margin-bottom:32px;">
+  <p style="margin:0 0 12px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Manifest (${shortId})</p>
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
     ${rows}
     <tr>
-      <td colspan="2" style="padding:12px 0;font-size:16px;font-weight:800;color:#0c2340;">Total Amount</td>
-      <td style="padding:12px 0;font-size:18px;font-weight:900;color:#0097a7;text-align:right;">$${order.total.toFixed(2)}</td>
+      <td colspan="2" style="padding:16px 0;font-size:16px;font-weight:700;color:#0f172a;">Total Amount</td>
+      <td style="padding:16px 0;font-size:18px;font-weight:800;color:#0c4a6e;text-align:right;">$${order.total.toFixed(2)}</td>
     </tr>
   </table>
 </div>
 
-<table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:10px;">
-  <tr><td style="border-radius:12px;background-color:#0097a7;background-image:linear-gradient(135deg,#0097a7,#1565c0);">
-    <a href="${coUrl}/admin/orders/${order.id}" style="display:inline-block;padding:14px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;">View Order in Admin Panel &rarr;</a>
+<table role="presentation" cellpadding="0" cellspacing="0">
+  <tr><td style="border-radius:8px;background:#0c4a6e;">
+    <a href="${coUrl}/admin/orders/${order.id}" style="display:inline-block;padding:14px 28px;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;">Open in Management Panel &rarr;</a>
   </td></tr>
 </table>
-`, `New Order from ${order.customerName} — ${shortId}`, undefined, coUrl)
+`, `Admin: New Order from ${order.customerName} (${shortId})`, undefined, coUrl)
 }

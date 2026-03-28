@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient as createSsrClient } from '@supabase/ssr'
 import { createServerClient } from '@/lib/supabase'
-import { resend } from '@/lib/email'
-import { buildOutForDeliveryEmail, buildDeliveredEmail } from '@/lib/email'
+import { resend, buildOutForDeliveryEmail, buildDeliveredEmail } from '@/lib/email'
+import { generateInvoicePDF, type InvoiceOrderData } from '@/lib/generateInvoice'
 
 export const dynamic = 'force-dynamic'
 
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     // Fetch order + customer info via separate queries to avoid schema relationship errors
     const { data: fullOrder } = await db
       .from('orders')
-      .select('id, customer_name, zone_id, user_id, zones(name), total, payment_status, payment_method, delivery_address, created_at')
+      .select('id, total, delivery_address, customer_name, payment_method, payment_status, user_id, tax_amount, discount_amount, created_at, zones(name), order_items(quantity, price, products(name))')
       .eq('id', orderId)
       .single()
 
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
 
     if (!profile?.email) return NextResponse.json({ skipped: true, reason: 'no customer email' })
 
-    const name = profile.name || customerName
+    const name = profile.name || fullOrder.customer_name
     const zoneName = Array.isArray((fullOrder as unknown as { zones?: { name: string }[] }).zones)
       ? ((fullOrder as unknown as { zones: { name: string }[] }).zones[0]?.name ?? null)
       : ((fullOrder as unknown as { zones: { name: string } | null }).zones?.name ?? null)
@@ -87,12 +87,83 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ skipped: true, reason: 'status not handled' })
     }
 
-    await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL ?? 'TajWater <orders@tajwater.ca>',
-      to: profile.email,
+    // Generate invoice PDF if delivered
+    let pdfAttachment: { filename: string; content: string } | undefined
+    if (newStatus === 'delivered') {
+      try {
+        const { data: contentRows } = await db.from('site_content').select('key, value')
+          .in('key', ['settings_company', 'settings_address', 'settings_phone', 'settings_email'])
+        const contentMap: Record<string, string> = {}
+        for (const r of (contentRows ?? [])) contentMap[r.key] = r.value
+
+        const invoiceCompanyInfo = {
+          name:    contentMap['settings_company'] || 'Taj Water LTD.',
+          address: contentMap['settings_address'] || '1770 McLean Ave, Port Coquitlam, BC V3C 4K8, Canada',
+          phone:   contentMap['settings_phone']   || process.env.NEXT_PUBLIC_COMPANY_PHONE || '',
+          email:   contentMap['settings_email']   || 'billing@tajwater.ca',
+          website: 'tajwater.ca'
+        }
+
+        type RawItem = { quantity: number; price: number; products: { name: string } | null }
+        const invoiceOrder: InvoiceOrderData = {
+          id: fullOrder.id,
+          total: fullOrder.total,
+          payment_status: fullOrder.payment_status,
+          payment_method: fullOrder.payment_method,
+          delivery_address: fullOrder.delivery_address ?? null,
+          customer_name: fullOrder.customer_name ?? null,
+          customer_phone: (fullOrder as any).customer_phone || null,
+          created_at: fullOrder.created_at || new Date().toISOString(),
+          zones: Array.isArray(fullOrder.zones) ? (fullOrder.zones[0] ?? null) : (fullOrder.zones as { name: string } | null) ?? null,
+          order_items: ((fullOrder.order_items ?? []) as unknown as RawItem[]).map(i => ({
+            id: crypto.randomUUID(),
+            quantity: i.quantity,
+            price: i.price,
+            products: i.products ? { name: i.products.name } : null,
+          })),
+          profiles: profile ? { name: profile.name ?? '', email: profile.email ?? '' } : null,
+          tax_amount: (fullOrder as { tax_amount?: number }).tax_amount ?? null,
+          discount_amount: (fullOrder as { discount_amount?: number }).discount_amount ?? null,
+        }
+
+        const pdfBuf = await generateInvoicePDF(invoiceOrder, invoiceCompanyInfo)
+        pdfAttachment = {
+          filename: `INV-${fullOrder.id.slice(-8).toUpperCase()}.pdf`,
+          content: pdfBuf.toString('base64'),
+        }
+      } catch (pdfErr) {
+        console.error('Invoice PDF generation failed:', pdfErr)
+      }
+    }
+
+    await (db as any).from('email_logs').insert({
+      user_id: fullOrder.user_id ?? null,
+      recipient_email: profile.email,
+      email_type: newStatus === 'delivered' ? 'delivery_success' : 'out_for_delivery',
       subject,
-      html,
+      status: 'sending',
+      sent_by: null,
+      metadata: { order_id: orderId },
     })
+
+    try {
+      const emailResult = await (resend as any).emails.send({
+        from: 'TajWater <billing@tajwater.ca>',
+        to: profile.email,
+        subject,
+        html,
+        attachments: pdfAttachment ? [{ filename: pdfAttachment.filename, content: pdfAttachment.content }] : undefined,
+      })
+      
+      if (emailResult.data?.id) {
+        await db.from('email_logs').update({ status: 'sent', resend_id: emailResult.data.id })
+          .match({ recipient_email: profile.email, metadata: { order_id: orderId }, status: 'sending' })
+      }
+    } catch (e) {
+       await db.from('email_logs').update({ status: 'failed', error_message: String(e) })
+          .match({ recipient_email: profile.email, metadata: { order_id: orderId }, status: 'sending' })
+       console.error('Email send failed:', e)
+    }
 
     return NextResponse.json({ success: true })
   } catch (err) {

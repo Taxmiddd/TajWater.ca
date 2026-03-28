@@ -58,6 +58,7 @@ export default function CheckoutPage() {
   const [applyingCoupon, setApplyingCoupon] = useState(false)
   const [couponError, setCouponError] = useState('')
   const [appliedDiscount, setAppliedDiscount] = useState<{ code: string; type: 'percent' | 'fixed'; value: number; amount: number; id: string } | null>(null)
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const router = useRouter()
 
   // Fetch active zones from DB
@@ -114,11 +115,12 @@ export default function CheckoutPage() {
     }
     checkAuth()
   }, [router])
-
+  
   const subtotal = total()
   const discountAmt = appliedDiscount?.amount ?? 0
   const tax = Math.round((subtotal - discountAmt) * 0.12 * 100) / 100
-  const orderTotal = Math.max(0, subtotal - discountAmt) + deliveryFee + tax
+  const deliveryFeeValue = deliveryFee // For clarity in callbacks
+  const orderTotal = Math.max(0, subtotal - discountAmt) + deliveryFeeValue + tax
   const displayTotal = serverTotal ?? orderTotal
 
   const applyCode = async () => {
@@ -145,7 +147,51 @@ export default function CheckoutPage() {
     setCouponInput('')
   }
 
-  // Handle Square tokenization from ALL payment methods
+  // --- Validation Logic ---
+  const validateField = (name: string, value: string) => {
+    let error = ''
+    if (name === 'name') {
+      if (!/^[a-zA-Z\s]+$/.test(value)) error = 'Name must only contain letters and spaces.'
+      else if (value.trim().split(' ').length < 2) error = 'Please enter your full name (first and last).'
+    } else if (name === 'phone') {
+      const cleaned = value.replace(/\D/g, '')
+      if (cleaned.length < 10) error = 'Invalid phone format (min 10 digits).'
+      else if (cleaned.length > 11) error = 'Excessive digits in phone number.'
+      else if (cleaned.length === 11 && !cleaned.startsWith('1')) error = 'US/Canada numbers must start with 1 if 11 digits.'
+    } else if (name === 'email') {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) error = 'Please enter a valid email address.'
+    } else if (name === 'postal') {
+      const isCanada = /^[A-Z]\d[A-Z]\s?\d[A-Z]\d$/i.test(value)
+      const isUSA = /^\d{5}(-\d{4})?$/.test(value)
+      if (!isCanada && !isUSA) error = 'Invalid Postal/Zip code format.'
+    }
+
+    setErrors(prev => ({ ...prev, [name]: error }))
+    return !error
+  }
+
+  const handleAddressChange = (name: string, value: string) => {
+    setAddress(prev => ({ ...prev, [name]: value }))
+    if (errors[name]) validateField(name, value)
+  }
+
+  const handleNextFromAddress = (e: React.FormEvent) => {
+    e.preventDefault()
+    const isNameValid   = validateField('name', address.name)
+    const isPhoneValid  = validateField('phone', address.phone)
+    const isEmailValid  = validateField('email', address.email)
+    const isPostalValid = validateField('postal', address.postal)
+    const isStreetValid = !!address.street.trim()
+    const isZoneValid   = !!address.zone
+
+    if (isNameValid && isPhoneValid && isEmailValid && isPostalValid && isStreetValid && isZoneValid) {
+      setStep('payment')
+    } else {
+      if (!isStreetValid) setErrors(prev => ({ ...prev, street: 'Street address is required.' }))
+      if (!isZoneValid)   setErrors(prev => ({ ...prev, zone: 'Please select a delivery zone.' }))
+    }
+  }
+
   const handlePaymentMethodTokenized = useCallback(async (token: { token: string }) => {
     setProcessing(true)
     setIntentError('')
@@ -223,10 +269,8 @@ export default function CheckoutPage() {
           paymentMethod: offlineMethod,
         }),
       })
-
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to place order')
-
       clearCart()
       setOrderId(data.orderId)
       setStep('confirmed')
@@ -238,24 +282,26 @@ export default function CheckoutPage() {
     }
   }
 
-  const StepIndicator = () => (
-    <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-8 sm:mb-10">
-      {(['cart', 'address', 'payment'] as Step[]).map((s, i) => (
-        <div key={s} className="flex items-center gap-1.5 sm:gap-2">
-          <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold transition-all ${step === s ? 'bg-[#0097a7] text-white' :
-            ['cart', 'address', 'payment', 'confirmed'].indexOf(step) > i ? 'bg-[#e0f7fa] text-[#0097a7]' :
-              'bg-[#f0f9ff] text-[#4a7fa5] border border-[#cce7f0]'
-            }`}>
-            {['cart', 'address', 'payment', 'confirmed'].indexOf(step) > i ? '✓' : i + 1}
+  const StepIndicator = () => {
+    return (
+      <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-8 sm:mb-10">
+        {(['cart', 'address', 'payment'] as Step[]).map((s, i) => (
+          <div key={s} className="flex items-center gap-1.5 sm:gap-2">
+            <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold transition-all ${step === s ? 'bg-[#0097a7] text-white' :
+              ['cart', 'address', 'payment', 'confirmed'].indexOf(step) > i ? 'bg-[#e0f7fa] text-[#0097a7]' :
+                'bg-[#f0f9ff] text-[#4a7fa5] border border-[#cce7f0]'
+              }`}>
+              {['cart', 'address', 'payment', 'confirmed'].indexOf(step) > i ? '✓' : i + 1}
+            </div>
+            <span className={`text-xs sm:text-sm font-medium ${step === s ? 'text-[#0097a7]' : 'text-[#4a7fa5]'} ${step !== s && 'hidden sm:block'}`}>
+              {s.charAt(0).toUpperCase() + s.slice(1)}
+            </span>
+            {i < 2 && <div className="w-4 sm:w-8 h-px sm:h-0.5 bg-[#cce7f0]" />}
           </div>
-          <span className={`text-xs sm:text-sm font-medium ${step === s ? 'text-[#0097a7]' : 'text-[#4a7fa5]'} ${step !== s && 'hidden sm:block'}`}>
-            {s.charAt(0).toUpperCase() + s.slice(1)}
-          </span>
-          {i < 2 && <div className="w-4 sm:w-8 h-px sm:h-0.5 bg-[#cce7f0]" />}
-        </div>
-      ))}
-    </div>
-  )
+        ))}
+      </div>
+    )
+  }
 
   if (!authChecked) {
     return (
@@ -383,42 +429,86 @@ export default function CheckoutPage() {
                   <MapPin className="w-5 h-5 text-[#0097a7]" />
                   <h2 className="font-bold text-[#0c2340]">Delivery Address</h2>
                 </div>
-                <form onSubmit={(e) => { e.preventDefault(); setStep('payment') }} className="p-5 space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                <form onSubmit={handleNextFromAddress} className="p-5 space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Full Name</label>
-                      <Input placeholder="John Smith" className="border-[#cce7f0]" required value={address.name} onChange={(e) => setAddress({ ...address, name: e.target.value })} />
+                      <Input 
+                        placeholder="John Smith" 
+                        className={`border-[#cce7f0] ${errors.name ? 'border-red-500 bg-red-50' : ''}`}
+                        required 
+                        value={address.name} 
+                        onChange={(e) => handleAddressChange('name', e.target.value)}
+                        onBlur={(e) => validateField('name', e.target.value)}
+                      />
+                      {errors.name && <p className="text-[10px] text-red-500 mt-1 ml-1 font-medium">{errors.name}</p>}
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Phone</label>
-                      <Input placeholder="+1 (604) 000-0000" className="border-[#cce7f0]" required value={address.phone} onChange={(e) => setAddress({ ...address, phone: e.target.value })} />
+                      <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Phone Number</label>
+                      <Input 
+                        placeholder="(604) 555-0123" 
+                        className={`border-[#cce7f0] ${errors.phone ? 'border-red-500 bg-red-50' : ''}`}
+                        required 
+                        value={address.phone} 
+                        onChange={(e) => handleAddressChange('phone', e.target.value)}
+                        onBlur={(e) => validateField('phone', e.target.value)}
+                      />
+                      {errors.phone && <p className="text-[10px] text-red-500 mt-1 ml-1 font-medium">{errors.phone}</p>}
                     </div>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Street Address</label>
-                    <Input placeholder="123 Main Street, Suite 4" className="border-[#cce7f0]" required value={address.street} onChange={(e) => setAddress({ ...address, street: e.target.value })} />
+                    <Input 
+                      placeholder="123 Main Street, Suite 4" 
+                      className={`border-[#cce7f0] ${errors.street ? 'border-red-500 bg-red-50' : ''}`}
+                      required 
+                      value={address.street} 
+                      onChange={(e) => handleAddressChange('street', e.target.value)}
+                    />
+                    {errors.street && <p className="text-[10px] text-red-500 mt-1 ml-1 font-medium">{errors.street}</p>}
                   </div>
                   <div>
                     <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Email Address</label>
-                    <Input type="email" placeholder="email@example.com" className="border-[#cce7f0]" required value={address.email} onChange={(e) => setAddress({ ...address, email: e.target.value })} />
-                    {!userId && <p className="text-[10px] text-[#4a7fa5] mt-1">Used for sending your order confirmation and invoice.</p>}
+                    <Input 
+                      type="email" 
+                      placeholder="email@example.com" 
+                      className={`border-[#cce7f0] ${errors.email ? 'border-red-500 bg-red-50' : ''}`}
+                      required 
+                      value={address.email} 
+                      onChange={(e) => handleAddressChange('email', e.target.value)}
+                      onBlur={(e) => validateField('email', e.target.value)}
+                    />
+                    {errors.email ? (
+                      <p className="text-[10px] text-red-500 mt-1 ml-1 font-medium">{errors.email}</p>
+                    ) : (
+                      !userId && <p className="text-[10px] text-[#4a7fa5] mt-1">Used for sending your order confirmation and invoice.</p>
+                    )}
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Zone</label>
+                      <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Delivery Zone</label>
                       <select
                         required
                         value={address.zone}
-                        onChange={(e) => setAddress({ ...address, zone: e.target.value })}
-                        className="w-full h-10 px-3 rounded-xl border border-[#cce7f0] text-sm focus:border-[#0097a7] focus:outline-none text-[#0c2340]"
+                        onChange={(e) => handleAddressChange('zone', e.target.value)}
+                        className={`w-full h-10 px-3 rounded-xl border border-[#cce7f0] text-sm focus:border-[#0097a7] focus:outline-none text-[#0c2340] ${errors.zone ? 'border-red-500 bg-red-50' : ''}`}
                       >
                         <option value="">Select zone...</option>
                         {zones.map((z) => <option key={z.id} value={z.name}>{z.name}</option>)}
                       </select>
+                      {errors.zone && <p className="text-[10px] text-red-500 mt-1 ml-1 font-medium">{errors.zone}</p>}
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Postal Code</label>
-                      <Input placeholder="V6B 1A1" className="border-[#cce7f0]" required value={address.postal} onChange={(e) => setAddress({ ...address, postal: e.target.value })} />
+                      <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Postal / Zip Code</label>
+                      <Input 
+                        placeholder="V6B 1A1" 
+                        className={`border-[#cce7f0] ${errors.postal ? 'border-red-500 bg-red-50' : ''}`}
+                        required 
+                        value={address.postal} 
+                        onChange={(e) => handleAddressChange('postal', e.target.value)}
+                        onBlur={(e) => validateField('postal', e.target.value)}
+                      />
+                      {errors.postal && <p className="text-[10px] text-red-500 mt-1 ml-1 font-medium">{errors.postal}</p>}
                     </div>
                   </div>
                   <div>
@@ -432,8 +522,10 @@ export default function CheckoutPage() {
                     />
                   </div>
                   <div className="flex gap-3 pt-2">
-                    <Button type="button" variant="outline" onClick={() => setStep('cart')} className="flex-1 border-[#cce7f0]">Back</Button>
-                    <Button type="submit" className="flex-1 bg-gradient-to-r from-[#0097a7] to-[#1565c0] text-white">Continue to Payment</Button>
+                    <Button type="button" variant="outline" onClick={() => setStep('cart')} className="flex-1 border-[#cce7f0]">Back to Cart</Button>
+                    <Button type="submit" className="flex-1 bg-gradient-to-r from-[#0097a7] to-[#1565c0] text-white shadow-md shadow-[#0097a7]/20">
+                      Payment & Review →
+                    </Button>
                   </div>
                 </form>
               </motion.div>

@@ -268,7 +268,7 @@ export async function POST(req: NextRequest) {
 
         if (toEmail && confirmNotifEnabled) {
           // resend proxy from @/lib/email is used here
-          const fromEmail = process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev'
+          const fromEmail = 'TajWater <billing@tajwater.ca>'
           type RawItem = { quantity: number; price: number; products: { name: string } | null }
           const subject = contentMap['email_confirmation_subject'] || `Your TajWater Order #${fullOrder.id.slice(0, 8).toUpperCase()} is Confirmed`
           const html = buildOrderConfirmationEmail({
