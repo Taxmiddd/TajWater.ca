@@ -106,20 +106,32 @@ export default function ProductShowcase() {
                 whileHover={{ y: -5 }}
                 className="group relative bg-white rounded-3xl border border-[#cce7f0] shadow-sm hover:shadow-xl hover:shadow-[#0097a7]/10 transition-all duration-300 overflow-hidden"
               >
-                {/* Card top gradient zone */}
-                <div className={`h-40 bg-gradient-to-br ${theme.gradient} flex items-center justify-center relative overflow-hidden`}>
+                <div className={`aspect-[4/5] bg-gradient-to-br ${theme.gradient} flex items-center justify-center relative overflow-hidden`}>
                   <motion.div
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    className="w-20 h-20 rounded-2xl bg-white/60 backdrop-blur-sm flex items-center justify-center shadow-lg"
+                    whileHover={{ scale: 1.05 }}
+                    className="w-full h-full flex items-center justify-center relative z-10"
                   >
-                    <Icon className="w-10 h-10" style={{ color: theme.iconColor }} />
+                    {product.image_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img 
+                        src={product.image_url} 
+                        alt={product.name} 
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                      />
+                    ) : (
+                      <div className="w-24 h-24 rounded-3xl bg-white/60 backdrop-blur-sm flex items-center justify-center shadow-lg">
+                        <Icon className="w-12 h-12" style={{ color: theme.iconColor }} />
+                      </div>
+                    )}
                   </motion.div>
+
                   {/* Ripple effect on hover */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full border-2 animate-ripple" style={{ borderColor: theme.iconColor + '40' }} />
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border-2 animate-ripple" style={{ borderColor: theme.iconColor + '30' }} />
                   </div>
+                  
                   <span
-                    className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold text-white"
+                    className="absolute top-4 right-4 px-3 py-1 rounded-full text-[10px] font-bold text-white z-20 shadow-sm"
                     style={{ background: theme.badgeColor }}
                   >
                     {theme.badge}

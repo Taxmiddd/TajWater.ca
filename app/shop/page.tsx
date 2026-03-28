@@ -154,22 +154,24 @@ export default function ShopPage() {
                     <motion.div key={product.id} layout initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ delay: i * 0.06 }}
                       className="water-card bg-white rounded-3xl border border-[#cce7f0] overflow-hidden shadow-sm hover:shadow-md hover:border-[#0097a7]/30 transition-all">
                       <Link href={`/shop/${product.id}`}>
-                        <div className="h-44 flex items-center justify-center relative overflow-hidden cursor-pointer" style={{ background: `linear-gradient(135deg, ${color}15, ${color}30)` }}>
+                        <div className="aspect-[4/5] flex items-center justify-center relative overflow-hidden cursor-pointer" style={{ background: `linear-gradient(135deg, ${color}10, ${color}20)` }}>
                           {product.image_url ? (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={product.image_url} alt={product.name} className="w-full h-full object-contain p-3" />
+                            <img src={product.image_url} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                           ) : (
-                            <div className="text-6xl">{categoryEmoji[product.category] ?? '💧'}</div>
+                            <div className="text-7xl opacity-50">{categoryEmoji[product.category] ?? '💧'}</div>
                           )}
-                          <Badge className="absolute top-3 left-3 text-[10px]" style={{ background: color }}>
+                          <Badge className="absolute top-4 left-4 text-[10px] z-10" style={{ background: color }}>
                             {product.category}
                           </Badge>
                           {product.category === 'subscription' && (
-                            <Badge className="absolute top-3 right-3 bg-amber-500 text-[10px]">Save 15%</Badge>
+                            <Badge className="absolute top-4 right-4 bg-amber-500 text-[10px] z-10 shadow-sm">Save 15%</Badge>
                           )}
                           {product.stock < 20 && product.stock > 0 && (
-                            <Badge className="absolute bottom-3 right-3 bg-orange-400 text-[10px]">Low Stock</Badge>
+                            <Badge className="absolute bottom-4 right-4 bg-orange-400 text-[10px] z-10 shadow-sm">Low Stock</Badge>
                           )}
+                          {/* Overlay gradient */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none" />
                         </div>
                       </Link>
 
