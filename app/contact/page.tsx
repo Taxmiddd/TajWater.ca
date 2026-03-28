@@ -15,7 +15,7 @@ export default function ContactPage() {
   const [sendError, setSendError] = useState('')
   const [phone, setPhone] = useState(process.env.NEXT_PUBLIC_COMPANY_PHONE ?? '')
   const [email, setEmail] = useState(process.env.NEXT_PUBLIC_COMPANY_EMAIL ?? '')
-  const [address, setAddress] = useState('Metro Vancouver, BC, Canada')
+  const [address, setAddress] = useState('1770 McLean Ave, Port Coquitlam, BC V3C 4K8, Canada')
   const [hours, setHours] = useState('Mon – Fri: 7:00 AM – 7:00 PM\nSaturday: 8:00 AM – 6:00 PM\nSunday: 9:00 AM – 5:00 PM')
 
   useEffect(() => {
@@ -244,7 +244,7 @@ export default function ContactPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="rounded-3xl overflow-hidden border border-[#cce7f0] shadow-lg h-72">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d83327.37699649763!2d-123.1948247!3d49.2576691!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x548673f143a94fb3%3A0xbb9196ea9b81f38b!2sVancouver%2C%20BC!5e0!3m2!1sen!2sca!4v1700000000001"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2605.187884844372!2d-122.7681533234907!3d49.261395972322304!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x54867f08d3a77617%3A0x6a0a09e8633c5e71!2s1770+McLean+Ave%2C+Port+Coquitlam%2C+BC+V3C+4K8!5e0!3m2!1sen!2sca!4v1711680000000!5m2!1sen!2sca"
               width="100%"
               height="100%"
               style={{ border: 0 }}

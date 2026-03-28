@@ -144,14 +144,14 @@ export default function AreasPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="rounded-3xl overflow-hidden border border-[#cce7f0] shadow-lg h-80 sm:h-96 lg:h-[480px]">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d173028.49782386647!2d-122.97750944003897!3d49.21270083478497!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sca!4v1700000000000!5m2!1sen!2sca"
+              src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d350000!2d-122.95!3d49.45!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sca!4v1711680000000!5m2!1sen!2sca"
               width="100%"
               height="100%"
               style={{ border: 0 }}
               allowFullScreen
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              title="TajWater Metro Vancouver Delivery Map"
+              title="TajWater Sea-to-Sky & Metro Vancouver Delivery Map"
             />
           </div>
         </div>
