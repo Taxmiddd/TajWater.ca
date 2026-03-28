@@ -117,7 +117,7 @@ export function buildOrderConfirmationEmail(order: {
       <p style="margin:12px 0 0;font-size:13px;color:#64748b;">Estimated delivery: <strong>1&ndash;2 business days</strong></p>
     </div>` : ''}
 
-    <p style="margin:0;font-size:13px;color:#94a3b8;line-height:1.7;">If you have any questions, please contact our support team at <a href="mailto:${_co.email}" style="color:#0c4a6e;font-weight:600;text-decoration:none;">${_co.email}</a>.</p>
+    <p style="margin:0;font-size:13px;color:#94a3b8;line-height:1.7;">If you have any questions, please contact our support team at <a href="mailto:support@tajwater.ca" style="color:#0c4a6e;font-weight:600;text-decoration:none;">support@tajwater.ca</a>.</p>
   </td></tr>
   <tr><td style="background:#f1f5f9;padding:32px 48px;text-align:center;border-top:1px solid #e2e8f0;">
     <p style="margin:0 0 8px;font-size:12px;color:#64748b;font-weight:600;"><a href="${_co.url}" style="color:#0c4a6e;text-decoration:none;">tajwater.ca</a>&nbsp;&middot;&nbsp;<a href="mailto:${_co.email}" style="color:#64748b;text-decoration:none;">Support</a></p>
