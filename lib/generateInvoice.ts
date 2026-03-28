@@ -19,11 +19,9 @@ export type InvoiceOrderData = {
 }
 export type CompanyInfo = { name: string; address: string; phone: string; email: string; website: string }
 
-export async function generateInvoicePDF(order: InvoiceOrderData, companyInfo: CompanyInfo): Promise<Buffer> {
-  // Dynamic import prevents startup crashes on some hosting environments
-  const { renderToBuffer, Document, Page, Text, View, StyleSheet } = await import('@react-pdf/renderer')
+import { Document, Page, Text, View, StyleSheet, renderToBuffer } from '@react-pdf/renderer'
 
-  const styles = StyleSheet.create({
+const styles = StyleSheet.create({
     page:           { fontFamily: 'Times-Roman', fontSize: 10, color: '#101828', padding: 48, backgroundColor: '#ffffff' },
     header:         { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 40, paddingBottom: 24, borderBottomWidth: 2, borderBottomColor: '#0c2340' },
     companyBlock:   { flexDirection: 'column' },
@@ -211,10 +209,13 @@ export async function generateInvoicePDF(order: InvoiceOrderData, companyInfo: C
             React.createElement(Text, { style: { ...styles.footerText, marginTop: 2 } }, 'GST# 84157 2639 RT0001'),
           ),
         ),
-      )
-    )
-  }
+    ),
+  )
+}
 
+export const InvoicePDF = InvoicePDFComponent;
+
+export async function generateInvoicePDF(order: InvoiceOrderData, companyInfo: CompanyInfo): Promise<Buffer> {
   return renderToBuffer(
     React.createElement(InvoicePDFComponent, { order, companyInfo }) as any
   )

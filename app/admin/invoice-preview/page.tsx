@@ -13,25 +13,7 @@ import {
   Eye
 } from 'lucide-react'
 
-// PDFViewer must be dynamic to avoid SSR issues
-const PDFViewer = dynamic(
-  () => import('@react-pdf/renderer').then((mod) => mod.PDFViewer),
-  { ssr: false, loading: () => <div className="h-full w-full bg-slate-100 dark:bg-slate-800 animate-pulse rounded-xl flex items-center justify-center text-slate-400">Loading Preview...</div> }
-)
-
-const dynamicImportInvoice = dynamic(
-  async () => {
-    // We need to import the component directly for the viewer
-    // This is a bit tricky with react-pdf, so we'll re-export it or use the generate function
-    // For the viewer, we'll use a client-side wrapper
-    return import('@/lib/generateInvoice').then(mod => {
-      // We need the component, but generateInvoice.ts only exports the Buffer generator
-      // Let's modify generateInvoice.ts to export the component too
-      return () => null
-    })
-  },
-  { ssr: false }
-)
+import { PDFViewer } from '@react-pdf/renderer'
 
 // Mock Data
 const MOCK_COMPANY: CompanyInfo = {
