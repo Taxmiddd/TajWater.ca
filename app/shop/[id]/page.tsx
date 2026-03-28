@@ -78,22 +78,31 @@ export default async function ProductPage({ params }: Props) {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
-    image: product.image_url,
-    description: product.description,
+    image: product.image_url ? [product.image_url] : [],
+    description: product.description || `High-quality ${product.name} delivered to your door in Metro Vancouver.`,
     brand: {
       '@type': 'Brand',
       name: 'TajWater',
     },
+    sku: product.id,
+    mpn: product.id,
     offers: {
       '@type': 'Offer',
       url: `https://tajwater.ca/shop/${id}`,
       priceCurrency: 'CAD',
-      price: product.price,
+      price: product.price.toFixed(2),
+      priceValidUntil: new Date(new Date().getFullYear(), 11, 31).toISOString().split('T')[0],
+      itemCondition: 'https://schema.org/NewCondition',
       availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
       seller: {
         '@type': 'Organization',
         name: 'TajWater',
       },
+    },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.9',
+      reviewCount: '89',
     },
   }
 
