@@ -156,7 +156,15 @@ export default function ProductShowcase() {
                       {product.price > 0 ? (
                         <>
                           <p className="text-2xl font-extrabold" style={{ color: theme.iconColor }}>${product.price.toFixed(2)}</p>
-                          <p className="text-xs text-[#4a7fa5]">per unit</p>
+                          <p className="text-xs text-[#4a7fa5]">
+                            {product.unit_label ? (
+                              (product.unit_label.toLowerCase().includes('per') || 
+                               product.unit_label.startsWith('/') || 
+                               product.unit_label.toLowerCase().startsWith('each')) 
+                                ? product.unit_label 
+                                : `per ${product.unit_label}`
+                            ) : 'per unit'}
+                          </p>
                         </>
                       ) : (
                         <>

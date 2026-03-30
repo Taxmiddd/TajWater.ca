@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     }
 
     // resend is imported from @/lib/email proxy
-    const fromEmail = process.env.RESEND_FROM_EMAIL ?? 'TajWater <orders@tajwater.ca>'
+    const fromEmail = 'TajWater <info@tajwater.ca>'
     const customerName = name || 'there'
 
     // Fetch email template overrides from site_content

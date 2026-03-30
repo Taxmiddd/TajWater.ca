@@ -45,23 +45,26 @@ export async function POST(request: NextRequest) {
     // Fetch order + customer info via separate queries to avoid schema relationship errors
     const { data: fullOrder } = await db
       .from('orders')
-      .select('id, total, delivery_address, customer_name, payment_method, payment_status, user_id, tax_amount, discount_amount, created_at, zones(name), order_items(quantity, price, products(name))')
+      .select('id, total, delivery_address, customer_name, customer_email, payment_method, payment_status, user_id, tax_amount, discount_amount, created_at, tracking_token, zones(name), order_items(quantity, price, products(name))')
       .eq('id', orderId)
       .single()
 
     if (!fullOrder) return NextResponse.json({ error: 'Order not found' }, { status: 404 })
 
-    if (!fullOrder?.user_id) return NextResponse.json({ skipped: true, reason: 'no user_id' })
+    let profile: { email: string, name: string } | null = null
+    if (fullOrder.user_id) {
+      const { data: p } = await db
+        .from('profiles')
+        .select('email, name')
+        .eq('id', fullOrder.user_id)
+        .single()
+      profile = p ?? null
+    }
+    
+    const recipientEmail = profile?.email ?? fullOrder.customer_email
+    if (!recipientEmail) return NextResponse.json({ skipped: true, reason: 'no customer email' })
 
-    const { data: profile } = await db
-      .from('profiles')
-      .select('email, name')
-      .eq('id', fullOrder.user_id)
-      .single()
-
-    if (!profile?.email) return NextResponse.json({ skipped: true, reason: 'no customer email' })
-
-    const name = profile.name || fullOrder.customer_name
+    const name = profile?.name || fullOrder.customer_name || 'Customer'
     const zoneName = Array.isArray((fullOrder as unknown as { zones?: { name: string }[] }).zones)
       ? ((fullOrder as unknown as { zones: { name: string }[] }).zones[0]?.name ?? null)
       : ((fullOrder as unknown as { zones: { name: string } | null }).zones?.name ?? null)
@@ -78,10 +81,10 @@ export async function POST(request: NextRequest) {
     for (const r of (tmplRows ?? [])) tmpl[r.key] = r.value
 
     if (newStatus === 'out_for_delivery') {
-      html = buildOutForDeliveryEmail({ orderId, customerName: name, zone: zoneName })
+      html = buildOutForDeliveryEmail({ orderId, trackingToken: fullOrder.tracking_token, customerName: name, zone: zoneName })
       subject = tmpl['email_delivery_subject'] || `Your TajWater order is on its way!`
     } else if (newStatus === 'delivered') {
-      html = buildDeliveredEmail({ orderId, customerName: name })
+      html = buildDeliveredEmail({ orderId, trackingToken: fullOrder.tracking_token, customerName: name })
       subject = tmpl['email_delivered_subject'] || `Your TajWater order has been delivered!`
     } else {
       return NextResponse.json({ skipped: true, reason: 'status not handled' })
@@ -138,7 +141,7 @@ export async function POST(request: NextRequest) {
 
     await (db as any).from('email_logs').insert({
       user_id: fullOrder.user_id ?? null,
-      recipient_email: profile.email,
+      recipient_email: recipientEmail,
       email_type: newStatus === 'delivered' ? 'delivery_success' : 'out_for_delivery',
       subject,
       status: 'sending',
@@ -148,8 +151,8 @@ export async function POST(request: NextRequest) {
 
     try {
       const emailResult = await (resend as any).emails.send({
-        from: 'TajWater <billing@tajwater.ca>',
-        to: profile.email,
+        from: 'TajWater Billing <billing@tajwater.ca>',
+        to: recipientEmail,
         subject,
         html,
         attachments: pdfAttachment ? [{ filename: pdfAttachment.filename, content: pdfAttachment.content }] : undefined,
@@ -157,11 +160,11 @@ export async function POST(request: NextRequest) {
       
       if (emailResult.data?.id) {
         await db.from('email_logs').update({ status: 'sent', resend_id: emailResult.data.id })
-          .match({ recipient_email: profile.email, metadata: { order_id: orderId }, status: 'sending' })
+          .match({ recipient_email: recipientEmail, metadata: { order_id: orderId }, status: 'sending' })
       }
     } catch (e) {
        await db.from('email_logs').update({ status: 'failed', error_message: String(e) })
-          .match({ recipient_email: profile.email, metadata: { order_id: orderId }, status: 'sending' })
+          .match({ recipient_email: recipientEmail, metadata: { order_id: orderId }, status: 'sending' })
        console.error('Email send failed:', e)
     }
 

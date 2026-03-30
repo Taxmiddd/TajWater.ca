@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ShoppingCart, Plus, Minus, Search, Star, Check } from 'lucide-react'
+import { ShoppingCart, Plus, Minus, Search, Check } from 'lucide-react'
+import { StarRating } from '../../components/ui/StarRating'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -167,8 +168,8 @@ export default function ShopPage() {
                           {product.category === 'subscription' && (
                             <Badge className="absolute top-4 right-4 bg-amber-500 text-[10px] z-10 shadow-sm">Save 15%</Badge>
                           )}
-                          {product.stock < 20 && product.stock > 0 && (
-                            <Badge className="absolute bottom-4 right-4 bg-orange-400 text-[10px] z-10 shadow-sm">Low Stock</Badge>
+                          {product.stock === 0 && (
+                            <Badge className="absolute bottom-4 right-4 bg-red-500 text-[10px] z-10 shadow-sm">Stockout</Badge>
                           )}
                           {/* Overlay gradient */}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none" />
@@ -180,15 +181,26 @@ export default function ShopPage() {
                           <h3 className="font-bold text-[#0c2340] mb-1.5 group-hover:text-[#0097a7] transition-colors">{product.name}</h3>
                           <p className="text-[#4a7fa5] text-xs leading-relaxed line-clamp-2">{product.description}</p>
                         </Link>
-                        <div className="flex items-center gap-1 mb-4">
-                          {[...Array(5)].map((_, i) => <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />)}
-                          <span className="text-xs text-[#4a7fa5] ml-1">(4.9)</span>
+                        <div className="flex items-center gap-2 mt-1">
+                          <StarRating rating={product.rating || 5.0} size="w-3.5 h-3.5" />
+                          <span className="text-[10px] font-bold text-[#4a7fa5]">{product.rating || 5.0}</span>
+                          <span className="text-[10px] text-[#4a7fa5]/60">({product.review_count || 0})</span>
                         </div>
 
                         <div className="flex items-center justify-between mt-6">
                           <div>
                             <p className="text-2xl font-extrabold" style={{ color }}>${product.price.toFixed(2)}</p>
-                            <p className="text-xs text-[#4a7fa5]">{product.category === 'subscription' ? '/month' : 'per unit'}</p>
+                            <p className="text-xs text-[#4a7fa5]">
+                              {product.category === 'subscription' && !product.unit_label 
+                                ? '/month' 
+                                : product.unit_label 
+                                  ? (product.unit_label.toLowerCase().includes('per') || 
+                                     product.unit_label.startsWith('/') || 
+                                     product.unit_label.toLowerCase().startsWith('each') 
+                                       ? product.unit_label 
+                                       : `per ${product.unit_label}`) 
+                                  : 'per unit'}
+                            </p>
                           </div>
 
                           {qty > 0 ? (

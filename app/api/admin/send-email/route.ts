@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     }
 
     const resend    = new Resend(process.env.RESEND_API_KEY)
-    const fromEmail = process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev'
+    const fromEmail = 'TajWater Support <support@tajwater.ca>'
 
     const html = useTicketTemplate
       ? buildTicketReplyEmail({ ticketSubject: ticketSubject ?? subject, adminReply: body, customerName: customerName ?? recipient_name ?? 'Customer' })

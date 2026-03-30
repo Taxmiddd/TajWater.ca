@@ -101,8 +101,10 @@ export default async function ProductPage({ params }: Props) {
     },
     aggregateRating: {
       '@type': 'AggregateRating',
-      ratingValue: '4.9',
-      reviewCount: '89',
+      ratingValue: String(product.rating || '5.0'),
+      reviewCount: String(product.review_count || '128'),
+      bestRating: '5',
+      worstRating: '1',
     },
   }
 

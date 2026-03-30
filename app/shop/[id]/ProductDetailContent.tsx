@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ShoppingCart, Plus, Minus, ArrowLeft, Star, Check, Package, Droplets, RefreshCw, Shield, Zap } from 'lucide-react'
+import { ShoppingCart, Plus, Minus, ArrowLeft, Check, Package, Droplets, RefreshCw, Shield, Zap } from 'lucide-react'
+import { StarRating } from '../../../components/ui/StarRating'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useCart } from '@/store/cartStore'
@@ -116,12 +117,9 @@ export default function ProductDetailContent({
               <Badge className="absolute top-4 left-4 text-xs capitalize" style={{ background: color }}>
                 {product.category}
               </Badge>
-              {product.stock < 20 && product.stock > 0 && (
-                <Badge className="absolute top-4 right-4 bg-orange-400 text-xs">Low Stock</Badge>
-              )}
               {product.stock === 0 && (
                 <div className="absolute inset-0 bg-black/40 rounded-3xl flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">Out of Stock</span>
+                  <span className="text-white font-bold text-xl uppercase tracking-widest">Stockout</span>
                 </div>
               )}
             </div>
@@ -138,9 +136,12 @@ export default function ProductDetailContent({
               <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0c2340] mb-3 leading-tight">{product.name}</h1>
 
               {/* Stars */}
-              <div className="flex items-center gap-1.5 mb-4">
-                {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />)}
-                <span className="text-sm text-[#4a7fa5] ml-1">4.9 · Trusted by 1,000+ customers</span>
+              <div className="flex items-center gap-3">
+                <StarRating rating={product.rating || 5.0} size="w-4.5 h-4.5" />
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm font-bold text-[#0c2340]">{product.rating || 5.0}</span>
+                  <span className="text-sm text-[#4a7fa5]">({product.review_count || 0} reviews)</span>
+                </div>
               </div>
 
               {/* Description */}
@@ -218,12 +219,23 @@ export default function ProductDetailContent({
                   {subscribeMode ? (
                     <p className="text-sm text-green-600 font-medium">You save ${(product.price * SUBSCRIBE_DISCOUNT).toFixed(2)} per delivery</p>
                   ) : (
-                    <p className="text-sm text-[#4a7fa5]">per {product.category === 'subscription' ? 'month' : 'unit'}</p>
+                    <p className="text-sm text-[#4a7fa5]">
+                      {product.category === 'subscription' && !product.unit_label 
+                        ? 'per month' 
+                        : product.unit_label 
+                          ? (product.unit_label.toLowerCase().includes('per') || 
+                             product.unit_label.startsWith('/') || 
+                             product.unit_label.toLowerCase().startsWith('each') 
+                               ? product.unit_label 
+                               : `per ${product.unit_label}`) 
+                          : 'per unit'}
+                    </p>
                   )}
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-[#4a7fa5]">In stock</p>
-                  <p className="font-bold text-[#0c2340]">{product.stock} units</p>
+                  <p className={`font-bold ${product.stock > 0 ? 'text-green-600' : 'text-red-500'}`}>
+                    {product.stock > 0 ? 'In Stock' : 'Stockout'}
+                  </p>
                 </div>
               </div>
 

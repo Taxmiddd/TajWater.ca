@@ -50,20 +50,25 @@ export default function AdminProductDetailPage() {
         .select('*')
         .eq('id', id)
         .single()
+      
       if (error || !data) {
         router.replace('/admin/products')
         return
       }
+
       setProduct(data)
       setForm({
-        name: data.name,
-        description: data.description,
-        price: data.price,
-        stock: data.stock,
-        category: data.category,
-        image_url: data.image_url,
-        active: data.active,
+        name: data.name || '',
+        description: data.description || '',
+        price: data.price || 0,
+        stock: data.stock || 0,
+        category: data.category || 'water',
+        image_url: data.image_url || '',
+        active: data.active === undefined ? true : data.active,
         featured: data.featured || false,
+        unit_label: data.unit_label || '',
+        rating: data.rating || 5.0,
+        review_count: data.review_count || 0,
       })
       setLoading(false)
     }
@@ -96,16 +101,26 @@ export default function AdminProductDetailPage() {
   const handleSave = async () => {
     if (!form || !product) return
     setSaving(true)
+    
+    // Explicitly verify payload
     const stockAdjusted = form.stock + stockDelta
     const payload = { ...form, stock: stockAdjusted }
-    const { error } = await supabase.from('products').update(payload).eq('id', product.id)
+
+    const { data: updatedData, error } = await supabase
+      .from('products')
+      .update(payload)
+      .eq('id', product.id)
+      .select()
+
     if (error) {
-      showToast('Failed to save changes.', 'error')
-    } else {
+      showToast('Failed to save changes: ' + error.message, 'error')
+    } else if (updatedData && updatedData.length > 0) {
       setProduct({ ...product, ...payload })
       setForm(payload)
       setStockDelta(0)
       showToast('Product saved!')
+    } else {
+      showToast('No changes persisted (0 rows affected). Check RLS.', 'error')
     }
     setSaving(false)
   }
@@ -261,6 +276,44 @@ export default function AdminProductDetailPage() {
                 </select>
               </div>
             </div>
+
+            <div>
+              <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Price Suffix (e.g. per unit, each, / bottle) *</label>
+              <Input
+                value={form.unit_label}
+                onChange={(e) => setForm({ ...form, unit_label: e.target.value })}
+                placeholder="e.g. per unit, each, / bottle"
+                className="border-[#cce7f0] focus:border-[#0097a7]"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Rating (0-5) *</label>
+                <Input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="5"
+                  value={form.rating}
+                  onChange={(e) => setForm({ ...form, rating: parseFloat(e.target.value) || 0 })}
+                  className="border-[#cce7f0] focus:border-[#0097a7]"
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Review Count *</label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={form.review_count}
+                  onChange={(e) => setForm({ ...form, review_count: parseInt(e.target.value) || 0 })}
+                  className="border-[#cce7f0] focus:border-[#0097a7]"
+                  required
+                />
+              </div>
+            </div>
           </div>
 
           {/* Image card */}
@@ -322,8 +375,8 @@ export default function AdminProductDetailPage() {
             <button
               onClick={() => setForm({ ...form, active: !form.active })}
               className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${form.active
-                  ? 'border-green-200 bg-green-50 text-green-700'
-                  : 'border-[#cce7f0] bg-[#f0f9ff] text-[#4a7fa5]'
+                ? 'border-green-200 bg-green-50 text-green-700'
+                : 'border-[#cce7f0] bg-[#f0f9ff] text-[#4a7fa5]'
                 }`}
             >
               <span className="text-sm font-medium">{form.active ? 'Visible on shop' : 'Hidden from shop'}</span>
@@ -332,8 +385,8 @@ export default function AdminProductDetailPage() {
             <button
               onClick={() => setForm({ ...form, featured: !form.featured })}
               className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${form.featured
-                  ? 'border-amber-200 bg-amber-50 text-amber-700'
-                  : 'border-[#cce7f0] bg-[#f0f9ff] text-[#4a7fa5]'
+                ? 'border-amber-200 bg-amber-50 text-amber-700'
+                : 'border-[#cce7f0] bg-[#f0f9ff] text-[#4a7fa5]'
                 }`}
             >
               <span className="text-sm font-medium">{form.featured ? 'Featured on Home' : 'Not featured'}</span>
@@ -352,7 +405,7 @@ export default function AdminProductDetailPage() {
 
             <div className="text-center">
               <p className="text-4xl font-extrabold text-[#0c2340]">{currentStock}</p>
-              <p className="text-xs text-[#4a7fa5]">units in stock</p>
+              <p className="text-xs text-[#4a7fa5]">{form.unit_label || 'units'} in stock</p>
               {stockDelta !== 0 && (
                 <p className={`text-xs font-semibold mt-1 ${stockDelta > 0 ? 'text-green-600' : 'text-red-500'}`}>
                   {stockDelta > 0 ? `+${stockDelta}` : stockDelta} pending (click Save)
@@ -472,7 +525,7 @@ export default function AdminProductDetailPage() {
         <div className="flex items-center gap-2">
           <Package className="w-4 h-4 text-[#0097a7]" />
           <span className="text-sm text-[#4a7fa5]">
-            {form.active ? 'Live on shop' : 'Hidden from shop'} · ${form.price.toFixed(2)} · {currentStock} units
+            {form.active ? 'Live on shop' : 'Hidden from shop'} · ${form.price.toFixed(2)} · {currentStock} {form.unit_label || 'units'}
           </span>
         </div>
         <div className="flex gap-2">

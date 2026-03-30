@@ -39,6 +39,7 @@ type OrderRow = {
   zones: { name: string } | { name: string }[] | null
   order_items: OrderItem[]
   profile: { name: string; phone: string } | null
+  customer_email: string | null
 }
 
 const STATUS_OPTIONS = ['all', 'pending', 'processing', 'out_for_delivery', 'delivered', 'cancelled']
@@ -82,7 +83,8 @@ export default function AdminOrdersPage() {
         id, user_id, status, payment_status, payment_method, total, delivery_address, zone_id,
         driver_name, customer_name, customer_phone, notes, created_at,
         zones ( name ),
-        order_items ( id, quantity, price, products ( name, image_url ) )
+        order_items ( id, quantity, price, products ( name, image_url ) ),
+        customer_email
       `)
       .order('created_at', { ascending: false })
       .limit(300)
@@ -260,6 +262,7 @@ export default function AdminOrdersPage() {
         shortId(o.id).toLowerCase().includes(q) ||
         o.id.toLowerCase().includes(q) ||
         (o.profile?.name ?? '').toLowerCase().includes(q) ||
+        (o.customer_email ?? '').toLowerCase().includes(q) ||
         ((Array.isArray(o.zones) ? o.zones[0]?.name : o.zones?.name) ?? '').toLowerCase().includes(q) ||
         (o.delivery_address ?? '').toLowerCase().includes(q)
       )

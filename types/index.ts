@@ -28,6 +28,9 @@ export interface Product {
   category: string
   active: boolean
   featured?: boolean
+  unit_label?: string
+  rating?: number
+  review_count?: number
 }
 
 export interface Order {
@@ -36,9 +39,14 @@ export interface Order {
   status: 'pending' | 'processing' | 'out_for_delivery' | 'delivered' | 'cancelled'
   total: number
   delivery_address: string
+  customer_name?: string
+  customer_email?: string
+  customer_phone?: string
   zone_id: string
   created_at: string
   payment_method: 'square_online' | 'cash_on_delivery' | 'card_on_delivery'
+  payment_status: 'pending' | 'paid' | 'failed' | 'refunded' | 'disputed'
+  tracking_token?: string
   items?: OrderItem[]
   profile?: Profile
 }

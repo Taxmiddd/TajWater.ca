@@ -41,6 +41,7 @@ interface OrderDetail {
   order_items: OrderItem[]
   profile: { name: string; email: string; phone: string } | null
   payment_method?: string | null
+  customer_email: string | null
 }
 
 const STATUS_STYLE: Record<string, { color: string; icon: React.ElementType; next: string | null; nextLabel: string }> = {
@@ -97,7 +98,8 @@ export default function AdminOrderDetailPage() {
           id, user_id, status, payment_status, payment_method, total, delivery_address, zone_id,
           driver_name, customer_name, customer_phone, notes, created_at, updated_at,
           zones ( name ),
-          order_items ( id, quantity, price, products ( name, image_url, category ) )
+          order_items ( id, quantity, price, products ( name, image_url, category ) ),
+          customer_email
         `)
         .eq('id', id)
         .maybeSingle()
@@ -226,7 +228,7 @@ export default function AdminOrderDetailPage() {
   const zoneName = order.zones ? (Array.isArray(order.zones) ? order.zones[0]?.name : (order.zones as { name: string }).name) : null
   const displayName = order.profile?.name ?? order.customer_name ?? '—'
   const displayPhone = order.profile?.phone ?? order.customer_phone ?? '—'
-  const displayEmail = order.profile?.email ?? '—'
+  const displayEmail = order.profile?.email ?? order.customer_email ?? '—'
 
   return (
     <div className="space-y-5">

@@ -116,6 +116,7 @@ export async function POST(req: NextRequest) {
       : null
 
     // 8. Create the order in Supabase (pending payment)
+    const trackingToken = crypto.randomUUID()
     const { data: order, error: orderError } = await db
       .from('orders')
       .insert({
@@ -126,12 +127,14 @@ export async function POST(req: NextRequest) {
         delivery_address: deliveryAddress,
         zone_id: zoneId,
         customer_name: address?.name ?? null,
+        customer_email: address?.email ?? null,
         customer_phone: address?.phone ?? null,
         notes: notes ?? null,
         tax_amount: taxAmount,
         discount_code_id: validatedDiscountCodeId,
         discount_amount: discountAmt,
         payment_method: paymentMethod,
+        tracking_token: trackingToken,
       })
       .select('id')
       .single()
@@ -233,7 +236,7 @@ export async function POST(req: NextRequest) {
     try {
       const { data: fullOrder } = await db
         .from('orders')
-        .select('id, total, delivery_address, customer_name, payment_method, payment_status, user_id, tax_amount, discount_amount, created_at, zones(name), order_items(quantity, price, products(name))')
+        .select('id, total, delivery_address, customer_name, customer_email, payment_method, payment_status, user_id, tax_amount, discount_amount, created_at, tracking_token, zones(name), order_items(quantity, price, products(name))')
         .eq('id', order.id)
         .single()
 
@@ -243,7 +246,7 @@ export async function POST(req: NextRequest) {
           const { data: p } = await db.from('profiles').select('name, email').eq('id', fullOrder.user_id).maybeSingle()
           profile = p
         }
-        const toEmail = profile?.email ?? address?.email ?? null
+        const toEmail = profile?.email ?? fullOrder.customer_email ?? address?.email ?? null
 
         // Check notification preference + fetch email templates + admin settings
         const { data: contentRows } = await db.from('site_content').select('key, value')
@@ -268,11 +271,12 @@ export async function POST(req: NextRequest) {
 
         if (toEmail && confirmNotifEnabled) {
           // resend proxy from @/lib/email is used here
-          const fromEmail = 'TajWater <billing@tajwater.ca>'
+          const fromEmail = 'TajWater Billing <billing@tajwater.ca>'
           type RawItem = { quantity: number; price: number; products: { name: string } | null }
           const subject = contentMap['email_confirmation_subject'] || `Your TajWater Order #${fullOrder.id.slice(0, 8).toUpperCase()} is Confirmed`
           const html = buildOrderConfirmationEmail({
             id: fullOrder.id,
+            trackingToken: fullOrder.tracking_token,
             customerName: profile?.name ?? fullOrder.customer_name ?? 'Valued Customer',
             items: ((fullOrder.order_items ?? []) as unknown as RawItem[]).map(i => ({ name: i.products?.name ?? 'Product', qty: i.quantity, price: i.price })),
             total: fullOrder.total,

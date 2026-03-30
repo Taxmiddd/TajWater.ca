@@ -13,6 +13,7 @@ export const resend = new Proxy({} as Resend, {
 
 export function buildOrderConfirmationEmail(order: {
   id: string
+  trackingToken?: string | null
   customerName: string
   items: { name: string; qty: number; price: number }[]
   total: number
@@ -78,7 +79,7 @@ export function buildOrderConfirmationEmail(order: {
             <p style="margin:4px 0 0;font-size:20px;font-weight:700;color:#0c4a6e;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;">${shortId}</p>
           </td>
           <td style="text-align:right;vertical-align:middle;">
-            <a href="${_co.url}/dashboard/orders" style="display:inline-block;background:#0c4a6e;color:#ffffff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">View Details &rarr;</a>
+            <a href="${_co.url}/track/${order.id}${order.trackingToken ? `?token=${order.trackingToken}` : ''}" style="display:inline-block;background:#0c4a6e;color:#ffffff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">Track Your Order &rarr;</a>
           </td>
         </tr>
       </table>
@@ -187,8 +188,8 @@ export function buildWelcomeEmail({ customerName, message }: { customerName: str
 }
 
 // ─── Out for Delivery ─────────────────────────────────────────────────────────
-export function buildOutForDeliveryEmail({ orderId, customerName, zone, message }: {
-  orderId: string; customerName: string; zone?: string | null; message?: string
+export function buildOutForDeliveryEmail({ orderId, trackingToken, customerName, zone, message }: {
+  orderId: string; trackingToken?: string | null; customerName: string; zone?: string | null; message?: string
 }): string {
   const coEmail = process.env.NEXT_PUBLIC_COMPANY_EMAIL ?? 'info@tajwater.ca'
   const coUrl   = process.env.NEXT_PUBLIC_SITE_URL      ?? 'https://tajwater.ca'
@@ -209,6 +210,9 @@ export function buildOutForDeliveryEmail({ orderId, customerName, zone, message 
       <p style="margin:4px 0 0;font-size:20px;font-weight:700;color:#0c4a6e;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;">${shortId}</p>
     </div>
     <div style="font-size:32px;">🚚</div>
+  </div>
+  <div style="margin-top:16px;text-align:center;">
+    <a href="${coUrl}/track/${orderId}${trackingToken ? `?token=${trackingToken}` : ''}" style="display:inline-block;background:#0c4a6e;color:#ffffff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">View Real-time Map &rarr;</a>
   </div>
 </div>
 
@@ -232,8 +236,8 @@ export function buildOutForDeliveryEmail({ orderId, customerName, zone, message 
 }
 
 // ─── Delivered ────────────────────────────────────────────────────────────────
-export function buildDeliveredEmail({ orderId, customerName, message }: {
-  orderId: string; customerName: string; message?: string
+export function buildDeliveredEmail({ orderId, trackingToken, customerName, message }: {
+  orderId: string; trackingToken?: string | null; customerName: string; message?: string
 }): string {
   const coEmail = process.env.NEXT_PUBLIC_COMPANY_EMAIL ?? 'info@tajwater.ca'
   const coUrl   = process.env.NEXT_PUBLIC_SITE_URL      ?? 'https://tajwater.ca'
@@ -257,7 +261,7 @@ export function buildDeliveredEmail({ orderId, customerName, message }: {
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
   <tr>
     <td style="padding-right:10px;width:50%;">
-      <a href="${coUrl}/dashboard/orders" style="display:block;padding:12px;background:#0c4a6e;color:#ffffff;font-size:13px;font-weight:600;text-decoration:none;border-radius:8px;text-align:center;">View Order Hub</a>
+      <a href="${coUrl}/track/${orderId}${trackingToken ? `?token=${trackingToken}` : ''}" style="display:block;padding:12px;background:#0c4a6e;color:#ffffff;font-size:13px;font-weight:600;text-decoration:none;border-radius:8px;text-align:center;">View Final Status</a>
     </td>
     <td style="padding-left:10px;width:50%;">
       <a href="${coUrl}/shop" style="display:block;padding:12px;background:#f8fafc;color:#0c4a6e;font-size:13px;font-weight:600;text-decoration:none;border-radius:8px;text-align:center;border:1px solid #e2e8f0;">Place New Order</a>

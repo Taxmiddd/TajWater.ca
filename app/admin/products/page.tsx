@@ -15,7 +15,7 @@ import type { Product } from '@/types'
 const categories = ['water', 'equipment', 'subscription', 'accessories']
 const categoryEmoji: Record<string, string> = { water: '💧', equipment: '🔧', subscription: '🔄', accessories: '🧹' }
 
-const empty: Omit<Product, 'id'> = { name: '', description: '', price: 0, image_url: '', stock: 0, category: 'water', active: true, featured: false }
+const empty: Omit<Product, 'id'> = { name: '', description: '', price: 0, image_url: '', stock: 0, category: 'water', active: true, featured: false, unit_label: 'unit', rating: 5.0, review_count: 0 }
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
@@ -57,6 +57,8 @@ export default function AdminProductsPage() {
     const { error } = await supabase.from('products').update({ stock: newStock }).eq('id', product.id)
     if (!error) {
       setProducts(prev => prev.map(p => p.id === product.id ? { ...p, stock: newStock } : p))
+    } else {
+      showToast('Inventory Update Failed: ' + error.message)
     }
   }
 
@@ -66,7 +68,7 @@ export default function AdminProductsPage() {
   }
 
   const openAdd = () => { setEditing(null); setForm(empty); setDialogOpen(true) }
-  const openEdit = (p: Product) => { setEditing(p); setForm({ name: p.name, description: p.description, price: p.price, image_url: p.image_url, stock: p.stock, category: p.category, active: p.active, featured: p.featured || false }); setDialogOpen(true) }
+  const openEdit = (p: Product) => { setEditing(p); setForm({ name: p.name, description: p.description, price: p.price, image_url: p.image_url, stock: p.stock, category: p.category, active: p.active, featured: p.featured || false, unit_label: p.unit_label || '', rating: p.rating || 5.0, review_count: p.review_count || 0 }); setDialogOpen(true) }
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -87,32 +89,71 @@ export default function AdminProductsPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     setSaving(true)
+    
     if (editing) {
-      const { error } = await supabase.from('products').update(form).eq('id', editing.id)
-      if (!error) { showToast('Product updated!'); fetchProducts(); setDialogOpen(false) }
+      const { data: updatedData, error } = await supabase
+        .from('products')
+        .update(form)
+        .eq('id', editing.id)
+        .select()
+        
+      if (error) {
+        showToast('Update Failed: ' + error.message)
+      } else if (updatedData && updatedData.length > 0) {
+        showToast('Product updated!')
+        fetchProducts()
+        setDialogOpen(false)
+      } else {
+        showToast('No changes persisted (0 rows affected). Check RLS.')
+      }
     } else {
-      const { error } = await supabase.from('products').insert(form)
-      if (!error) { showToast('Product added!'); fetchProducts(); setDialogOpen(false) }
+      const { data: insertedData, error } = await supabase
+        .from('products')
+        .insert(form)
+        .select()
+        
+      if (error) {
+        showToast('Addition Failed: ' + error.message)
+      } else if (insertedData && insertedData.length > 0) {
+        showToast('Product added!')
+        fetchProducts()
+        setDialogOpen(false)
+      } else {
+        showToast('No data persisted (0 rows affected). Check RLS.')
+      }
     }
     setSaving(false)
   }
 
   const toggleActive = async (p: Product) => {
-    await supabase.from('products').update({ active: !p.active }).eq('id', p.id)
-    setProducts((prev) => prev.map((x) => x.id === p.id ? { ...x, active: !x.active } : x))
+    const { error } = await supabase.from('products').update({ active: !p.active }).eq('id', p.id)
+    if (error) {
+      showToast('Deactivation Failed: ' + error.message)
+    } else {
+      setProducts((prev) => prev.map((x) => x.id === p.id ? { ...x, active: !x.active } : x))
+      showToast(p.active ? 'Product deactivated.' : 'Product activated!')
+    }
   }
 
   const toggleFeatured = async (p: Product) => {
-    await supabase.from('products').update({ featured: !p.featured }).eq('id', p.id)
-    setProducts((prev) => prev.map((x) => x.id === p.id ? { ...x, featured: !x.featured } : x))
-    showToast(p.featured ? 'Removed from featured.' : 'Marked as featured!')
+    const { error } = await supabase.from('products').update({ featured: !p.featured }).eq('id', p.id)
+    if (error) {
+      showToast('Featured Update Failed: ' + error.message)
+    } else {
+      setProducts((prev) => prev.map((x) => x.id === p.id ? { ...x, featured: !x.featured } : x))
+      showToast(p.featured ? 'Removed from featured.' : 'Marked as featured!')
+    }
   }
 
   const handleDelete = async (id: string) => {
     if (!confirm('Archive this product? It will be hidden from the shop but order history is preserved.')) return
-    await supabase.from('products').update({ active: false }).eq('id', id)
-    setProducts((prev) => prev.map((p) => p.id === id ? { ...p, active: false } : p))
-    showToast('Product archived.')
+    const { error } = await supabase.from('products').update({ active: false }).eq('id', id)
+    if (error) {
+      showToast('Archival Failed: ' + error.message)
+    } else {
+      setProducts((prev) => prev.map((p) => p.id === id ? { ...p, active: false } : p))
+      showToast('Product archived.')
+    }
   }
 
   const filtered = products.filter((p) => {
@@ -243,7 +284,7 @@ export default function AdminProductsPage() {
                 <div className={`flex items-center gap-1 text-xs font-bold ${product.stock < lowThreshold ? 'text-amber-500' : 'text-[#4a7fa5] dark:text-[#94a3b8]'}`}>
                   {product.stock < lowThreshold && product.stock > 0 && <AlertTriangle className="w-3.5 h-3.5" />}
                   <Package className="w-3.5 h-3.5" />
-                  {product.stock} in stock
+                  {product.stock} {product.unit_label || 'unit'} in stock
                 </div>
               </div>
 
@@ -253,7 +294,7 @@ export default function AdminProductsPage() {
                   style={{ width: `${Math.min(100, (product.stock / maxStock) * 100)}%` }} />
               </div>
 
-               {/* Quick stock adjust */}
+              {/* Quick stock adjust */}
               <div className="flex items-center gap-2 mb-3">
                 <button onClick={() => adjustStock(product, -1)} disabled={product.stock === 0}
                   className="w-7 h-7 rounded-lg border border-[#cce7f0] dark:border-white/10 flex items-center justify-center text-[#4a7fa5] dark:text-[#b3e5fc]/60 hover:border-red-400 hover:text-red-500 disabled:opacity-30 transition-colors">
@@ -264,7 +305,7 @@ export default function AdminProductsPage() {
                   className="w-7 h-7 rounded-lg border border-[#cce7f0] dark:border-white/10 flex items-center justify-center text-[#4a7fa5] dark:text-[#b3e5fc]/60 hover:border-green-500 hover:text-green-500 transition-colors">
                   <Plus className="w-3 h-3" />
                 </button>
-                <span className="text-[10px] text-[#4a7fa5] dark:text-[#94a3b8] ml-1">units</span>
+                <span className="text-[10px] text-[#4a7fa5] dark:text-[#94a3b8] ml-1">{product.unit_label || 'units'}</span>
               </div>
 
               <button onClick={() => toggleFeatured(product)}
@@ -303,6 +344,20 @@ export default function AdminProductsPage() {
               <div>
                 <label className="text-sm font-semibold text-[#0c2340] dark:text-[#f8fafc] mb-1.5 block">Stock (units) *</label>
                 <Input type="number" min="0" value={form.stock} onChange={(e) => setForm({ ...form, stock: parseInt(e.target.value) || 0 })} className="border-[#cce7f0] dark:border-white/10 dark:bg-white/5 dark:text-white" required />
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-[#0c2340] dark:text-[#f8fafc] mb-1.5 block">Price Suffix (e.g. per unit, each, / bottle) *</label>
+              <Input value={form.unit_label} onChange={(e) => setForm({ ...form, unit_label: e.target.value })} placeholder="e.g. per unit, each, / bottle" className="border-[#cce7f0] dark:border-white/10 dark:bg-white/5 dark:text-white" required />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-semibold text-[#0c2340] dark:text-[#f8fafc] mb-1.5 block">Rating (0-5) *</label>
+                <Input type="number" step="0.1" min="0" max="5" value={form.rating} onChange={(e) => setForm({ ...form, rating: parseFloat(e.target.value) || 0 })} className="border-[#cce7f0] dark:border-white/10 dark:bg-white/5 dark:text-white" required />
+              </div>
+              <div>
+                <label className="text-sm font-semibold text-[#0c2340] dark:text-[#f8fafc] mb-1.5 block">Review Count *</label>
+                <Input type="number" min="0" value={form.review_count} onChange={(e) => setForm({ ...form, review_count: parseInt(e.target.value) || 0 })} className="border-[#cce7f0] dark:border-white/10 dark:bg-white/5 dark:text-white" required />
               </div>
             </div>
             <div>
