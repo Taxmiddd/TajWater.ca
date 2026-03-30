@@ -62,7 +62,7 @@ export default function Hero() {
         ].map((drop, i) => (
           <div
             key={i}
-            className={`absolute ${ drop.pos } ${ drop.size } rounded-full border border - white / 20 animate - float - bubble`}
+            className={`absolute ${ drop.pos } ${ drop.size } rounded-full border border-white/20 animate-float-bubble`}
             style={{ animationDelay: drop.delay, animationDuration: drop.dur, background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15), transparent)' }}
           />
         ))}
