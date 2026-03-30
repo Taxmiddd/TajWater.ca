@@ -29,7 +29,7 @@ export default function Hero() {
   }, [])
 
   const description = services.length > 0
-    ? `${services.join(', ')} Across Metro Vancouver. Affordable and Competitive 5-Gallon Water Delivery — Fresh, Clean, and on Time.'
+    ? `${services.join(', ')} Across Metro Vancouver. Affordable and Competitive 5-Gallon Water Delivery — Fresh, Clean, and on Time.`
     : 'Affordable and Competitive 5-Gallon Water Delivery, Filter Installation, and Commercial Supply Across Metro Vancouver. Your #1 Drinking Water Supplier.'
 
   return (
