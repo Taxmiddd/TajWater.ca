@@ -83,7 +83,7 @@ export default function ProductShowcase() {
         >
           <span className="inline-block px-4 py-1.5 rounded-full bg-[#e0f7fa] text-[#0097a7] text-sm font-semibold mb-3">Our Products</span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0c2340] mb-4">
-            Cheap & Competitive <span className="gradient-text">5-Gallon Water</span>
+            Affordable & Competitive <span className="gradient-text">5-Gallon Water</span>
           </h2>
           <p className="text-[#4a7fa5] text-lg max-w-xl mx-auto">
             From individual households in Vancouver to large enterprises — the best prices for your water supply.
@@ -113,10 +113,10 @@ export default function ProductShowcase() {
                   >
                     {product.image_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img 
-                        src={product.image_url} 
-                        alt={product.name} 
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                      <img
+                        src={product.image_url}
+                        alt={product.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />
                     ) : (
                       <div className="w-24 h-24 rounded-3xl bg-white/60 backdrop-blur-sm flex items-center justify-center shadow-lg">
@@ -129,7 +129,7 @@ export default function ProductShowcase() {
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border-2 animate-ripple" style={{ borderColor: theme.iconColor + '30' }} />
                   </div>
-                  
+
                   <span
                     className="absolute top-4 right-4 px-3 py-1 rounded-full text-[10px] font-bold text-white z-20 shadow-sm"
                     style={{ background: theme.badgeColor }}
@@ -158,10 +158,10 @@ export default function ProductShowcase() {
                           <p className="text-2xl font-extrabold" style={{ color: theme.iconColor }}>${product.price.toFixed(2)}</p>
                           <p className="text-xs text-[#4a7fa5]">
                             {product.unit_label ? (
-                              (product.unit_label.toLowerCase().includes('per') || 
-                               product.unit_label.startsWith('/') || 
-                               product.unit_label.toLowerCase().startsWith('each')) 
-                                ? product.unit_label 
+                              (product.unit_label.toLowerCase().includes('per') ||
+                                product.unit_label.startsWith('/') ||
+                                product.unit_label.toLowerCase().startsWith('each'))
+                                ? product.unit_label
                                 : `per ${product.unit_label}`
                             ) : 'per unit'}
                           </p>

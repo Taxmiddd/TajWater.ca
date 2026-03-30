@@ -29,8 +29,8 @@ export default function Hero() {
   }, [])
 
   const description = services.length > 0
-    ? `${services.join(', ')} across Metro Vancouver. Cheap and competitive 5-gallon water delivery — fresh, clean, and on time.`
-    : 'Cheap and competitive 5-gallon water delivery, filtration installation, and commercial supply across Metro Vancouver. Your #1 drinking water supplier.'
+    ? `${services.join(', ')} Across Metro Vancouver. Affordable and Competitive 5-Gallon Water Delivery — Fresh, Clean, and on Time.'
+    : 'Affordable and Competitive 5-Gallon Water Delivery, Filter Installation, and Commercial Supply Across Metro Vancouver. Your #1 Drinking Water Supplier.'
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden hero-gradient">
@@ -62,7 +62,7 @@ export default function Hero() {
         ].map((drop, i) => (
           <div
             key={i}
-            className={`absolute ${drop.pos} ${drop.size} rounded-full border border-white/20 animate-float-bubble`}
+            className={`absolute ${ drop.pos } ${ drop.size } rounded-full border border - white / 20 animate - float - bubble`}
             style={{ animationDelay: drop.delay, animationDuration: drop.dur, background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15), transparent)' }}
           />
         ))}
@@ -78,7 +78,7 @@ export default function Hero() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 border border-white/25 text-white text-sm mb-6 backdrop-blur-sm"
           >
             <span className="w-2 h-2 rounded-full bg-[#00bcd4] animate-pulse" />
-            Trusted by 5,000+ Metro Vancouver families
+            Trusted by 5,000+ Metro Vancouver Families
           </motion.div>
 
           {/* Headline */}

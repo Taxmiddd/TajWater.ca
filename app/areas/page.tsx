@@ -77,7 +77,7 @@ export default function AreasPage() {
               We Deliver Across<br /><span className="gradient-text-light">Metro Vancouver</span>
             </h1>
             <p className="text-[#b3e5fc] text-xl max-w-2xl mx-auto">
-              10 zones covered and growing. Check your area and see our delivery schedule.
+              21 zones “are” covered and growing. Check your area and see our delivery schedule.
             </p>
           </motion.div>
         </div>

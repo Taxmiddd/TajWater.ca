@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: 'Delivery Areas — TajWater Metro Vancouver',
-    description: 'Serving 10 zones across Metro Vancouver with same-day and scheduled water delivery. Check if we deliver to your area.',
+    description: 'Serving 21 zones across Metro Vancouver with same-day and scheduled water delivery. Check if we deliver to your area.',
     url: '/areas',
     type: 'website',
     images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'TajWater Delivery Areas Metro Vancouver' }],
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Delivery Areas — TajWater Metro Vancouver',
-    description: 'Serving 10 zones across Metro Vancouver. Check your delivery zone.',
+    description: 'Serving 21 zones across Metro Vancouver. Check your delivery zone.',
     images: ['/og-image.png'],
   },
   alternates: {
@@ -40,7 +40,7 @@ const breadcrumbSchema = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
   itemListElement: [
-    { '@type': 'ListItem', position: 1, name: 'Home',           item: 'https://tajwater.ca' },
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://tajwater.ca' },
     { '@type': 'ListItem', position: 2, name: 'Delivery Areas', item: 'https://tajwater.ca/areas' },
   ],
 }
@@ -54,14 +54,14 @@ const serviceAreaSchema = {
     'North Vancouver BC', 'West Vancouver BC', 'Vancouver BC', 'Richmond BC',
     'Burnaby BC', 'Coquitlam BC', 'Port Moody BC', 'Surrey BC', 'Delta BC', 'Langley BC',
   ],
-  description: '20L water jug delivery across Metro Vancouver. Same-day and scheduled delivery available.',
+  description: '5 Gallon water jug delivery across Metro Vancouver. Same-day and scheduled delivery available.',
 }
 
 export default function AreasLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <Script id="breadcrumb-schema"    type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-      <Script id="service-area-schema"  type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceAreaSchema) }} />
+      <Script id="breadcrumb-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <Script id="service-area-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceAreaSchema) }} />
       {children}
     </>
   )

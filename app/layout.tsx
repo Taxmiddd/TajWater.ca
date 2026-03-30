@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     'water dispenser delivery Vancouver',
     'water filtration installation Vancouver',
     'bulk water delivery Metro Vancouver',
-    '20L water jug delivery BC',
+    '5 gallon water jug delivery BC',
     'alkaline water delivery Vancouver',
     'distilled water delivery Vancouver',
     'spring water delivery Vancouver',
