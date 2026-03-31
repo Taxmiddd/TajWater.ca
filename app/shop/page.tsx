@@ -169,7 +169,7 @@ export default function ShopPage() {
                             <Badge className="absolute top-4 right-4 bg-amber-500 text-[10px] z-10 shadow-sm">Save 15%</Badge>
                           )}
                           {product.stock === 0 && (
-                            <Badge className="absolute bottom-4 right-4 bg-red-500 text-[10px] z-10 shadow-sm">Stockout</Badge>
+                            <Badge className="absolute bottom-4 right-4 bg-red-500 text-[10px] z-10 shadow-sm">Out Of Stock</Badge>
                           )}
                           {/* Overlay gradient */}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none" />

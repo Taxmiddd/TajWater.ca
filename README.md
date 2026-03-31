@@ -6,13 +6,13 @@
 
 **Premium water delivery platform for Metro Vancouver**
 
-[![Next.js](https://img.shields.io/badge/Next.js_16-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org)
+[![Next.js](https://img.shields.io/badge/Next.js_15-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 [![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
 [![Square](https://img.shields.io/badge/Square-000000?style=for-the-badge&logo=square&logoColor=white)](https://squareup.com)
 
-[Live Demo](https://tajwater.ca) · [Report Bug](https://github.com/Osayeedjaber/tajwater/issues)
+[Live Demo](https://tajwater.ca) · [Report Bug](https://github.com/Taxmiddd/TajWater.ca/issues)
 
 </div>
 
@@ -28,7 +28,7 @@ TajWater is a full-stack e-commerce platform built for a water delivery company 
 
 | Layer | Technology |
 |---|---|
-| **Framework** | Next.js 16 (App Router, TypeScript) |
+| **Framework** | Next.js 15 (App Router, TypeScript) |
 | **Styling** | Tailwind CSS v4, shadcn/ui, Framer Motion |
 | **State** | Zustand (cart — localStorage persist) |
 | **Database** | Supabase (PostgreSQL + RLS) |
@@ -108,7 +108,7 @@ supabase/         migrations/
 ### Installation
 
 ```bash
-git clone https://github.com/Osayeedjaber/tajwater.git
+git clone https://github.com/Taxmiddd/TajWater.ca.git
 cd tajwater
 npm install
 ```

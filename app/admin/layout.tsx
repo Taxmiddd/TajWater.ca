@@ -143,27 +143,42 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const unread = notifs.filter(n => !n.read).length
 
   useEffect(() => {
-    // Skip auth check on the login page itself
+    // Skip on login page
     if (pathname === '/admin/login') {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+      const storedTheme = localStorage.getItem('admin_theme') as 'light' | 'dark' | null
+      if (storedTheme) setTheme(storedTheme)
       setMounted(true)
       return
     }
 
-    const storedRole = localStorage.getItem('admin_role') as Role
-    const storedName = localStorage.getItem('admin_name') || 'Admin'
     const storedTheme = localStorage.getItem('admin_theme') as 'light' | 'dark' | null
-
-    // No role stored → not logged in → redirect
-    if (!storedRole) {
-      router.replace('/admin/login')
-      return
-    }
-
     if (storedTheme) setTheme(storedTheme)
-    setRole(storedRole)
-    setAdminName(storedName)
-    setMounted(true)
+
+    const storedRole = localStorage.getItem('admin_role') as Role
+    const storedName = localStorage.getItem('admin_name')
+
+    if (storedRole && storedName) {
+      setRole(storedRole)
+      setAdminName(storedName)
+      setMounted(true)
+    } else {
+      // Re-hydrate from Supabase if missing from localStorage
+      // Middleware ensures 'user' is valid here.
+      supabase.auth.getUser().then(async ({ data: { user } }) => {
+        if (!user?.email) {
+          setMounted(true)
+          return
+        }
+        const { data: admin } = await supabase.from('admin_users').select('role, name').eq('email', user.email).single()
+        if (admin) {
+          localStorage.setItem('admin_role', admin.role)
+          localStorage.setItem('admin_name', admin.name || 'Admin')
+          setRole(admin.role)
+          setAdminName(admin.name || 'Admin')
+        }
+        setMounted(true)
+      })
+    }
   }, [pathname, router])
 
   const toggleTheme = () => {

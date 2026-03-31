@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Shop — Order Water Online | TajWater Vancouver',
-    description: 'Order 20L jugs, dispensers, and filtration products. Fast Metro Vancouver delivery.',
+    description: 'Order 20L jugs, dispensers, and filter products. Fast Metro Vancouver delivery.',
     images: ['/og-image.png'],
   },
   alternates: {

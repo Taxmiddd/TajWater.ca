@@ -23,13 +23,19 @@ export default function Hero() {
       .limit(3)
       .then(({ data }) => {
         if (data && data.length > 0) {
-          setServices(data.map(s => s.title))
+          // Filter out any "Ice" related services to ensure accuracy
+          const filtered = data
+            .map(s => s.title)
+            .filter(title => !title.toLowerCase().includes('ice'))
+          setServices(filtered)
         }
       })
   }, [])
 
   const description = services.length > 0
-    ? `${services.join(', ')} Across Metro Vancouver. Affordable and Competitive 5-Gallon Water Delivery — Fresh, Clean, and on Time.`
+    ? (services.length > 1 
+        ? `${services.slice(0, -1).join(', ')}, and ${services[services.length - 1]}`
+        : services[0]) + ' Across Metro Vancouver. Affordable and Competitive 5-Gallon Water Delivery — Fresh, Clean, and on Time.'
     : 'Affordable and Competitive 5-Gallon Water Delivery, Filter Installation, and Commercial Supply Across Metro Vancouver. Your #1 Drinking Water Supplier.'
 
   return (
@@ -142,6 +148,7 @@ export default function Hero() {
               { value: '5+', label: 'Years Serving BC' },
               { value: '24h', label: 'Delivery Window' },
             ].map((stat) => (
+
               <div key={stat.label} className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-0 sm:bg-transparent sm:backdrop-blur-none sm:text-center">
                 <p className="text-xl sm:text-2xl font-extrabold text-white">{stat.value}</p>
                 <p className="text-[10px] sm:text-xs text-[#b3e5fc] uppercase tracking-wider">{stat.label}</p>

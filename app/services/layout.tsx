@@ -2,11 +2,11 @@ import type { Metadata } from 'next'
 import Script from 'next/script'
 
 export const metadata: Metadata = {
-  title: 'Water Services Vancouver — 5-Gallon Delivery & Filtration | TajWater',
-  description: 'Cheap and competitive water services in Metro Vancouver: 5-gallon jug delivery, water filtration installation, and commercial bulk water supply for offices and business.',
+  title: 'Water Services Vancouver — 5-Gallon Delivery & Filter Installation | TajWater',
+  description: 'Affordable and Competitive water services in Metro Vancouver: 5-gallon jug delivery, water filter installation, and commercial bulk water supply for offices and business.',
   keywords: [
     'water services Vancouver',
-    'filtration system installation BC',
+    'filter system installation BC',
     'commercial water delivery Vancouver',
     'office water supply Vancouver',
     'water dispenser service BC',
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: 'Water Delivery Services — TajWater Vancouver',
-    description: 'Premium water delivery, filtration installation, and commercial supply across Metro Vancouver. Flexible scheduling and competitive pricing.',
+    description: 'Premium water delivery, filter installation, and commercial supply across Metro Vancouver. Flexible scheduling and competitive pricing.',
     url: '/services',
     type: 'website',
     images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'TajWater Water Delivery Services' }],
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Water Delivery Services — TajWater Vancouver',
-    description: 'Premium water delivery, filtration, and commercial supply across Metro Vancouver.',
+    description: 'Premium water delivery, filter installation, and commercial supply across Metro Vancouver.',
     images: ['/og-image.png'],
   },
   alternates: {

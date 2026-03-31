@@ -93,9 +93,9 @@ const styles = StyleSheet.create({
     const deliveryFee  = Math.max(0, parseFloat((order.total - subtotal + discountAmt - taxAmt).toFixed(2)))
     
     const methodMap: Record<string, string> = {
-      'square_online': 'Royal Online Payment',
-      'cash_on_delivery': 'Royal Cash on Delivery',
-      'card_on_delivery': 'Royal Card on Delivery (POS)',
+      'square_online': 'Square Online Payment',
+      'cash_on_delivery': 'Cash on Delivery',
+      'card_on_delivery': 'Card on Delivery (POS)',
     }
     const paymentMethodName = methodMap[order.payment_method ?? ''] ?? 'Royal Order'
     
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
         React.createElement(View, { style: styles.header },
           React.createElement(View, { style: styles.companyBlock },
             React.createElement(Text, { style: styles.companyName }, "Taj Water LTD."),
-            React.createElement(Text, { style: styles.companyDetail }, "1770 McLean Ave"),
+            React.createElement(Text, { style: styles.companyDetail }, "Unit-7, 1770 McLean Ave"),
             React.createElement(Text, { style: styles.companyDetail }, "Port Coquitlam, BC V3C 4K8, Canada"),
             React.createElement(Text, { style: styles.companyDetail }, companyInfo.email),
             React.createElement(Text, { style: styles.companyDetail }, companyInfo.phone),

@@ -25,7 +25,7 @@ const testimonials = [
     name: 'Jennifer Park',
     location: 'Richmond',
     rating: 5,
-    text: "The filtration installation was done in under 2 hours. Clean, professional, and the water tastes incredible. Worth every penny!",
+    text: "The Filter Installation was done in under 2 hours. Clean, professional, and the water tastes incredible. Worth every penny!",
     avatar: 'JP',
     color: '#006064',
   },

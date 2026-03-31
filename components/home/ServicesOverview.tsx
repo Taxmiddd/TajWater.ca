@@ -40,7 +40,11 @@ export default function ServicesOverview() {
       .order('sort_order')
       .limit(6)
       .then(({ data }) => {
-        if (data && data.length > 0) setServices(data)
+        if (data && data.length > 0) {
+          // Filter out any "Ice" related services to ensure accuracy
+          const filtered = data.filter(s => !s.title.toLowerCase().includes('ice'))
+          setServices(filtered)
+        }
         setLoading(false)
       })
   }, [])
@@ -60,7 +64,7 @@ export default function ServicesOverview() {
             Vancouver&apos;s Preferred <span className="gradient-text">Water Supplier</span>
           </h2>
           <p className="text-[#4a7fa5] text-lg max-w-xl mx-auto">
-            Cheap and competitive 5-gallon jug delivery, filtration, and commercial solutions for homes and workplaces.
+            Affordable and Competitive 5-gallon jug delivery, filter installation, and commercial solutions for homes and workplaces.
           </p>
         </motion.div>
 

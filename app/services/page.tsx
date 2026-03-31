@@ -20,7 +20,6 @@ const bgMap: Record<string, string> = {
 
 const faqs = [
   { q: 'How quickly can I get my first delivery?', a: 'For most zones, we offer same-day delivery if you order before 12pm. Otherwise, next-day delivery is always available. Scheduling takes only 2 minutes online.' },
-  { q: 'What makes TajWater different from store-bought water?', a: 'Our water goes through a 6-step purification process including reverse osmosis, UV sterilization, and pH balancing. It\'s fresher, cleaner, and far more cost-effective than bottled water.' },
   { q: 'Can I pause or cancel my subscription?', a: 'Absolutely. You can pause, change frequency, or cancel your subscription anytime from your customer dashboard — no fees, no questions asked.' },
   { q: 'Do you service commercial/industrial clients?', a: 'Yes! We have dedicated commercial accounts with custom pricing, invoicing, and a dedicated account manager for businesses needing 10+ jugs per delivery.' },
   { q: 'What areas do you cover?', a: 'We currently deliver to Burnaby, Cloverdale, Coquitlam, Delta, Langley, Langley Township, Maple Ridge, Mary Hill. North Vancouver, Pitt Meadows, Port Coquitlam, Port Moody, Richmond, Squamish, Surrey, Tsawwessen, Vancouver, Walln ut Grove, Whistler, White Rock. More zones coming soon.' },

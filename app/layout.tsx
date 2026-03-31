@@ -13,13 +13,13 @@ export const metadata: Metadata = {
     default: 'TajWater — Pure Water Delivered to Your Door | Metro Vancouver',
     template: '%s | TajWater',
   },
-  description: 'Cheap and competitive 5-gallon water jug delivery across Metro Vancouver. Premium spring, alkaline & distilled water, water dispenser installation, filtration systems, and commercial bulk supply. Same-day & scheduled delivery. Serving Vancouver, Burnaby, Richmond, Surrey, Langley and more. TajWater - Your #1 drinking water supplier.',
+  description: 'Affordable and Competitive 5-gallon water jug delivery across Metro Vancouver. Premium spring, alkaline & distilled water, water dispenser installation, filter systems, and commercial bulk supply. Same-day & scheduled delivery. Serving Vancouver, Burnaby, Richmond, Surrey, Langley and more. TajWater - Your #1 drinking water supplier.',
   keywords: [
     'drinking water supplier Vancouver',
     '5 gallon water jug delivery Vancouver',
     'cheap water delivery Vancouver',
     'water dispenser delivery Vancouver',
-    'water filtration installation Vancouver',
+    'water filter installation Vancouver',
     'bulk water delivery Metro Vancouver',
     '5 gallon water jug delivery BC',
     'alkaline water delivery Vancouver',
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     url: BASE_URL,
     siteName: 'TajWater',
     title: 'TajWater — Vancouver\'s Best Drinking Water Supplier | 5 Gallon Jugs',
-    description: 'Cheap and competitive 5-gallon jug delivery, filtration installation, and commercial supply in Vancouver. Same-day delivery available.',
+    description: 'Affordable and Competitive 5-gallon jug delivery, filter installation, and commercial supply in Vancouver. Same-day delivery available.',
     images: [
       {
         url: '/og-image.png',
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'TajWater — Vancouver\'s Best Drinking Water Supplier | 5 Gallon Jugs',
-    description: 'Cheap and competitive 5-gallon jug delivery, filtration, and commercial supply in Vancouver. Order now.',
+    description: 'Affordable and Competitive 5-gallon jug delivery, filter installation, and commercial supply in Vancouver. Order now.',
     images: ['/og-image.png'],
   },
   alternates: {
@@ -85,7 +85,7 @@ const localBusinessJsonLd = {
   '@id': `${BASE_URL}/#business`,
   name: 'TajWater',
   alternateName: 'Taj Water',
-  description: 'Premium water delivery service across Metro Vancouver. 20L spring, alkaline & distilled jugs, water filtration installation, and commercial bulk water supply.',
+  description: 'Premium water delivery service across Metro Vancouver. 20L spring, alkaline & distilled jugs, water filter installation, and commercial bulk water supply.',
   url: BASE_URL,
   logo: `${BASE_URL}/logo/tajcyan.svg`,
   image: `${BASE_URL}/og-image.png`,
@@ -141,12 +141,12 @@ const localBusinessJsonLd = {
   sameAs: [],
   hasOfferCatalog: {
     '@type': 'OfferCatalog',
-    name: 'Water Delivery & Filtration Services',
+    name: 'Water Delivery and Filter Services',
     itemListElement: [
       {
         '@type': 'Offer',
         name: '5 Gallon (20L) Water Jug Delivery',
-        description: 'Cheap and competitive 5-gallon spring, alkaline & distilled water jug delivery to your home or office across Metro Vancouver',
+        description: 'Affordable and Competitive 5-gallon spring, alkaline & distilled water jug delivery to your home or office across Metro Vancouver',
         price: '8.99',
         priceCurrency: 'CAD',
         availability: 'https://schema.org/InStock',
@@ -161,8 +161,8 @@ const localBusinessJsonLd = {
         '@type': 'Offer',
         itemOffered: {
           '@type': 'Service',
-          name: 'Water Filtration Installation',
-          description: 'Professional under-sink and whole-home water filtration system installation with 2-year warranty',
+          name: 'Water Filter Installation',
+          description: 'Professional under-sink and whole-home water filter system installation with 2-year warranty',
         },
       },
       {

@@ -33,7 +33,7 @@ const stats = [
   { icon: Users, value: 2000, suffix: '+', label: 'Happy Customers', color: '#0097a7' },
   { icon: MapPin, value: 21, suffix: '', label: 'Delivery Zones', color: '#1565c0' },
   { icon: Droplets, value: 30000, suffix: '+', label: 'Jugs Delivered', color: '#00acc1' },
-  { icon: Award, value: 5, suffix: '+', label: 'Years in Business', color: '#006064' },
+  { icon: Award, value: 5, suffix: '+', label: 'Years In Business', color: '#006064' },
   { icon: Star, value: 4.9, suffix: '★', label: 'Average Rating', color: '#0097a7' },
   { icon: Shield, value: 100, suffix: '%', label: 'Quality Certified', color: '#1565c0' },
 ]
@@ -80,7 +80,7 @@ export default function TrustSignals() {
           className="text-center mb-14"
         >
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-3">Trusted Across Metro Vancouver</h2>
-          <p className="text-[#b3e5fc] text-lg">Numbers that speak for our commitment to quality</p>
+          <p className="text-[#b3e5fc] text-lg">Numbers that speak to our commitment to quality</p>
         </motion.div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
