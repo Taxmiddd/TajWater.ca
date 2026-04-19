@@ -15,7 +15,7 @@ export const supabase = new Proxy({} as SupabaseClient, {
       if (!url || !key) return undefined
       _supabase = createBrowserClient(url, key)
     }
-    return (_supabase as any)?.[prop]
+    return (_supabase as unknown as Record<string | symbol, unknown>)?.[prop]
   },
 })
 

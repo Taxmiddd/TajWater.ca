@@ -163,7 +163,7 @@ export default function SettingsPage() {
     showToast('Social links saved!')
   }
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchAll() }, [])
 
   // ── Save: Business ────────────────────────────────────────────────────────
@@ -732,3 +732,4 @@ export default function SettingsPage() {
     </div>
   )
 }
+

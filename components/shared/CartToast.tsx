@@ -1,7 +1,7 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { ShoppingCart, Check } from 'lucide-react'
+import { Check } from 'lucide-react'
 import Link from 'next/link'
 import { useRef } from 'react'
 import type { Product } from '@/types'
@@ -63,3 +63,4 @@ export default function CartToast({ product, visible }: { product: Product | nul
     </AnimatePresence>
   )
 }
+

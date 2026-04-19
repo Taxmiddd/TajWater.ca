@@ -6,10 +6,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowLeft, Package, Truck, CheckCircle2, Clock, XCircle,
   Download, RotateCcw, MapPin, MessageSquare, Droplets,
-  CreditCard, User, Phone, Mail, CalendarDays, ChevronRight,
+  CreditCard, User, Phone, CalendarDays, ChevronRight,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useCart } from '@/store/cartStore'

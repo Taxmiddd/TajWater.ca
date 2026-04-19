@@ -182,12 +182,15 @@ export default function Footer() {
 
         <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3">
           <p className="text-[#b3e5fc]/60 text-xs">© 2023-26 TajWater LTD. All rights reserved.</p>
-          <div className="flex gap-4">
+          <div className="flex gap-4 items-center">
             <Link href="/legal/privacy" className="text-[#b3e5fc]/60 hover:text-[#b3e5fc] text-xs transition-colors">Privacy Policy</Link>
             <Link href="/legal/terms" className="text-[#b3e5fc]/60 hover:text-[#b3e5fc] text-xs transition-colors">Terms of Service</Link>
+            <span className="text-[#b3e5fc]/30">|</span>
+            <a href="https://noeticstudio.net" target="_blank" rel="noopener noreferrer" className="text-[#b3e5fc]/60 hover:text-white text-xs transition-colors">Developed By <span className="font-semibold text-white">NOÉTIC Studio</span></a>
           </div>
         </div>
       </div>
     </footer>
   )
 }
+

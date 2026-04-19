@@ -36,20 +36,6 @@ export function buildOrderConfirmationEmail(order: {
     .replace(/\{\{total\}\}/g, `$${order.total.toFixed(2)}`)
     .replace(/\n/g, '<br/>')
 
-  const rows = order.items.map(i => `
-    <tr>
-      <td style="padding:11px 14px;border-bottom:1px solid #edf4f7;font-size:14px;color:#1a3347;">${i.name}</td>
-      <td style="padding:11px 14px;border-bottom:1px solid #edf4f7;font-size:14px;color:#6b8c9e;text-align:center;">&times;${i.qty}</td>
-      <td style="padding:11px 14px;border-bottom:1px solid #edf4f7;font-size:13px;color:#6b8c9e;text-align:right;">$${i.price.toFixed(2)}</td>
-      <td style="padding:11px 14px;border-bottom:1px solid #edf4f7;font-size:14px;font-weight:700;color:#1a3347;text-align:right;">$${(i.qty * i.price).toFixed(2)}</td>
-    </tr>`).join('')
-
-  const extraRows = [
-    discount > 0    ? `<tr><td colspan="3" style="padding:5px 14px;text-align:right;font-size:13px;color:#16a34a;">Discount</td><td style="padding:5px 14px;text-align:right;font-size:13px;font-weight:700;color:#16a34a;">&#8722;$${discount.toFixed(2)}</td></tr>` : '',
-    delivery > 0.01 ? `<tr><td colspan="3" style="padding:5px 14px;text-align:right;font-size:13px;color:#6b8c9e;">Delivery Fee</td><td style="padding:5px 14px;text-align:right;font-size:13px;font-weight:700;color:#1a3347;">$${delivery.toFixed(2)}</td></tr>` : '',
-    tax > 0         ? `<tr><td colspan="3" style="padding:5px 14px;text-align:right;font-size:13px;color:#6b8c9e;">Tax (GST + PST)</td><td style="padding:5px 14px;text-align:right;font-size:13px;font-weight:700;color:#1a3347;">$${tax.toFixed(2)}</td></tr>` : '',
-  ].filter(Boolean).join('')
-
   const _co = {
     email: process.env.NEXT_PUBLIC_COMPANY_EMAIL ?? 'info@tajwater.ca',
     url:   process.env.NEXT_PUBLIC_SITE_URL      ?? 'https://tajwater.ca',

@@ -76,7 +76,7 @@ export default function AdminContentPage() {
     setLoading(false)
   }
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchAll() }, [])
 
   // ─── Site content helpers ─────────────────────────────
@@ -546,3 +546,4 @@ export default function AdminContentPage() {
     </div>
   )
 }
+

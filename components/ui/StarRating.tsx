@@ -36,3 +36,4 @@ export function StarRating({ rating = 0, maxStars = 5, size = 'w-4 h-4', classNa
 
   return <div className="flex items-center">{stars}</div>
 }
+

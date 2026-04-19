@@ -1,6 +1,5 @@
 import { createServerClient } from '@/lib/supabase'
 import { notFound } from 'next/navigation'
-import { StarRating } from '@/components/ui/StarRating'
 import { Package, Truck, CheckCircle2, Clock, MapPin, Phone, CreditCard } from 'lucide-react'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
@@ -137,7 +136,7 @@ export default async function TrackOrderPage({ params, searchParams }: TrackPage
             <div className="bg-white rounded-3xl border border-[#e2e8f0] shadow-sm p-6">
               <h3 className="font-bold text-[#0c2340] mb-4 text-lg">Order Items</h3>
               <div className="space-y-4">
-                {(order.order_items || []).map((item: any, i: number) => (
+                {(order.order_items || []).map((item: { quantity: number; price: number; products: { name: string; image_url: string | null } | null }, i: number) => (
                   <div key={i} className="flex items-center gap-4 py-3 border-b border-[#f1f5f9] last:border-0">
                     <div className="w-16 h-16 bg-[#f8fafc] rounded-xl flex-shrink-0 overflow-hidden border border-[#e2e8f0]">
                       {item.products?.image_url && (

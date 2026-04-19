@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import Link from 'next/link'
 import { ClipboardList, Truck, CheckCircle2, ArrowRight } from 'lucide-react'
 
 const steps = [
@@ -88,11 +89,12 @@ export default function HowItWorks() {
           transition={{ delay: 0.5 }}
           className="text-center mt-12"
         >
-          <a href="/shop" className="inline-flex items-center gap-2 text-[#0097a7] font-semibold hover:gap-3 transition-all duration-200">
+          <Link href="/shop" className="inline-flex items-center gap-2 text-[#0097a7] font-semibold hover:gap-3 transition-all duration-200">
             Start your first order <ArrowRight className="w-4 h-4" />
-          </a>
+          </Link>
         </motion.div>
       </div>
     </section>
   )
 }
+

@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
             React.createElement(Text, { style: styles.billingName }, customerName),
             React.createElement(Text, { style: styles.billingText }, order.profiles?.email || '—'),
             React.createElement(Text, { style: styles.billingText }, order.customer_phone || '—'),
-            React.createElement(Text, { style: { ...styles.billingText, marginTop: 4 } }, (order.zones as any)?.name ? `Region: ${(order.zones as any).name}` : ''),
+            React.createElement(Text, { style: { ...styles.billingText, marginTop: 4 } }, (order.zones as { name: string } | null)?.name ? `Region: ${(order.zones as { name: string }).name}` : ''),
             React.createElement(Text, { style: styles.billingText }, order.delivery_address || ''),
           ),
           React.createElement(View, { style: styles.billingBoxRight },
@@ -217,6 +217,7 @@ export const InvoicePDF = InvoicePDFComponent;
 
 export async function generateInvoicePDF(order: InvoiceOrderData, companyInfo: CompanyInfo): Promise<Buffer> {
   return renderToBuffer(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     React.createElement(InvoicePDFComponent, { order, companyInfo }) as any
   )
 }

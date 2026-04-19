@@ -13,8 +13,6 @@ import {
   ArrowLeft, 
   Truck as TruckIcon, 
   AlertCircle, 
-  Tag, 
-  X, 
   Wallet, 
   Coins 
 } from 'lucide-react'
@@ -52,12 +50,7 @@ export default function CheckoutPage() {
   const [userId, setUserId] = useState<string | null>(null)
   const [authChecked, setAuthChecked] = useState(false)
   const [serverTotal, setServerTotal] = useState<number | null>(null)
-  const [taxAmount, setTaxAmount] = useState(0)
   const [deliveryFee, setDeliveryFee] = useState(0)
-  const [couponInput, setCouponInput] = useState('')
-  const [applyingCoupon, setApplyingCoupon] = useState(false)
-  const [couponError, setCouponError] = useState('')
-  const [appliedDiscount, setAppliedDiscount] = useState<{ code: string; type: 'percent' | 'fixed'; value: number; amount: number; id: string } | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const router = useRouter()
 
@@ -117,35 +110,12 @@ export default function CheckoutPage() {
   }, [router])
   
   const subtotal = total()
-  const discountAmt = appliedDiscount?.amount ?? 0
-  const tax = Math.round((subtotal - discountAmt) * 0.12 * 100) / 100
+  const discountAmt = 0
+  const tax = Math.round(subtotal * 0.12 * 100) / 100
   const deliveryFeeValue = deliveryFee // For clarity in callbacks
   const orderTotal = Math.max(0, subtotal - discountAmt) + deliveryFeeValue + tax
   const displayTotal = serverTotal ?? orderTotal
 
-  const applyCode = async () => {
-    const code = couponInput.trim().toUpperCase()
-    if (!code) return
-    setApplyingCoupon(true)
-    setCouponError('')
-    const { data } = await supabase
-      .from('discount_codes')
-      .select('id, code, type, value, min_order_amount, max_uses, uses_count, expires_at, active')
-      .eq('code', code)
-      .single()
-    setApplyingCoupon(false)
-    if (!data || !data.active) { setCouponError('Invalid or inactive discount code.'); return }
-    if (data.expires_at && new Date(data.expires_at) < new Date()) { setCouponError('This discount code has expired.'); return }
-    if (data.max_uses !== null && data.uses_count >= data.max_uses) { setCouponError('This discount code has reached its maximum uses.'); return }
-    if (data.min_order_amount > 0 && subtotal < data.min_order_amount) {
-      setCouponError(`Minimum order of $${data.min_order_amount.toFixed(2)} required for this code.`); return
-    }
-    const amount = data.type === 'percent'
-      ? Math.round(subtotal * (data.value / 100) * 100) / 100
-      : Math.min(data.value, subtotal)
-    setAppliedDiscount({ id: data.id, code: data.code, type: data.type, value: data.value, amount })
-    setCouponInput('')
-  }
 
   // --- Validation Logic ---
   const validateField = (name: string, value: string) => {
@@ -218,8 +188,8 @@ export default function CheckoutPage() {
           },
           notes: address.notes || null,
           userId,
-          discountCodeId: appliedDiscount?.id ?? null,
-          discountAmount: appliedDiscount?.amount ?? 0,
+          discountCodeId: null,
+          discountAmount: 0,
           paymentMethod: 'square_online',
         }),
       })
@@ -227,7 +197,6 @@ export default function CheckoutPage() {
       if (data.error) throw new Error(data.error)
       setOrderId(data.orderId)
       setServerTotal(data.serverTotal ?? orderTotal)
-      setTaxAmount(data.taxAmount ?? tax)
       if (data.deliveryFee !== undefined) setDeliveryFee(data.deliveryFee)
       clearCart()
       setStep('confirmed')
@@ -237,7 +206,7 @@ export default function CheckoutPage() {
     } finally {
       setProcessing(false)
     }
-  }, [orderTotal, items, address, userId, tax, appliedDiscount, clearCart])
+  }, [orderTotal, items, address, userId, clearCart])
 
   const handleOfflineOrder = async () => {
     setProcessing(true)
@@ -264,8 +233,8 @@ export default function CheckoutPage() {
           },
           notes: address.notes || null,
           userId,
-          discountCodeId: appliedDiscount?.id ?? null,
-          discountAmount: appliedDiscount?.amount ?? 0,
+          discountCodeId: null,
+          discountAmount: 0,
           paymentMethod: offlineMethod,
         }),
       })
@@ -275,8 +244,8 @@ export default function CheckoutPage() {
       setOrderId(data.orderId)
       setStep('confirmed')
       window.scrollTo(0, 0)
-    } catch (err: any) {
-      setIntentError(err.message)
+    } catch (err: unknown) {
+      setIntentError(err instanceof Error ? err.message : 'Failed to place order')
     } finally {
       setProcessing(false)
     }
@@ -764,12 +733,6 @@ export default function CheckoutPage() {
                     <span>Tax (12%)</span>
                     <span>${tax.toFixed(2)}</span>
                   </div>
-                  {appliedDiscount && (
-                    <div className="flex justify-between text-xs text-[#0097a7] font-bold">
-                      <span>Discount ({appliedDiscount.code})</span>
-                      <span>-${appliedDiscount.amount.toFixed(2)}</span>
-                    </div>
-                  )}
                   <div className="flex justify-between text-base font-black text-[#0c2340] pt-2 border-t border-[#f0f9ff]">
                     <span>Total</span>
                     <span>${displayTotal.toFixed(2)}</span>
@@ -793,3 +756,4 @@ export default function CheckoutPage() {
     </div>
   )
 }
+

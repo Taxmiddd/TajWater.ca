@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
@@ -60,7 +60,7 @@ export default function AdminSubscriptionsPage() {
     setLoading(false)
   }
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchSubs() }, [])
 
   const updateStatus = async (id: string, newStatus: string) => {
@@ -104,7 +104,7 @@ export default function AdminSubscriptionsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-extrabold text-[#0c2340]">Subscriptions</h1>
-          <p className="text-sm text-[#4a7fa5]">{activeCnt} active Â· {pausedCnt} paused Â· {cancelledCnt} cancelled</p>
+          <p className="text-sm text-[#4a7fa5]">{activeCnt} active · {pausedCnt} paused · {cancelledCnt} cancelled</p>
         </div>
         <Button size="sm" variant="outline" onClick={fetchSubs} className="border-[#cce7f0] text-[#4a7fa5]">
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -180,10 +180,10 @@ export default function AdminSubscriptionsPage() {
                   return (
                     <tr key={sub.id} className="border-t border-[#f0f9ff] hover:bg-[#f8fbfe]">
                       <td className="px-4 py-3">
-                        <p className="font-medium text-[#0c2340]">{sub.profile?.name ?? 'â€”'}</p>
+                        <p className="font-medium text-[#0c2340]">{sub.profile?.name ?? '—'}</p>
                         <p className="text-xs text-[#4a7fa5]">{sub.profile?.email ?? ''}</p>
                       </td>
-                      <td className="px-4 py-3 text-[#4a7fa5]">{sub.product?.name ?? 'â€”'}</td>
+                      <td className="px-4 py-3 text-[#4a7fa5]">{sub.product?.name ?? '—'}</td>
                       <td className="px-4 py-3">
                         <span className="capitalize text-[#4a7fa5]">{sub.frequency}</span>
                       </td>
@@ -199,11 +199,11 @@ export default function AdminSubscriptionsPage() {
                             />
                             <button onClick={saveDeliveryDate} disabled={savingDelivery}
                               className="w-6 h-6 rounded-lg bg-green-100 text-green-600 flex items-center justify-center hover:bg-green-200 text-xs font-bold">
-                              âœ“
+                              ✓
                             </button>
                             <button onClick={() => setEditingDelivery(null)}
                               className="w-6 h-6 rounded-lg bg-red-50 text-red-400 flex items-center justify-center hover:bg-red-100 text-xs font-bold">
-                              âœ•
+                              ✕
                             </button>
                           </div>
                         ) : (
@@ -255,3 +255,4 @@ export default function AdminSubscriptionsPage() {
     </div>
   )
 }
+

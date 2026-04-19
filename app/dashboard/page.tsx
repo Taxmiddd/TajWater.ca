@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { supabase } from '@/lib/supabase'
 
-type OrderItem = { quantity: number; product: { name: string } | null }
+type OrderItem = { quantity: number; product: { name: string } | { name: string }[] | null }
 type Order = {
   id: string
   status: string
@@ -82,24 +82,23 @@ export default function DashboardPage() {
         const orders = ordersRes.data ?? []
         setOrderCount(orders.length)
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const totalJugs = (orders as any[]).reduce((sum: number, o: any) => {
-          return sum + (Array.isArray(o.order_items) ? o.order_items : []).reduce((s: number, item: any) => s + (item.quantity ?? 0), 0)
+        
+        const totalJugs = (orders as unknown as Order[]).reduce((sum: number, o: Order) => {
+          return sum + (Array.isArray(o.order_items) ? o.order_items : []).reduce((s: number, item: OrderItem) => s + (item.quantity ?? 0), 0)
         }, 0)
         setJugsOrdered(totalJugs)
 
         // Count all orders toward totalSpent, not just 'paid' — paid status relies on webhook
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const spent = (orders as unknown as any[])
-          .filter((o) => o.payment_status === 'paid' || o.payment_status === 'processing')
-          .reduce((s: number, o: { total: number }) => s + Number(o.total ?? 0), 0)
+        
+        const spent = (orders as unknown as Order[])
+          .filter((o: Order) => o.payment_status === 'paid' || o.payment_status === 'processing')
+          .reduce((s: number, o: Order) => s + Number(o.total ?? 0), 0)
         setTotalSpent(spent)
         setRecentOrders(orders.slice(0, 3) as unknown as Order[])
 
         const activeStatuses = ['pending', 'processing', 'out_for_delivery']
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const activeOrder = (orders as unknown as any[]).find((o: { status: string }) => activeStatuses.includes(o.status))
-        if (activeOrder) setLatestActiveOrder(activeOrder as Order)
+        const activeOrder = (orders as unknown as Order[]).find((o: Order) => activeStatuses.includes(o.status))
+        if (activeOrder) setLatestActiveOrder(activeOrder)
 
         // Load subscription (active OR paused — anything not cancelled)
         const { data: sub } = await supabase
@@ -130,7 +129,10 @@ export default function DashboardPage() {
   const getOrderItems = (order: Order) => {
     if (!order.order_items || order.order_items.length === 0) return 'No items'
     return order.order_items
-      .map((item) => `${item.quantity}× ${item.product?.name ?? 'Item'}`)
+      .map((item) => {
+        const prod = Array.isArray(item.product) ? (item.product[0] ?? null) : item.product
+        return `${item.quantity}× ${prod?.name ?? 'Item'}`
+      })
       .join(', ')
   }
 
@@ -398,3 +400,4 @@ export default function DashboardPage() {
     </div>
   )
 }
+

@@ -128,7 +128,7 @@ export default function AdminDashboard() {
     setLoading(false)
   }
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchData() }, [])
 
   const today = new Date().toLocaleDateString('en-CA', {
@@ -347,3 +347,4 @@ export default function AdminDashboard() {
     </div>
   )
 }
+

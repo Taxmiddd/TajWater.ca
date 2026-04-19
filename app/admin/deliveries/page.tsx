@@ -85,7 +85,7 @@ export default function DeliveriesPage() {
     setLoading(false)
   }
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchData() }, [])
 
   const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0)
@@ -406,3 +406,4 @@ export default function DeliveriesPage() {
     </div>
   )
 }
+

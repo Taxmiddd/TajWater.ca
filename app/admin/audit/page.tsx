@@ -56,7 +56,7 @@ export default function AuditPage() {
     setLoading(false)
   }
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/exhaustive-deps
   useEffect(() => { fetchData() }, [days])
 
   const filtered = logs.filter(l => {
@@ -183,3 +183,4 @@ export default function AuditPage() {
     </div>
   )
 }
+

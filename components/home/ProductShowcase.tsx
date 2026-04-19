@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { ShoppingCart, Droplets, Zap, Building2, ArrowRight, Package, LucideIcon } from 'lucide-react'
+import type { Product } from '@/types'
 import { supabase } from '@/lib/supabase'
 
 const iconMap: Record<string, LucideIcon> = {
@@ -41,7 +42,7 @@ const themeMap: Record<string, { badge: string; badgeColor: string; gradient: st
 }
 
 export default function ProductShowcase() {
-  const [productList, setProductList] = useState<any[]>([])
+  const [productList, setProductList] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -212,3 +213,4 @@ export default function ProductShowcase() {
     </section>
   )
 }
+

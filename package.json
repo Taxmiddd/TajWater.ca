@@ -1,13 +1,17 @@
 {
-  "name": "tajwater-temp",
-  "type": "module",
-  "version": "0.1.0",
+  "name": "tajwater",
+  "version": "1.0.0",
+  "description": "TajWater Pure Water Delivery & Filtration Services Platform",
+  "author": "TajWater",
+  "license": "Licensed",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.3.2",
@@ -29,6 +33,7 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.2.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

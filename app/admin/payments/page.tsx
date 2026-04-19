@@ -153,7 +153,7 @@ export default function PaymentsPage() {
     setLoading(false)
   }
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchData() }, [])
 
   // ── Revenue stats ────────────────────────────────────────────────────────
@@ -435,3 +435,4 @@ export default function PaymentsPage() {
     </div>
   )
 }
+
