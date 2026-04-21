@@ -7,7 +7,8 @@ const CITIES = [
   'vancouver', 'burnaby', 'richmond', 'surrey', 'langley',
   'coquitlam', 'port-coquitlam', 'port-moody', 'north-vancouver',
   'west-vancouver', 'delta', 'maple-ridge', 'pitt-meadows',
-  'white-rock', 'squamish', 'whistler',
+  'white-rock', 'squamish', 'whistler', 'cloverdale',
+  'langley-township', 'mary-hill', 'tsawwassen', 'walnut-grove',
 ]
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

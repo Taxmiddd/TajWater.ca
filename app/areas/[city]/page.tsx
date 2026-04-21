@@ -106,6 +106,36 @@ const CITY_DATA: Record<string, { name: string; districts: string[]; schedule: s
     schedule: 'Thursdays',
     description: 'Water delivery in Whistler. Premium 5-gallon water jugs for homes, hotels, and businesses in Whistler Village and surrounding areas.',
   },
+  'cloverdale': {
+    name: 'Cloverdale',
+    districts: ['Cloverdale Town Centre', 'Clayton', 'Clayton Heights', 'Hillcrest'],
+    schedule: 'Mon, Wed, Fri',
+    description: 'Water jug delivery in Cloverdale, Surrey. 5-gallon spring, alkaline, and distilled water delivered to Clayton, Clayton Heights, and Cloverdale Town Centre.',
+  },
+  'langley-township': {
+    name: 'Langley Township',
+    districts: ['Willoughby', 'Walnut Grove', 'Brookswood', 'Murrayville', 'Fort Langley', 'Aldergrove'],
+    schedule: 'Tue, Thu, Sat',
+    description: 'Water delivery across Langley Township. Serving Willoughby, Walnut Grove, Brookswood, Fort Langley, Aldergrove, and Murrayville with fresh 5-gallon jugs.',
+  },
+  'mary-hill': {
+    name: 'Mary Hill',
+    districts: ['Mary Hill', 'Citadel Heights', 'Riverwood', 'Prairie'],
+    schedule: 'Tue, Thu, Sat',
+    description: 'Water delivery to Mary Hill in Port Coquitlam. Fresh 5-gallon water jugs delivered to Mary Hill, Citadel Heights, and surrounding neighbourhoods.',
+  },
+  'tsawwassen': {
+    name: 'Tsawwassen',
+    districts: ['Tsawwassen Heights', 'English Bluff', 'Pebble Hill', 'Beach Grove', 'Boundary Bay'],
+    schedule: 'Mon, Wed, Fri',
+    description: 'Water delivery in Tsawwassen, Delta. 5-gallon spring and alkaline water jugs delivered to Tsawwassen Heights, Beach Grove, Boundary Bay, and all Tsawwassen areas.',
+  },
+  'walnut-grove': {
+    name: 'Walnut Grove',
+    districts: ['Walnut Grove Town Centre', 'Walnut Grove North', 'Walnut Grove South', 'Topham Park'],
+    schedule: 'Tue, Thu, Sat',
+    description: 'Water jug delivery in Walnut Grove, Langley Township. Fresh 5-gallon spring and alkaline water delivered to your door.',
+  },
 }
 
 export async function generateStaticParams() {
