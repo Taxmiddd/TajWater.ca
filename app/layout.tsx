@@ -163,6 +163,20 @@ const localBusinessJsonLd = {
           '@type': 'Product',
           name: '5 Gallon Spring Water Jug',
           category: 'Water',
+          image: `${BASE_URL}/og-image.png`,
+          description: 'Premium spring water in a 20L BPA-free jug.',
+          offers: {
+            '@type': 'Offer',
+            price: '8.99',
+            priceCurrency: 'CAD',
+            availability: 'https://schema.org/InStock',
+            url: `${BASE_URL}/shop`,
+          },
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: '5.0',
+            reviewCount: '128',
+          },
         },
       },
       {
