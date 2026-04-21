@@ -1,0 +1,215 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ShoppingCart, Plus, Minus, Search, Check } from 'lucide-react'
+import { StarRating } from '@/components/ui/StarRating'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { useCart } from '@/store/cartStore'
+import Link from 'next/link'
+import type { Product } from '@/types'
+import CartToast from '@/components/shared/CartToast'
+
+const categoryEmoji: Record<string, string> = {
+  water: '💧', equipment: '🔧', subscription: '🔄', accessories: '🧹',
+}
+const categoryColors: Record<string, string> = {
+  water: '#0097a7', equipment: '#1565c0', subscription: '#006064', accessories: '#00acc1',
+}
+
+interface ShopContentProps {
+  initialProducts: Product[]
+}
+
+export default function ShopContent({ initialProducts }: ShopContentProps) {
+  const [products] = useState<Product[]>(initialProducts)
+  const [categories, setCategories] = useState<string[]>(['all'])
+  const [search, setSearch] = useState('')
+  const [category, setCategory] = useState('all')
+  const [sort, setSort] = useState('default')
+  const [addedId, setAddedId] = useState<string | null>(null)
+  const { items, addItem, updateQuantity, count, _hasHydrated } = useCart()
+
+  useEffect(() => {
+    const cats = Array.from(new Set(initialProducts.map((p: Product) => p.category).filter(Boolean))) as string[]
+    setCategories(['all', ...cats.sort()])
+  }, [initialProducts])
+
+  const filtered = products
+    .filter((p) => category === 'all' || p.category === category)
+    .filter((p) =>
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      (p.description ?? '').toLowerCase().includes(search.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (sort === 'price-asc') return a.price - b.price
+      if (sort === 'price-desc') return b.price - a.price
+      return 0
+    })
+
+  const getCartQty = (id: string) => items.find((i) => i.product.id === id)?.quantity ?? 0
+
+  const handleAdd = (product: Product) => {
+    addItem(product, undefined)
+    setAddedId(product.id)
+    setTimeout(() => setAddedId(null), 2500)
+  }
+
+  return (
+    <div className="min-h-screen">
+      <CartToast product={products.find(p => p.id === addedId) ?? null} visible={addedId !== null} />
+      {/* Hero */}
+      <section className="relative py-24 hero-gradient overflow-hidden">
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 80" className="w-full" preserveAspectRatio="none">
+            <path d="M0,40 C240,80 480,0 720,40 C960,80 1200,0 1440,40 L1440,80 L0,80 Z" fill="#f0f9ff" />
+          </svg>
+        </div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}>
+            <h1 className="text-3xl sm:text-5xl font-extrabold text-white mb-4">Shop Pure Water</h1>
+            <p className="text-[#b3e5fc] text-lg">Jugs, dispensers, subscriptions & accessories — all in one place.</p>
+          </motion.div>
+        </div>
+      </section>
+
+      <section className="py-12 bg-[#f0f9ff]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Toolbar */}
+          <div className="flex flex-col md:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8">
+            <div className="relative flex-1">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#0097a7]" />
+              <Input placeholder="Search products..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 h-11 border-[#cce7f0] bg-white text-base" />
+            </div>
+            <div className="flex gap-2 sm:gap-4">
+              <select value={sort} onChange={(e) => setSort(e.target.value)} className="flex-1 md:flex-none h-11 px-3 sm:px-4 rounded-xl border border-[#cce7f0] bg-white text-[#0c2340] text-sm focus:border-[#0097a7] focus:outline-none">
+                <option value="default">Sort: Featured</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+              </select>
+              <Link href="/checkout" className="flex-1 md:flex-none">
+                <Button className="w-full h-11 gap-2 bg-gradient-to-r from-[#0097a7] to-[#1565c0] text-white font-semibold px-5 relative">
+                  <ShoppingCart className="w-4 h-4" />
+                  <span className="hidden sm:inline">Cart</span>
+                  {_hasHydrated && count() > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white text-[#0097a7] text-[10px] font-bold flex items-center justify-center border-2 border-[#f0f9ff]">
+                      {count()}
+                    </span>
+                  )}
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          {/* Category tabs */}
+          <div className="flex overflow-x-auto pb-4 sm:pb-0 sm:flex-wrap gap-2 mb-8 no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
+            {categories.map((cat) => (
+              <button key={cat} onClick={() => setCategory(cat)}
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap ${category === cat
+                  ? 'bg-[#0097a7] text-white shadow-lg shadow-[#0097a7]/30'
+                  : 'bg-white border border-[#cce7f0] text-[#4a7fa5] hover:border-[#0097a7] hover:text-[#0097a7]'
+                  }`}>
+                {cat === 'all' ? '🌊 All' : `${categoryEmoji[cat] ?? '📦'} ${cat.charAt(0).toUpperCase() + cat.slice(1)}`}
+              </button>
+            ))}
+          </div>
+
+          {/* Product grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <AnimatePresence>
+              {filtered.map((product, i) => {
+                const qty = getCartQty(product.id)
+                const color = categoryColors[product.category] ?? '#0097a7'
+                const justAdded = addedId === product.id
+
+                return (
+                  <motion.div key={product.id} layout initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ delay: i * 0.06 }}
+                    className="water-card bg-white rounded-3xl border border-[#cce7f0] overflow-hidden shadow-sm hover:shadow-md hover:border-[#0097a7]/30 transition-all">
+                    <Link href={`/shop/${product.id}`}>
+                      <div className="aspect-[4/5] flex items-center justify-center relative overflow-hidden cursor-pointer" style={{ background: `linear-gradient(135deg, ${color}10, ${color}20)` }}>
+                        {product.image_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={product.image_url} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                        ) : (
+                          <div className="text-7xl opacity-50">{categoryEmoji[product.category] ?? '💧'}</div>
+                        )}
+                        <Badge className="absolute top-4 left-4 text-[10px] z-10" style={{ background: color }}>
+                          {product.category}
+                        </Badge>
+                        {product.category === 'subscription' && (
+                          <Badge className="absolute top-4 right-4 bg-amber-500 text-[10px] z-10 shadow-sm">Save 15%</Badge>
+                        )}
+                        {product.stock === 0 && (
+                          <Badge className="absolute bottom-4 right-4 bg-red-500 text-[10px] z-10 shadow-sm">Out Of Stock</Badge>
+                        )}
+                        {/* Overlay gradient */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none" />
+                      </div>
+                    </Link>
+
+                    <div className="p-5">
+                      <Link href={`/shop/${product.id}`} className="group block mb-4">
+                        <h3 className="font-bold text-[#0c2340] mb-1.5 group-hover:text-[#0097a7] transition-colors">{product.name}</h3>
+                        <p className="text-[#4a7fa5] text-xs leading-relaxed line-clamp-2">{product.description}</p>
+                      </Link>
+                      <div className="flex items-center gap-2 mt-1">
+                        <StarRating rating={product.rating || 5.0} size="w-3.5 h-3.5" />
+                        <span className="text-[10px] font-bold text-[#4a7fa5]">{product.rating || 5.0}</span>
+                        <span className="text-[10px] text-[#4a7fa5]/60">({product.review_count || 0})</span>
+                      </div>
+
+                      <div className="flex items-center justify-between mt-6">
+                        <div>
+                          <p className="text-2xl font-extrabold" style={{ color }}>${product.price.toFixed(2)}</p>
+                          <p className="text-xs text-[#4a7fa5]">
+                            {product.category === 'subscription' && !product.unit_label 
+                              ? '/month' 
+                              : product.unit_label 
+                                ? (product.unit_label.toLowerCase().includes('per') || 
+                                   product.unit_label.startsWith('/') || 
+                                   product.unit_label.toLowerCase().startsWith('each') 
+                                     ? product.unit_label 
+                                     : `per ${product.unit_label}`) 
+                                : 'per unit'}
+                          </p>
+                        </div>
+
+                        {qty > 0 ? (
+                          <div className="flex items-center gap-2">
+                            <button onClick={() => updateQuantity(product.id, qty - 1)} className="w-8 h-8 rounded-lg border border-[#cce7f0] flex items-center justify-center hover:border-[#0097a7] hover:text-[#0097a7] transition-colors">
+                              <Minus className="w-3.5 h-3.5" />
+                            </button>
+                            <span className="w-6 text-center font-bold text-[#0c2340]">{qty}</span>
+                            <button onClick={() => updateQuantity(product.id, qty + 1)} className="w-8 h-8 rounded-lg flex items-center justify-center text-white" style={{ background: color }}>
+                              <Plus className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ) : (
+                          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} onClick={() => handleAdd(product)}
+                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold transition-all"
+                            style={{ background: justAdded ? '#22c55e' : `linear-gradient(135deg, ${color}, ${color}cc)` }}>
+                            {justAdded ? <><Check className="w-4 h-4" /> Added</> : <><ShoppingCart className="w-4 h-4" /> Add</>}
+                          </motion.button>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                )
+              })}
+            </AnimatePresence>
+          </div>
+
+          {filtered.length === 0 && (
+            <div className="text-center py-20 text-[#4a7fa5]">
+              <div className="text-5xl mb-4">💧</div>
+              <p className="font-semibold">No products found</p>
+              <button onClick={() => { setSearch(''); setCategory('all') }} className="mt-3 text-[#0097a7] underline text-sm">Clear filters</button>
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  )
+}
