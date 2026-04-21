@@ -10,10 +10,10 @@ const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://tajwater.ca'
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
-    default: 'TajWater — Pure Water Delivered to Your Door | Metro Vancouver',
+    default: 'TajWater — #1 Water Delivery Service in Metro Vancouver',
     template: '%s | TajWater',
   },
-  description: 'Affordable and Competitive 5-gallon water jug delivery across Metro Vancouver. Premium spring, alkaline & distilled water, water dispenser installation, filter systems, and commercial bulk supply. Same-day & scheduled delivery. Serving Vancouver, Burnaby, Richmond, Surrey, Langley and more. TajWater - Your #1 drinking water supplier.',
+  description: '5-gallon water jug delivery across Metro Vancouver. Spring, alkaline & distilled water, filter installation, and commercial supply. Same-day delivery available.',
   keywords: [
     'drinking water supplier Vancouver',
     '5 gallon water jug delivery Vancouver',
@@ -82,10 +82,11 @@ export const metadata: Metadata = {
 const localBusinessJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'LocalBusiness',
+  additionalType: 'https://schema.org/WaterDeliveryService',
   '@id': `${BASE_URL}/#business`,
   name: 'TajWater',
   alternateName: 'Taj Water',
-  description: 'Premium water delivery service across Metro Vancouver. 20L spring, alkaline & distilled jugs, water filter installation, and commercial bulk water supply.',
+  description: '5-gallon water jug delivery across Metro Vancouver. Spring, alkaline & distilled water, filter installation, and commercial supply.',
   url: BASE_URL,
   logo: `${BASE_URL}/logo/tajcyan.svg`,
   image: `${BASE_URL}/og-image.png`,
@@ -102,21 +103,28 @@ const localBusinessJsonLd = {
     { '@type': 'City', name: 'North Vancouver' },
     { '@type': 'City', name: 'West Vancouver' },
     { '@type': 'City', name: 'Coquitlam' },
+    { '@type': 'City', name: 'Port Coquitlam' },
     { '@type': 'City', name: 'Port Moody' },
     { '@type': 'City', name: 'Delta' },
     { '@type': 'City', name: 'Langley' },
+    { '@type': 'City', name: 'Maple Ridge' },
+    { '@type': 'City', name: 'Pitt Meadows' },
+    { '@type': 'City', name: 'White Rock' },
+    { '@type': 'City', name: 'Squamish' },
+    { '@type': 'City', name: 'Whistler' },
   ],
   address: {
     '@type': 'PostalAddress',
-    addressLocality: 'Vancouver',
+    streetAddress: '1770 McLean Ave',
+    addressLocality: 'Port Coquitlam',
     addressRegion: 'BC',
     addressCountry: 'CA',
-    postalCode: 'V5K 0A1',
+    postalCode: 'V3C 4K8',
   },
   geo: {
     '@type': 'GeoCoordinates',
-    latitude: 49.2827,
-    longitude: -123.1207,
+    latitude: 49.2614,
+    longitude: -122.7681,
   },
   openingHoursSpecification: [
     {

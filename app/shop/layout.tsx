@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Shop 5-Gallon Water Jugs — Best Prices in Vancouver | TajWater',
+  title: 'Shop 5-Gallon Water Jugs — Best Prices in Vancouver',
   description: 'Order cheap and competitive 5-gallon spring, alkaline, and distilled water jugs online. Fast delivery across Metro Vancouver. Subscribe and save 15% on regular deliveries.',
   keywords: [
     'buy 5 gallon water jug Vancouver',

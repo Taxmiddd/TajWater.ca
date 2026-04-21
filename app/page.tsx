@@ -6,6 +6,7 @@ import DeliveryChecker from '@/components/home/DeliveryChecker'
 import TrustSignals from '@/components/home/TrustSignals'
 import Testimonials from '@/components/home/Testimonials'
 import Newsletter from '@/components/home/Newsletter'
+import FAQ from '@/components/home/FAQ'
 
 export default function HomePage() {
   return (
@@ -17,8 +18,8 @@ export default function HomePage() {
       <ServicesOverview />
       <DeliveryChecker />
       <Testimonials />
+      <FAQ />
       <Newsletter />
     </>
   )
 }
-

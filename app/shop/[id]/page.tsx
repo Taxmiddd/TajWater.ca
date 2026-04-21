@@ -36,19 +36,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!product) {
     return {
-      title: 'Product Not Found | TajWater',
+      title: 'Product Not Found',
     }
   }
 
-  const title = `${product.name} — Buy 5-Gallon Water Jugs Vancouver | TajWater`
-  const description = product.description || `Cheap and competitive ${product.name} delivery in Vancouver. Best prices for 5-gallon water jugs and dispensers.`
+  const categoryLabel: Record<string, string> = {
+    water: '5-Gallon Water Jugs',
+    equipment: 'Water Dispensers & Equipment',
+    subscription: 'Water Subscriptions',
+    accessories: 'Water Accessories',
+  }
+  const catText = categoryLabel[product.category] ?? product.category
+
+  const title = `${product.name} — ${catText} Vancouver`
+  const description = product.description || `Order ${product.name} online. Fast delivery across Metro Vancouver. Competitive prices on ${catText.toLowerCase()}.`
   const url = `https://tajwater.ca/shop/${id}`
 
   return {
     title,
     description,
     openGraph: {
-      title,
+      title: `${title} | TajWater`,
       description,
       url,
       type: 'website',
@@ -56,7 +64,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: 'summary_large_image',
-      title,
+      title: `${title} | TajWater`,
       description,
       images: product.image_url ? [product.image_url] : [],
     },

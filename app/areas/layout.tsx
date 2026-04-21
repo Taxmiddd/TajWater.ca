@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Script from 'next/script'
 
 export const metadata: Metadata = {
-  title: 'Service Areas — 5-Gallon Water Delivery Across Metro Vancouver | TajWater',
+  title: 'Service Areas — 5-Gallon Water Delivery Across Metro Vancouver',
   description: 'Cheap and competitive 5-gallon water jug delivery in Vancouver, Burnaby, Richmond, Surrey, Langley and more. See our full service area and delivery schedule.',
   keywords: [
     'water delivery Vancouver',

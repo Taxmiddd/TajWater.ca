@@ -94,11 +94,11 @@ export default function Hero() {
             transition={{ delay: 0.2, duration: 0.7 }}
             className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-[1.15] mb-6"
           >
-            Vancouver&apos;s Best
+            Vancouver&apos;s #1
             <br />
-            <span className="gradient-text-light">Drinking Water Supplier</span>
+            <span className="gradient-text-light">Water Delivery</span>
             <br />
-            Delivered to Your Door
+            Service
           </motion.h1>
 
           <motion.p

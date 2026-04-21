@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
-export const alt = 'TajWater — Pure Water Delivered to Your Door'
+export const alt = 'TajWater — #1 Water Delivery Service in Metro Vancouver'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -108,7 +108,7 @@ export default async function Image() {
             justifyContent: 'center',
           }}
         >
-          {['Vancouver', 'Burnaby', 'Richmond', 'Surrey', '+ 6 More Zones'].map((zone) => (
+          {['Vancouver', 'Burnaby', 'Richmond', 'Surrey', '+ 12 More Zones'].map((zone) => (
             <span
               key={zone}
               style={{
