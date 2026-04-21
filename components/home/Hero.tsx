@@ -5,38 +5,11 @@ import { motion, useScroll, useTransform } from 'framer-motion'
 import Link from 'next/link'
 import { ArrowRight, Play, Droplets, ChevronDown } from 'lucide-react'
 import WaterBackground from '@/components/shared/WaterBackground'
-import { supabase } from '@/lib/supabase'
-
-export default function Hero() {
+export default function Hero({ description }: { description: string }) {
   const { scrollY } = useScroll()
-  const [services, setServices] = useState<string[]>([])
 
   // Very subtle — blobs drift 40px up over first 500px of scroll
   const blobY = useTransform(scrollY, [0, 500], [0, -40])
-
-  useEffect(() => {
-    supabase
-      .from('services')
-      .select('title')
-      .eq('active', true)
-      .order('sort_order')
-      .limit(3)
-      .then(({ data }) => {
-        if (data && data.length > 0) {
-          // Filter out any "Ice" related services to ensure accuracy
-          const filtered = data
-            .map(s => s.title)
-            .filter(title => !title.toLowerCase().includes('ice'))
-          setServices(filtered)
-        }
-      })
-  }, [])
-
-  const description = services.length > 0
-    ? (services.length > 1 
-        ? `${services.slice(0, -1).join(', ')}, and ${services[services.length - 1]}`
-        : services[0]) + ' Across Metro Vancouver. Affordable and Competitive 5-Gallon Water Delivery — Fresh, Clean, and on Time.'
-    : 'Affordable and Competitive 5-Gallon Water Delivery, Filter Installation, and Commercial Supply Across Metro Vancouver. Your #1 Drinking Water Supplier.'
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden hero-gradient">
@@ -88,10 +61,7 @@ export default function Hero() {
           </motion.div>
 
           {/* Headline */}
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.7 }}
+          <h1
             className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-[1.15] mb-6"
           >
             Vancouver&apos;s #1
@@ -99,16 +69,13 @@ export default function Hero() {
             <span className="gradient-text-light">Water Delivery</span>
             <br />
             Service
-          </motion.h1>
+          </h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 }}
+          <p
             className="text-lg sm:text-xl text-[#b3e5fc] mb-10 max-w-xl leading-relaxed min-h-[3.5rem]"
           >
             {description}
-          </motion.p>
+          </p>
 
           {/* CTAs */}
           <motion.div
