@@ -174,8 +174,8 @@ const localBusinessJsonLd = {
           },
           aggregateRating: {
             '@type': 'AggregateRating',
-            ratingValue: '5.0',
-            reviewCount: '128',
+            ratingValue: 5.0,
+            reviewCount: 128,
           },
         },
       },
