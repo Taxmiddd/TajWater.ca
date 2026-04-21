@@ -61,26 +61,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }))
 
-  // Dynamic product pages
-  let productPages: MetadataRoute.Sitemap = []
-  try {
-    const db = createServerClient()
-    const { data } = await db
-      .from('products')
-      .select('id, updated_at')
-      .eq('active', true)
-
-    if (data) {
-      productPages = data.map((product) => ({
-        url: `${BASE_URL}/shop/${product.id}`,
-        lastModified: product.updated_at ? new Date(product.updated_at) : new Date(),
-        changeFrequency: 'weekly' as const,
-        priority: 0.7,
-      }))
-    }
-  } catch {
-    // If Supabase is unavailable at build time, skip product pages gracefully
-  }
+  // Dynamic product pages (Temporarily disabled for stability)
+  const productPages: MetadataRoute.Sitemap = []
 
   return [...staticPages, ...cityPages, ...productPages]
 }

@@ -24,8 +24,9 @@ interface ShopContentProps {
 }
 
 export default function ShopContent({ initialProducts }: ShopContentProps) {
-  const [products] = useState<Product[]>(initialProducts)
+  const [products, setProducts] = useState<Product[]>(initialProducts)
   const [categories, setCategories] = useState<string[]>(['all'])
+  const [loading, setLoading] = useState(initialProducts.length === 0)
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('all')
   const [sort, setSort] = useState('default')
@@ -33,8 +34,28 @@ export default function ShopContent({ initialProducts }: ShopContentProps) {
   const { items, addItem, updateQuantity, count, _hasHydrated } = useCart()
 
   useEffect(() => {
-    const cats = Array.from(new Set(initialProducts.map((p: Product) => p.category).filter(Boolean))) as string[]
-    setCategories(['all', ...cats.sort()])
+    if (initialProducts.length > 0) {
+      setProducts(initialProducts)
+      const cats = Array.from(new Set(initialProducts.map((p: Product) => p.category).filter(Boolean))) as string[]
+      setCategories(['all', ...cats.sort()])
+      setLoading(false)
+    } else {
+      const fetchProducts = async () => {
+        const { supabase } = await import('@/lib/supabase')
+        const { data } = await supabase
+          .from('products')
+          .select('*')
+          .eq('active', true)
+          .order('category')
+        if (data) {
+          setProducts(data)
+          const cats = Array.from(new Set(data.map((p: any) => p.category).filter(Boolean))) as string[]
+          setCategories(['all', ...cats.sort()])
+        }
+        setLoading(false)
+      }
+      fetchProducts()
+    }
   }, [initialProducts])
 
   const filtered = products

@@ -51,6 +51,28 @@ export default function AreasContent({ initialDbZones }: AreasContentProps) {
         }
       })
       setDisplayZones(merged)
+    } else {
+      const fetchZones = async () => {
+        const { supabase } = await import('@/lib/supabase')
+        const { data } = await supabase
+          .from('zones')
+          .select('name, delivery_fee, schedule')
+          .eq('active', true)
+        if (data) {
+          const merged = data.map((dbZone, i) => {
+            const existing = HARDCODED_ZONES.find(hz => hz.name.toLowerCase() === dbZone.name.toLowerCase())
+            return {
+              name: dbZone.name,
+              fee: dbZone.delivery_fee === 0 ? 'Free' : `$${dbZone.delivery_fee.toFixed(2)}`,
+              schedule: dbZone.schedule,
+              color: existing?.color || ['#0097a7', '#1565c0', '#006064', '#00acc1'][i % 4],
+              districts: existing?.districts || []
+            }
+          })
+          setDisplayZones(merged)
+        }
+      }
+      fetchZones()
     }
   }, [initialDbZones])
 

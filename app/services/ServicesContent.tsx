@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Droplets, Settings, Building2, RefreshCw, Clock, Shield, CheckCircle2, ChevronDown, Phone, ArrowRight, LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -43,7 +43,27 @@ interface ServicesContentProps {
 
 export default function ServicesContent({ initialServices }: ServicesContentProps) {
   const [openFaq, setOpenFaq] = useState<number | null>(null)
-  const [services] = useState<Service[]>(initialServices)
+  const [services, setServices] = useState<Service[]>(initialServices)
+  const [loading, setLoading] = useState(initialServices.length === 0)
+
+  useEffect(() => {
+    if (initialServices.length > 0) {
+      setServices(initialServices)
+      setLoading(false)
+    } else {
+      const fetchServices = async () => {
+        const { supabase } = await import('@/lib/supabase')
+        const { data } = await supabase
+          .from('services')
+          .select('*')
+          .eq('active', true)
+          .order('sort_order')
+        if (data) setServices(data)
+        setLoading(false)
+      }
+      fetchServices()
+    }
+  }, [initialServices])
 
   return (
     <div className="min-h-screen">

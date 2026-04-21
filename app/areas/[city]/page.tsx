@@ -186,19 +186,12 @@ export default async function CityPage({ params }: Props) {
   const data = CITY_DATA[city]
   if (!data) notFound()
 
-  // Fetch featured products for CTA
-  let products: { id: string; name: string; price: number; category: string }[] = []
-  try {
-    const db = createServerClient()
-    const { data: prods } = await db
-      .from('products')
-      .select('id, name, price, category')
-      .eq('active', true)
-      .eq('category', 'water')
-      .order('price')
-      .limit(3)
-    if (prods) products = prods
-  } catch { /* graceful fallback */ }
+  // Hardcoded featured products to ensure 100% static stability without DB hits at runtime
+  const products = [
+    { id: 'spring-5g', name: '5 Gallon Spring Water', price: 8.99, category: 'water' },
+    { id: 'alkaline-5g', name: '5 Gallon Alkaline Water', price: 12.99, category: 'water' },
+    { id: 'distilled-5g', name: '5 Gallon Distilled Water', price: 9.99, category: 'water' },
+  ]
 
   const jsonLd = {
     '@context': 'https://schema.org',
