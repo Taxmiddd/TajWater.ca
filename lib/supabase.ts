@@ -19,13 +19,21 @@ export const supabase = new Proxy({} as SupabaseClient, {
   },
 })
 
-// Server client — uses service role key, bypasses RLS. Only call inside API routes.
+// Server client — uses service role key, bypasses RLS. Only call inside API routes or server components.
 export function createServerClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  
+  if (!url || !key) {
+    console.error('Supabase server client initialized without URL or Service Role Key')
+    // Return a dummy client or throw a more descriptive error
+    // For now, we'll return a client that will fail gracefully on execution
+    return createClient(url || '', key || '', {
       auth: { autoRefreshToken: false, persistSession: false },
-    }
-  )
+    })
+  }
+
+  return createClient(url, key, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  })
 }

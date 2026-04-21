@@ -1,7 +1,7 @@
 import { createServerClient } from '@/lib/supabase'
 import AreasContent from './AreasContent'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 3600 // revalidate every hour
 
 async function getZones() {
   const supabase = createServerClient()

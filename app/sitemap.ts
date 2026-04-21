@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next'
 import { createServerClient } from '@/lib/supabase'
+export const revalidate = 3600 // revalidate every hour
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://tajwater.ca'
 

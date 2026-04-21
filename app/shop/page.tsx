@@ -1,7 +1,7 @@
 import { createServerClient } from '@/lib/supabase'
 import ShopContent from './ShopContent'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 3600 // revalidate every hour
 
 async function getProducts() {
   const supabase = createServerClient()
