@@ -18,11 +18,9 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
+            request,
           })
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options)
@@ -35,20 +33,17 @@ export async function middleware(request: NextRequest) {
   // 2. Perform Auth Check for Admin routes
   const { pathname } = request.nextUrl
   if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data, error } = await supabase.auth.getUser()
+    const user = data?.user
 
-    if (!user) {
-      // Not logged in -> Redirect to login
+    if (error || !user) {
+      // Not logged in or error -> Redirect to login
       const url = request.nextUrl.clone()
       url.pathname = '/admin/login'
-      // Pass the current path as a redirect parameter if needed (optional)
       return NextResponse.redirect(url)
     }
 
     // 3. Verify Admin Status (check admin_users table)
-    // We use a regular query here. If we need to bypass RLS, we'd need service role,
-    // but usually admin_users is readable by authenticated users or specifically protected.
-    // For middleware, we should use a client that can verify role.
     const { data: adminRow } = await supabase
       .from('admin_users')
       .select('role')
@@ -56,7 +51,7 @@ export async function middleware(request: NextRequest) {
       .single()
 
     if (!adminRow) {
-      // User is logged in but NOT an admin -> Redirect to login or forbidden
+      // User is logged in but NOT an admin -> Redirect to login
       const url = request.nextUrl.clone()
       url.pathname = '/admin/login'
       return NextResponse.redirect(url)
