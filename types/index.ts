@@ -99,3 +99,20 @@ export interface DeliveryZone {
   fee: number
   schedule: string
 }
+
+export interface PaymentLink {
+  id: string
+  description: string
+  amount: number
+  currency: string
+  customer_name: string | null
+  customer_phone: string | null
+  customer_email: string | null
+  internal_note: string | null
+  status: 'pending' | 'paid'
+  square_payment_id: string | null
+  line_items: { description: string; quantity: number; unit_price: number }[] | null
+  created_at: string
+  paid_at: string | null
+  created_by: string | null
+}

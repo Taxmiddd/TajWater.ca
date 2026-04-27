@@ -18,7 +18,7 @@ export default function ConditionalShell({ children }: { children: React.ReactNo
   // The server might evaluate pathname differently. By defaulting to the public shell layout 
   // during SSR and hydration (mounted = false), React correctly hydrates without crashing.
   // Once mounted, it correctly evaluates the path and hides the shell if needed.
-  const isExcluded = pathname?.startsWith('/admin') || pathname?.startsWith('/auth') || pathname?.startsWith('/dashboard')
+  const isExcluded = pathname?.startsWith('/admin') || pathname?.startsWith('/auth') || pathname?.startsWith('/dashboard') || pathname?.startsWith('/pay')
   const hideShell = mounted ? isExcluded : false
 
   return (

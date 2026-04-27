@@ -344,3 +344,70 @@ export function buildAdminOrderNotificationEmail(order: {
 </table>
 `, `Admin: New Order from ${order.customerName} (${shortId})`, undefined, coUrl)
 }
+
+// ─── Payment Link Request ───────────────────────────────────────────────────────
+export function buildPaymentLinkEmail({ paymentId, amount, description, customerName, paymentUrl }: {
+  paymentId: string; amount: number; description: string; customerName?: string; paymentUrl: string
+}): string {
+  const coEmail = process.env.NEXT_PUBLIC_COMPANY_EMAIL ?? 'billing@tajwater.ca'
+  const coUrl   = process.env.NEXT_PUBLIC_SITE_URL      ?? 'https://tajwater.ca'
+  const greet = customerName ? `Dear ${customerName},` : 'Hello,'
+
+  return shell(`
+<h1 style="margin:0 0 16px;font-size:24px;font-weight:800;color:#0f172a;letter-spacing:-0.5px;">Payment Request</h1>
+<p style="margin:0 0 32px;font-size:16px;color:#334155;line-height:1.6;">${greet}<br/><br/>TajWater has sent you a payment request for <strong>$${amount.toFixed(2)} CAD</strong>.</p>
+
+<div style="background:#f1f5f9;border-radius:12px;padding:24px;margin-bottom:32px;border:1px solid #e2e8f0;">
+  <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Description</p>
+  <p style="margin:0 0 16px;font-size:15px;color:#1e293b;">${description}</p>
+  
+  <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Reference ID</p>
+  <p style="margin:0 0 16px;font-size:15px;font-mono;color:#0097a7;font-weight:bold;">${paymentId}</p>
+
+  <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Amount Due</p>
+  <p style="margin:0;font-size:20px;font-weight:800;color:#0c4a6e;">$${amount.toFixed(2)} CAD</p>
+</div>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
+  <tr><td align="center">
+    <a href="${paymentUrl}" style="display:inline-block;background:#0c4a6e;color:#ffffff;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:600;text-decoration:none;">Pay Securely Online &rarr;</a>
+  </td></tr>
+</table>
+
+<p style="margin:0;font-size:13px;color:#94a3b8;line-height:1.7;text-align:center;">Payments are processed securely by Square. If you have any questions, please contact <a href="mailto:${coEmail}" style="color:#0c4a6e;text-decoration:none;">${coEmail}</a>.</p>
+`, `Payment Request: $${amount.toFixed(2)} CAD for ${description}`, coEmail, coUrl)
+}
+
+// ─── Payment Receipt ───────────────────────────────────────────────────────────
+export function buildPaymentReceiptEmail({ paymentId, amount, description, customerName, paidAt }: {
+  paymentId: string; amount: number; description: string; customerName?: string; paidAt: string
+}): string {
+  const coEmail = process.env.NEXT_PUBLIC_COMPANY_EMAIL ?? 'billing@tajwater.ca'
+  const coUrl   = process.env.NEXT_PUBLIC_SITE_URL      ?? 'https://tajwater.ca'
+  const greet = customerName ? `Dear ${customerName},` : 'Hello,'
+  const dateStr = new Date(paidAt).toLocaleDateString('en-CA', { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+
+  return shell(`
+<div style="text-align:center;margin-bottom:24px;">
+  <div style="font-size:48px;margin-bottom:16px;">✅</div>
+  <h1 style="margin:0;font-size:24px;font-weight:800;color:#0f172a;letter-spacing:-0.5px;">Payment Receipt</h1>
+</div>
+<p style="margin:0 0 32px;font-size:16px;color:#334155;line-height:1.6;text-align:center;">${greet}<br/><br/>Thank you for your payment. Your transaction has been successfully completed.</p>
+
+<div style="background:#f0fdf4;border:1px solid #dcfce7;border-radius:12px;padding:24px;margin-bottom:32px;">
+  <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:1px;">Reference ID</p>
+  <p style="margin:0 0 16px;font-size:15px;font-mono;color:#14532d;font-weight:bold;">${paymentId}</p>
+
+  <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:1px;">Description</p>
+  <p style="margin:0 0 16px;font-size:15px;color:#14532d;">${description}</p>
+
+  <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:1px;">Paid On</p>
+  <p style="margin:0 0 16px;font-size:15px;color:#14532d;">${dateStr}</p>
+
+  <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:1px;">Total Paid</p>
+  <p style="margin:0;font-size:20px;font-weight:800;color:#14532d;">$${amount.toFixed(2)} CAD</p>
+</div>
+
+<p style="margin:0;font-size:13px;color:#94a3b8;line-height:1.7;text-align:center;">This email serves as your official receipt. Keep it for your records. If you have any questions, please contact <a href="mailto:${coEmail}" style="color:#0c4a6e;text-decoration:none;">${coEmail}</a>.</p>
+`, `Receipt for Payment ${paymentId}`, coEmail, coUrl)
+}

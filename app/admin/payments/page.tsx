@@ -1,18 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   DollarSign, TrendingUp, Clock, XCircle, Download,
   RefreshCw, Search, CheckCircle2, Package, CreditCard,
-  RotateCcw, AlertTriangle, ExternalLink, Trash2
+  RotateCcw, AlertTriangle, ExternalLink, Trash2, Link2, Plus, QrCode, Copy, Mail, Calendar, Check, User
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { supabase } from '@/lib/supabase'
 import { exportCSV } from '@/lib/csv'
+import QRCode from 'qrcode'
+import type { PaymentLink } from '@/types'
 
+// ── Shared Types & Helpers ──────────────────────────────────────────────────
 type TxnRow = {
   id: string
   user_id: string | null
@@ -51,20 +54,67 @@ const FILTER_OPTIONS = ['all', 'paid', 'pending', 'failed', 'refunded', 'dispute
 
 type RefundDialog = { orderId: string; total: number; amount: string; loading: boolean; error: string }
 
+// ── Main Component ────────────────────────────────────────────────────────────
 export default function PaymentsPage() {
-  const [txns,        setTxns]        = useState<TxnRow[]>([])
-  const [loading,     setLoading]     = useState(true)
-  const [search,      setSearch]      = useState('')
-  const [filter,      setFilter]      = useState('all')
-  const [toast,       setToast]       = useState('')
-  const [refundDlg,   setRefundDlg]   = useState<RefundDialog | null>(null)
-
+  const [activeTab, setActiveTab] = useState<'orders' | 'links'>('orders')
+  const [toast, setToast] = useState('')
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 3000) }
 
-  const openRefund = (txn: TxnRow) => {
-    setRefundDlg({ orderId: txn.id, total: txn.total, amount: txn.total.toFixed(2), loading: false, error: '' })
+  // Orders State
+  const [txns, setTxns] = useState<TxnRow[]>([])
+  const [loadingOrders, setLoadingOrders] = useState(true)
+  const [searchOrders, setSearchOrders] = useState('')
+  const [filterOrders, setFilterOrders] = useState('all')
+  const [refundDlg, setRefundDlg] = useState<RefundDialog | null>(null)
+
+  // Links State
+  const [links, setLinks] = useState<PaymentLink[]>([])
+  const [loadingLinks, setLoadingLinks] = useState(true)
+  const [searchLinks, setSearchLinks] = useState('')
+  const [filterLinks, setFilterLinks] = useState('all')
+  const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [qrModal, setQrModal] = useState<{ id: string; url: string; qrDataUrl: string } | null>(null)
+
+  // Fetch Data
+  const fetchOrders = async () => {
+    setLoadingOrders(true)
+    const { data: rows, error } = await supabase
+      .from('orders')
+      .select('id, user_id, status, payment_status, payment_method, total, refund_amount, created_at, customer_name, square_payment_id, zones(name)')
+      .order('created_at', { ascending: false })
+      .limit(300)
+
+    if (error) { console.error(error); setLoadingOrders(false); return }
+
+    const orderRows = (rows ?? []) as Omit<TxnRow, 'profile'>[]
+    const uids = [...new Set(orderRows.map(o => o.user_id).filter(Boolean))] as string[]
+    const profMap: Record<string, { name: string }> = {}
+    if (uids.length > 0) {
+      const { data: profs } = await supabase.from('profiles').select('id, name').in('id', uids)
+      profs?.forEach((p: { id: string; name: string }) => { profMap[p.id] = p })
+    }
+
+    setTxns(orderRows.map(o => ({ ...o, profile: o.user_id ? (profMap[o.user_id] ?? null) : null })))
+    setLoadingOrders(false)
   }
 
+  const fetchLinks = async () => {
+    setLoadingLinks(true)
+    const res = await fetch('/api/admin/payment-links')
+    if (res.ok) {
+      const data = await res.json()
+      setLinks(data)
+    }
+    setLoadingLinks(false)
+  }
+
+  useEffect(() => {
+    if (activeTab === 'orders' && txns.length === 0) fetchOrders()
+    if (activeTab === 'links' && links.length === 0) fetchLinks()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab])
+
+  // ── Orders Helpers ──────────────────────────────────────────────────────────
   const submitRefund = async () => {
     if (!refundDlg) return
     const amt = parseFloat(refundDlg.amount)
@@ -83,107 +133,68 @@ export default function PaymentsPage() {
       setRefundDlg(d => d ? { ...d, loading: false, error: json.error ?? 'Refund failed' } : null)
       return
     }
-    setTxns(prev => prev.map(t =>
-      t.id === refundDlg.orderId
-        ? { ...t, payment_status: 'refunded', status: 'cancelled', refund_amount: amt }
-        : t
-    ))
+    setTxns(prev => prev.map(t => t.id === refundDlg.orderId ? { ...t, payment_status: 'refunded', status: 'cancelled', refund_amount: amt } : t))
     setRefundDlg(null)
     showToast(`Refund of $${amt.toFixed(2)} processed`)
   }
 
   const handleCleanup = async () => {
     const pendingCount = txns.filter(t => (t.payment_status ?? 'pending') === 'pending').length
-    if (pendingCount === 0) {
-      showToast('No pending orders to clean up')
-      return
-    }
+    if (pendingCount === 0) return showToast('No pending orders to clean up')
     if (!confirm(`Delete all ${pendingCount} pending test orders? This cannot be undone.`)) return
     
-    setLoading(true)
+    setLoadingOrders(true)
     try {
-      // 1. Get IDs of pending orders
-      const pendingIds = txns
-        .filter(t => (t.payment_status ?? 'pending') === 'pending')
-        .map(t => t.id)
-
-      // 2. Delete order_items first
+      const pendingIds = txns.filter(t => (t.payment_status ?? 'pending') === 'pending').map(t => t.id)
       await supabase.from('order_items').delete().in('order_id', pendingIds)
-
-      // 3. Delete orders
       const { error } = await supabase.from('orders').delete().in('id', pendingIds)
-
       if (error) throw error
-
       setTxns(prev => prev.filter(t => !pendingIds.includes(t.id)))
       showToast(`Cleaned up ${pendingCount} orders`)
     } catch (err) {
       console.error('Cleanup error:', err)
       showToast('Cleanup failed')
     } finally {
-      setLoading(false)
+      setLoadingOrders(false)
     }
   }
 
-  const fetchData = async () => {
-    setLoading(true)
-
-    const { data: rows, error } = await supabase
-      .from('orders')
-      .select('id, user_id, status, payment_status, payment_method, total, refund_amount, created_at, customer_name, square_payment_id, zones(name)')
-      .order('created_at', { ascending: false })
-      .limit(300)
-
-    if (error) { console.error(error); setLoading(false); return }
-
-    const orderRows = (rows ?? []) as Omit<TxnRow, 'profile'>[]
-
-    // Resolve profile names for logged-in customers
-    const uids = [...new Set(orderRows.map(o => o.user_id).filter(Boolean))] as string[]
-    const profMap: Record<string, { name: string }> = {}
-    if (uids.length > 0) {
-      const { data: profs } = await supabase.from('profiles').select('id, name').in('id', uids)
-      profs?.forEach((p: { id: string; name: string }) => { profMap[p.id] = p })
-    }
-
-    setTxns(orderRows.map(o => ({
-      ...o,
-      profile: o.user_id ? (profMap[o.user_id] ?? null) : null,
-    })))
-    setLoading(false)
-  }
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { fetchData() }, [])
-
-  // ── Revenue stats ────────────────────────────────────────────────────────
-  const now        = new Date()
-  const todayStart = new Date(now); todayStart.setHours(0, 0, 0, 0)
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-
-  const paidTxns      = txns.filter(t => t.payment_status === 'paid')
-  const todayRevenue  = paidTxns.filter(t => new Date(t.created_at) >= todayStart).reduce((s, t) => s + t.total, 0)
-  const monthRevenue  = paidTxns.filter(t => new Date(t.created_at) >= monthStart).reduce((s, t) => s + t.total, 0)
-  const pendingAmount = txns.filter(t => !t.payment_status || t.payment_status === 'pending').reduce((s, t) => s + t.total, 0)
-  const refundAmount  = txns.filter(t => t.payment_status === 'refunded' && new Date(t.created_at) >= monthStart).reduce((s, t) => s + (t.refund_amount ?? t.total), 0)
-
-  // ── Filter ───────────────────────────────────────────────────────────────
-  const filtered = txns
-    .filter(t => filter === 'all' || (t.payment_status ?? 'pending') === filter)
+  const filteredOrders = txns
+    .filter(t => filterOrders === 'all' || (t.payment_status ?? 'pending') === filterOrders)
     .filter(t => {
-      const q = search.toLowerCase()
-      return (
-        shortId(t.id).toLowerCase().includes(q) ||
-        (t.profile?.name ?? t.customer_name ?? '').toLowerCase().includes(q) ||
-        getZoneName(t.zones).toLowerCase().includes(q) ||
-        (t.square_payment_id ?? '').toLowerCase().includes(q)
-      )
+      const q = searchOrders.toLowerCase()
+      return shortId(t.id).toLowerCase().includes(q) || (t.profile?.name ?? t.customer_name ?? '').toLowerCase().includes(q) || getZoneName(t.zones).toLowerCase().includes(q) || (t.square_payment_id ?? '').toLowerCase().includes(q)
     })
 
-  const filterCounts = FILTER_OPTIONS.reduce((acc, f) => {
-    acc[f] = f === 'all' ? txns.length : txns.filter(t => (t.payment_status ?? 'pending') === f).length
-    return acc
-  }, {} as Record<string, number>)
+  // ── Links Helpers ───────────────────────────────────────────────────────────
+  const handleDeleteLink = async (id: string) => {
+    if (!confirm('Delete this payment link?')) return
+    const res = await fetch(`/api/admin/payment-links/${id}`, { method: 'DELETE' })
+    if (res.ok) {
+      setLinks(prev => prev.filter(l => l.id !== id))
+      showToast('Link deleted')
+    } else {
+      const { error } = await res.json()
+      showToast(error || 'Failed to delete')
+    }
+  }
+
+  const filteredLinks = links
+    .filter(l => filterLinks === 'all' || l.status === filterLinks)
+    .filter(l => {
+      const q = searchLinks.toLowerCase()
+      return l.id.toLowerCase().includes(q) || l.description.toLowerCase().includes(q) || (l.customer_name ?? '').toLowerCase().includes(q) || (l.customer_email ?? '').toLowerCase().includes(q)
+    })
+
+  const showQr = async (link: PaymentLink) => {
+    const url = `${process.env.NEXT_PUBLIC_PAY_URL || 'https://pay.tajwater.ca'}/${link.id}`
+    try {
+      const qrDataUrl = await QRCode.toDataURL(url, { margin: 2, scale: 8, color: { dark: '#0c2340', light: '#ffffff' } })
+      setQrModal({ id: link.id, url, qrDataUrl })
+    } catch (e) {
+      console.error('QR error', e)
+    }
+  }
 
   return (
     <div className="space-y-5 relative">
@@ -196,243 +207,396 @@ export default function PaymentsPage() {
         )}
       </AnimatePresence>
 
-      {/* Refund Dialog */}
-      <AnimatePresence>
-        {refundDlg && (
-          <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={() => !refundDlg.loading && setRefundDlg(null)}
-              className="fixed inset-0 bg-black/40 dark:bg-black/60 z-40 transition-colors" />
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-white dark:bg-[#1e293b] rounded-2xl shadow-2xl border border-[#cce7f0] dark:border-white/10 p-6 w-full max-w-sm transition-colors">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center transition-colors">
-                  <RotateCcw className="w-5 h-5 text-red-500 dark:text-red-400" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-[#0c2340] dark:text-[#f8fafc]">Issue Refund</h3>
-                  <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8]">Order total: ${refundDlg.total.toFixed(2)}</p>
-                </div>
-              </div>
-              <label className="text-xs font-medium text-[#4a7fa5] dark:text-[#b3e5fc]/60 mb-1.5 block">Refund amount ($)</label>
-              <Input
-                type="number"
-                min="0.01"
-                max={refundDlg.total}
-                step="0.01"
-                value={refundDlg.amount}
-                onChange={e => setRefundDlg(d => d ? { ...d, amount: e.target.value, error: '' } : null)}
-                className="border-[#cce7f0] dark:border-white/10 dark:bg-white/5 dark:text-white mb-3 transition-colors"
-              />
-              {refundDlg.error && (
-                <p className="text-xs text-red-500 mb-3 flex items-center gap-1"><AlertTriangle className="w-3 h-3" />{refundDlg.error}</p>
-              )}
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => setRefundDlg(null)} disabled={refundDlg.loading}
-                  className="flex-1 border-[#cce7f0] text-[#4a7fa5]">Cancel</Button>
-                <Button size="sm" onClick={submitRefund} disabled={refundDlg.loading}
-                  className="flex-1 bg-red-500 hover:bg-red-600 text-white">
-                  {refundDlg.loading ? 'Processing…' : 'Confirm Refund'}
-                </Button>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-extrabold text-[#0c2340] dark:text-[#f8fafc]">Payments</h2>
-          <p className="text-sm text-[#4a7fa5] dark:text-[#94a3b8]">Square-powered · auto-updated via webhooks · live from Supabase</p>
+          <p className="text-sm text-[#4a7fa5] dark:text-[#94a3b8]">Manage order transactions and custom payment links</p>
         </div>
-        <div className="flex gap-2">
-          <Button size="sm" variant="outline" onClick={handleCleanup} className="border-red-200 dark:border-red-900/40 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 gap-2">
-            <Trash2 className="w-4 h-4" /> Cleanup Pending
-          </Button>
-          <Button size="sm" variant="outline" onClick={fetchData} className="border-[#cce7f0] dark:border-white/10 text-[#4a7fa5] dark:text-[#b3e5fc] hover:bg-white/10 transition-colors">
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          </Button>
-          <Button
-            size="sm" variant="outline" className="border-[#cce7f0] dark:border-white/10 text-[#4a7fa5] dark:text-[#b3e5fc] hover:bg-white/10 transition-colors gap-2"
-            onClick={() => exportCSV('payments.csv', filtered.map(t => ({
-              id: shortId(t.id),
-              customer: t.profile?.name ?? t.customer_name ?? 'Guest',
-              zone: getZoneName(t.zones),
-              amount: t.total.toFixed(2),
-              payment_status: t.payment_status ?? 'pending',
-              square_id: t.square_payment_id ?? '—',
-              date: fmtDate(t.created_at),
-            })))}
+        
+        {/* Tabs */}
+        <div className="flex bg-[#e0f7fa] dark:bg-white/5 p-1 rounded-xl">
+          <button
+            onClick={() => setActiveTab('orders')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+              activeTab === 'orders' ? 'bg-white dark:bg-[#1e293b] text-[#0097a7] dark:text-[#b3e5fc] shadow-sm' : 'text-[#4a7fa5] hover:text-[#0097a7]'
+            }`}
           >
-            <Download className="w-4 h-4" /> Export
-          </Button>
+            <DollarSign className="w-4 h-4" /> Orders
+          </button>
+          <button
+            onClick={() => setActiveTab('links')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+              activeTab === 'links' ? 'bg-white dark:bg-[#1e293b] text-[#0097a7] dark:text-[#b3e5fc] shadow-sm' : 'text-[#4a7fa5] hover:text-[#0097a7]'
+            }`}
+          >
+            <Link2 className="w-4 h-4" /> Custom Links
+          </button>
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: "Today's Revenue",  value: `$${todayRevenue.toFixed(2)}`,  icon: DollarSign, color: '#0097a7', bg: '#e0f7fa' },
-          { label: 'This Month',       value: `$${monthRevenue.toFixed(2)}`,  icon: TrendingUp, color: '#1565c0', bg: '#e3f2fd' },
-          { label: 'Awaiting Payment', value: `$${pendingAmount.toFixed(2)}`, icon: Clock,      color: '#f59e0b', bg: '#fef3c7' },
-          { label: 'Refunds (month)',  value: `$${refundAmount.toFixed(2)}`,  icon: XCircle,    color: '#ef4444', bg: '#fef2f2' },
-        ].map((s, i) => {
-          const Icon = s.icon
-          return (
-            <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
-              className="bg-white dark:bg-[#1e293b] rounded-2xl p-4 border border-[#cce7f0] dark:border-white/10 shadow-sm transition-colors">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-2" style={{ background: s.bg }}>
-                <Icon className="w-4 h-4" style={{ color: s.color }} />
+      {activeTab === 'orders' ? (
+        // ── ORDERS TAB ─────────────────────────────────────────────────────────
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+          {/* Controls */}
+          <div className="flex flex-col sm:flex-row gap-3 justify-between">
+            <div className="flex flex-1 gap-3">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#0097a7]" />
+                <Input
+                  placeholder="Search orders..."
+                  value={searchOrders}
+                  onChange={e => setSearchOrders(e.target.value)}
+                  className="pl-10 border-[#cce7f0] dark:border-white/10 bg-white dark:bg-[#1e293b] text-[#0c2340] dark:text-[#f8fafc]"
+                />
               </div>
-              <p className={`text-xl font-extrabold text-[#0c2340] dark:text-[#f8fafc] ${loading ? 'opacity-40' : ''}`}>{loading ? '—' : s.value}</p>
-              <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8]">{s.label}</p>
-            </motion.div>
-          )
-        })}
-      </div>
-
-      {/* Square note */}
-      <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#f0f9ff] dark:bg-white/5 border border-[#cce7f0] dark:border-white/10 text-xs text-[#4a7fa5] dark:text-[#94a3b8] transition-colors">
-        <CreditCard className="w-4 h-4 text-[#0097a7] dark:text-[#b3e5fc] shrink-0" />
-        Payment statuses update automatically when Square fires webhooks (<code className="bg-white dark:bg-white/10 px-1 py-0.5 rounded text-[#0097a7] dark:text-[#b3e5fc]">payment.completed</code>, <code className="bg-white dark:bg-white/10 px-1 py-0.5 rounded text-[#0097a7] dark:text-[#b3e5fc]">refund.created</code>). Configure your webhook at <strong className="text-[#0c2340] dark:text-[#f8fafc]">squareup.com/dashboard</strong> → Webhooks → endpoint: <code className="text-[#0097a7] dark:text-[#b3e5fc]">/api/square/webhook</code>
-      </div>
-
-      {/* Disputes alert */}
-      {txns.filter(t => t.payment_status === 'disputed').length > 0 && (
-        <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/30 text-xs text-orange-700 dark:text-orange-400 transition-colors">
-          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-          <div>
-            <p className="font-semibold text-orange-800 dark:text-orange-300">
-              {txns.filter(t => t.payment_status === 'disputed').length} disputed payment{txns.filter(t => t.payment_status === 'disputed').length > 1 ? 's' : ''} require attention
-            </p>
-            <p className="mt-0.5 text-orange-600 dark:text-orange-400/80">
-              Use the &quot;Square&quot; button on each disputed row to submit evidence in the Square Dashboard. Disputes must be responded to within 7–10 days.
-            </p>
+              <div className="flex gap-2 flex-wrap">
+                {FILTER_OPTIONS.map(f => (
+                  <button key={f} onClick={() => setFilterOrders(f)}
+                    className={`px-3 py-2 rounded-xl text-xs font-medium transition-all capitalize ${
+                      filterOrders === f ? 'bg-[#0097a7] text-white' : 'bg-white dark:bg-[#1e293b] border border-[#cce7f0] text-[#4a7fa5]'
+                    }`}>
+                    {f}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={handleCleanup} className="border-red-200 text-red-500 hover:bg-red-50 gap-2">
+                <Trash2 className="w-4 h-4" /> Cleanup Pending
+              </Button>
+              <Button size="sm" variant="outline" onClick={fetchOrders} className="border-[#cce7f0] text-[#4a7fa5] hover:bg-white/10">
+                <RefreshCw className={`w-4 h-4 ${loadingOrders ? 'animate-spin' : ''}`} />
+              </Button>
+              <Button size="sm" variant="outline" className="border-[#cce7f0] text-[#4a7fa5] gap-2"
+                onClick={() => exportCSV('payments.csv', filteredOrders.map(t => ({ id: shortId(t.id), amount: t.total, status: t.payment_status }))) }>
+                <Download className="w-4 h-4" /> Export
+              </Button>
+            </div>
           </div>
-        </div>
-      )}
 
-      {/* Search + Filter */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#0097a7]" />
-          <Input
-            placeholder="Search by order ID, customer, zone, or Square ID..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="pl-10 border-[#cce7f0] dark:border-white/10 bg-white dark:bg-[#1e293b] text-[#0c2340] dark:text-[#f8fafc] transition-colors"
-          />
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          {FILTER_OPTIONS.map(f => (
-            <button key={f} onClick={() => setFilter(f)}
-              className={`px-3 py-2 rounded-xl text-xs font-medium transition-all capitalize ${
-                filter === f ? 'bg-[#0097a7] text-white' : 'bg-white dark:bg-[#1e293b] border border-[#cce7f0] dark:border-white/10 text-[#4a7fa5] dark:text-[#94a3b8] hover:border-[#0097a7] focus:border-[#0097a7]'
-              }`}>
-              {f}
-              {filterCounts[f] > 0 && (
-                <span className={`ml-1.5 text-[10px] ${filter === f ? 'opacity-70' : 'text-[#0097a7]'}`}>
-                  {filterCounts[f]}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
+          {/* KPI Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-white dark:bg-[#1e293b] rounded-2xl p-4 border border-[#cce7f0] shadow-sm">
+              <p className="text-xl font-extrabold text-[#0c2340]">${filteredOrders.reduce((s, t) => s + (t.payment_status === 'paid' ? t.total : 0), 0).toFixed(2)}</p>
+              <p className="text-xs text-[#4a7fa5]">Filtered Paid Revenue</p>
+            </div>
+            <div className="bg-white dark:bg-[#1e293b] rounded-2xl p-4 border border-[#cce7f0] shadow-sm">
+              <p className="text-xl font-extrabold text-[#0c2340]">{filteredOrders.length}</p>
+              <p className="text-xs text-[#4a7fa5]">Filtered Orders</p>
+            </div>
+          </div>
 
-      {/* Transaction table */}
-      {loading ? (
-        <div className="space-y-2">
-          {[...Array(6)].map((_, i) => <div key={i} className="h-12 bg-white rounded-2xl border border-[#cce7f0] animate-pulse" />)}
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="bg-white dark:bg-[#1e293b] rounded-3xl border border-[#cce7f0] dark:border-white/10 p-16 text-center transition-colors">
-          <Package className="w-10 h-10 text-[#cce7f0] dark:text-white/10 mx-auto mb-3" />
-          <p className="text-[#4a7fa5] dark:text-[#94a3b8] font-medium">No transactions yet</p>
-          <p className="text-xs text-[#4a7fa5] dark:text-white/40 mt-1">Transactions appear here automatically once customers place orders and pay via Square</p>
-        </div>
+          {/* Table */}
+          {loadingOrders ? (
+             <div className="h-32 bg-white rounded-2xl border border-[#cce7f0] animate-pulse" />
+          ) : (
+            <div className="bg-white dark:bg-[#1e293b] rounded-3xl border border-[#cce7f0] shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                  <thead className="bg-[#f0f9ff] dark:bg-white/5 border-b border-[#cce7f0]">
+                    <tr>
+                      <th className="px-4 py-3 text-xs font-semibold text-[#4a7fa5] uppercase">Order</th>
+                      <th className="px-4 py-3 text-xs font-semibold text-[#4a7fa5] uppercase">Customer</th>
+                      <th className="px-4 py-3 text-xs font-semibold text-[#4a7fa5] uppercase">Amount</th>
+                      <th className="px-4 py-3 text-xs font-semibold text-[#4a7fa5] uppercase">Payment</th>
+                      <th className="px-4 py-3 text-xs font-semibold text-[#4a7fa5] uppercase">Square ID</th>
+                      <th className="px-4 py-3 text-xs font-semibold text-[#4a7fa5] uppercase">Date</th>
+                      <th className="px-4 py-3 text-xs font-semibold text-[#4a7fa5] uppercase">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#f0f9ff] dark:divide-white/5">
+                    {filteredOrders.map(txn => {
+                      const pb = paymentBadge(txn.payment_status)
+                      return (
+                        <tr key={txn.id} className="hover:bg-[#f0f9ff] dark:hover:bg-white/5">
+                          <td className="px-4 py-3 font-mono text-xs font-bold text-[#0097a7]">{shortId(txn.id)}</td>
+                          <td className="px-4 py-3 font-medium text-[#0c2340] max-w-[110px] truncate">{txn.profile?.name ?? txn.customer_name ?? 'Guest'}</td>
+                          <td className="px-4 py-3 font-bold text-[#0c2340]">${txn.total.toFixed(2)}</td>
+                          <td className="px-4 py-3"><Badge className={`text-[10px] ${pb.color}`}>{pb.label}</Badge></td>
+                          <td className="px-4 py-3 font-mono text-[10px] text-[#4a7fa5]">{txn.square_payment_id ?? '—'}</td>
+                          <td className="px-4 py-3 text-xs text-[#4a7fa5]">{fmtDate(txn.created_at)}</td>
+                          <td className="px-4 py-3 flex gap-2">
+                            {txn.payment_status === 'paid' && (
+                              <Button size="sm" variant="outline" onClick={() => setRefundDlg({ orderId: txn.id, total: txn.total, amount: txn.total.toFixed(2), loading: false, error: '' })} className="h-7 text-xs border-red-200 text-red-500 hover:bg-red-50"><RotateCcw className="w-3 h-3 mr-1" /> Refund</Button>
+                            )}
+                            {txn.square_payment_id && (
+                              <a href={`https://squareup.com/dashboard/sales/transactions/${txn.square_payment_id}`} target="_blank" rel="noreferrer"><Button size="sm" variant="outline" className="h-7 text-xs border-[#0097a7]/30 text-[#0097a7] hover:bg-[#e0f7fa]"><ExternalLink className="w-3 h-3 mr-1" /> Square</Button></a>
+                            )}
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Refund Modal */}
+          <AnimatePresence>
+            {refundDlg && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div className="absolute inset-0 bg-black/40" onClick={() => setRefundDlg(null)} />
+                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm relative z-10 border border-[#cce7f0]">
+                  <h3 className="font-bold text-[#0c2340] mb-2">Issue Refund</h3>
+                  <Input type="number" step="0.01" value={refundDlg.amount} onChange={e => setRefundDlg(d => d ? { ...d, amount: e.target.value } : null)} className="mb-4" />
+                  {refundDlg.error && <p className="text-red-500 text-xs mb-4">{refundDlg.error}</p>}
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="flex-1" onClick={() => setRefundDlg(null)}>Cancel</Button>
+                    <Button className="flex-1 bg-red-500 text-white hover:bg-red-600" onClick={submitRefund} disabled={refundDlg.loading}>{refundDlg.loading ? 'Processing' : 'Confirm'}</Button>
+                  </div>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
+        </motion.div>
       ) : (
-        <div className="bg-white dark:bg-[#1e293b] rounded-3xl border border-[#cce7f0] dark:border-white/10 shadow-sm overflow-hidden transition-colors">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-[#f0f9ff] dark:bg-white/5 border-b border-[#cce7f0] dark:border-white/10 transition-colors">
-                <tr>
-                  {[
-                    { label: 'Order',     cls: '' },
-                    { label: 'Customer',  cls: '' },
-                    { label: 'Zone',      cls: 'hidden sm:table-cell' },
-                    { label: 'Amount',    cls: '' },
-                    { label: 'Payment',   cls: '' },
-                    { label: 'Square ID', cls: 'hidden lg:table-cell' },
-                    { label: 'Date',      cls: 'hidden sm:table-cell' },
-                    { label: 'Actions',   cls: '' },
-                  ].map(h => (
-                    <th key={h.label} className={`px-4 py-3 text-left text-xs font-semibold text-[#4a7fa5] dark:text-[#b3e5fc]/60 uppercase tracking-wider whitespace-nowrap ${h.cls}`}>{h.label}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#f0f9ff] dark:divide-white/5 transition-colors">
-                {filtered.map((txn, i) => {
-                  const pb = paymentBadge(txn.payment_status)
-                  const customerName = txn.profile?.name ?? txn.customer_name ?? 'Guest'
-                  return (
-                    <motion.tr key={txn.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.02 }}
-                      className="hover:bg-[#f0f9ff] dark:hover:bg-white/5 transition-colors">
-                      <td className="px-4 py-3 font-mono text-xs font-bold text-[#0097a7] dark:text-[#b3e5fc]">{shortId(txn.id)}</td>
-                      <td className="px-4 py-3 font-medium text-[#0c2340] dark:text-[#f8fafc] max-w-[110px] truncate">{customerName}</td>
-                      <td className="hidden sm:table-cell px-4 py-3 text-[#4a7fa5] dark:text-[#94a3b8] text-xs">{getZoneName(txn.zones)}</td>
-                      <td className="px-4 py-3 font-bold text-[#0c2340] dark:text-[#f8fafc] whitespace-nowrap">${txn.total.toFixed(2)}</td>
+        // ── LINKS TAB ──────────────────────────────────────────────────────────
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+          
+          <div className="flex flex-col sm:flex-row gap-3 justify-between">
+             <div className="flex flex-1 gap-3">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#0097a7]" />
+                <Input placeholder="Search links..." value={searchLinks} onChange={e => setSearchLinks(e.target.value)} className="pl-10 border-[#cce7f0] bg-white text-[#0c2340]" />
+              </div>
+              <div className="flex gap-2">
+                {['all', 'pending', 'paid'].map(f => (
+                  <button key={f} onClick={() => setFilterLinks(f)} className={`px-3 py-2 rounded-xl text-xs font-medium transition-all capitalize ${filterLinks === f ? 'bg-[#0097a7] text-white' : 'bg-white border border-[#cce7f0] text-[#4a7fa5]'}`}>{f}</button>
+                ))}
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={fetchLinks} className="border-[#cce7f0] text-[#4a7fa5]"><RefreshCw className={`w-4 h-4 ${loadingLinks ? 'animate-spin' : ''}`} /></Button>
+              <Button size="sm" onClick={() => setIsCreateOpen(true)} className="bg-[#0097a7] text-white hover:bg-[#006064] gap-2 shadow-md shadow-[#0097a7]/20"><Plus className="w-4 h-4" /> New Link</Button>
+            </div>
+          </div>
+
+          {loadingLinks ? (
+            <div className="h-32 bg-white rounded-2xl border border-[#cce7f0] animate-pulse" />
+          ) : filteredLinks.length === 0 ? (
+            <div className="bg-white rounded-3xl border border-[#cce7f0] p-16 text-center">
+              <Link2 className="w-10 h-10 text-[#cce7f0] mx-auto mb-3" />
+              <p className="text-[#4a7fa5] font-medium">No payment links found</p>
+            </div>
+          ) : (
+            <div className="bg-white rounded-3xl border border-[#cce7f0] shadow-sm overflow-hidden">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-[#f0f9ff] border-b border-[#cce7f0]">
+                  <tr>
+                    <th className="px-4 py-3 text-xs font-semibold text-[#4a7fa5] uppercase">ID</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-[#4a7fa5] uppercase">Description</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-[#4a7fa5] uppercase">Amount</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-[#4a7fa5] uppercase">Customer</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-[#4a7fa5] uppercase">Status</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-[#4a7fa5] uppercase text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#f0f9ff]">
+                  {filteredLinks.map(link => (
+                    <tr key={link.id} className="hover:bg-[#f0f9ff]">
+                      <td className="px-4 py-3 font-mono text-xs font-bold text-[#0097a7]">{link.id}</td>
                       <td className="px-4 py-3">
-                        <Badge className={`text-[10px] ${pb.color} dark:bg-opacity-20`}>{pb.label}</Badge>
+                        <div className="text-[#0c2340] max-w-[200px] truncate">{link.description}</div>
+                        {link.internal_note && <div className="text-[10px] text-amber-600 font-medium truncate max-w-[200px]">Note: {link.internal_note}</div>}
                       </td>
-                      <td className="hidden lg:table-cell px-4 py-3 font-mono text-[10px] text-[#4a7fa5] dark:text-[#94a3b8] max-w-[140px] truncate">
-                        {txn.square_payment_id ?? '—'}
+                      <td className="px-4 py-3 font-bold text-[#0c2340]">${link.amount.toFixed(2)}</td>
+                      <td className="px-4 py-3">
+                        <div className="text-[#0c2340]">{link.customer_name || '—'}</div>
+                        {link.customer_email && <div className="text-[10px] text-[#4a7fa5]">{link.customer_email}</div>}
                       </td>
-                      <td className="hidden sm:table-cell px-4 py-3 text-xs text-[#4a7fa5] dark:text-[#94a3b8] whitespace-nowrap">{fmtDate(txn.created_at)}</td>
-                      <td className="px-4 py-3 flex gap-2">
-                        {txn.payment_status === 'paid' && (
-                          <Button size="sm" variant="outline" onClick={() => openRefund(txn)}
-                            className="border-red-200 dark:border-red-900/40 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 h-7 text-xs gap-1 transition-colors">
-                            <RotateCcw className="w-3 h-3" /> Refund
+                      <td className="px-4 py-3">
+                        <Badge className={`text-[10px] ${link.status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>{link.status}</Badge>
+                      </td>
+                      <td className="px-4 py-3 flex gap-2 justify-end">
+                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-[#0097a7]" onClick={() => showQr(link)} title="Show QR / URL">
+                          <QrCode className="w-4 h-4" />
+                        </Button>
+                        <a href={`${process.env.NEXT_PUBLIC_PAY_URL || 'https://pay.tajwater.ca'}/${link.id}`} target="_blank" rel="noreferrer">
+                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-[#4a7fa5]" title="Open Link">
+                            <ExternalLink className="w-4 h-4" />
+                          </Button>
+                        </a>
+                        {link.status !== 'paid' && (
+                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-500 hover:bg-red-50" onClick={() => handleDeleteLink(link.id)} title="Delete">
+                            <Trash2 className="w-4 h-4" />
                           </Button>
                         )}
-                        {txn.square_payment_id && (txn.payment_status === 'paid' || txn.payment_status === 'disputed') && (
-                          <a href={`https://squareup.com/dashboard/sales/transactions/${txn.square_payment_id}`}
-                            target="_blank" rel="noreferrer">
-                            <Button size="sm" variant="outline"
-                              className="border-[#0097a7]/30 dark:border-[#b3e5fc]/20 text-[#0097a7] dark:text-[#b3e5fc] hover:bg-[#e0f7fa] dark:hover:bg-white/5 h-7 text-xs gap-1 transition-colors">
-                              <ExternalLink className="w-3 h-3" /> Square
-                            </Button>
-                          </a>
-                        )}
-                        {(txn.payment_status === 'paid' || txn.payment_method === 'cash_on_delivery' || txn.payment_method === 'card_on_delivery') && (
-                          <a href={`/api/invoice/${txn.id}`} target="_blank" rel="noreferrer">
-                            <Button size="sm" variant="outline" className="border-[#cce7f0] text-[#4a7fa5] h-7 text-xs gap-1 transition-colors" title="Download Invoice">
-                              <Download className="w-3 h-3" /> Invoice
-                            </Button>
-                          </a>
-                        )}
                       </td>
-                    </motion.tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
-          {/* Footer totals */}
-          <div className="px-5 py-3 border-t border-[#cce7f0] dark:border-white/10 bg-[#f0f9ff] dark:bg-white/5 flex items-center justify-between transition-colors">
-            <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8]">{filtered.length} transactions</p>
-            <p className="text-sm font-bold text-[#0c2340] dark:text-[#f8fafc]">
-              Shown total: <span className="text-[#0097a7] dark:text-[#b3e5fc]">
-                ${filtered.reduce((s, t) => s + t.total, 0).toFixed(2)}
-              </span>
-            </p>
-          </div>
-        </div>
+          {/* QR Modal */}
+          <AnimatePresence>
+            {qrModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div className="absolute inset-0 bg-black/40" onClick={() => setQrModal(null)} />
+                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-white rounded-3xl shadow-xl p-8 w-full max-w-sm relative z-10 border border-[#cce7f0] text-center">
+                  <h3 className="font-extrabold text-[#0c2340] text-xl mb-1">{qrModal.id}</h3>
+                  <p className="text-[#4a7fa5] text-sm mb-6">Scan to pay securely</p>
+                  <div className="bg-white p-2 rounded-2xl border border-[#cce7f0] shadow-sm inline-block mb-6">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={qrModal.qrDataUrl} alt="QR Code" className="w-48 h-48 mx-auto" />
+                  </div>
+                  <div className="flex items-center gap-2 bg-[#f0f9ff] p-2 rounded-xl border border-[#cce7f0] mb-4">
+                    <input type="text" readOnly value={qrModal.url} className="bg-transparent text-xs text-[#0c2340] w-full outline-none pl-2" />
+                    <Button size="sm" className="bg-[#0097a7] text-white hover:bg-[#006064] h-7" onClick={() => { navigator.clipboard.writeText(qrModal.url); showToast('Copied to clipboard') }}>
+                      <Copy className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                  <Button variant="outline" className="w-full text-[#4a7fa5]" onClick={() => setQrModal(null)}>Close</Button>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
+          
+          {/* Create Modal */}
+          <CreateLinkModal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} onCreated={(link) => { setLinks(prev => [link, ...prev]); showQr(link); showToast('Link created') }} />
+
+        </motion.div>
       )}
     </div>
   )
 }
 
+// ── Create Link Modal ─────────────────────────────────────────────────────────
+function CreateLinkModal({ isOpen, onClose, onCreated }: { isOpen: boolean; onClose: () => void; onCreated: (link: PaymentLink) => void }) {
+  const [desc, setDesc] = useState('')
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [internalNote, setInternalNote] = useState('')
+  
+  const [lineItems, setLineItems] = useState<{description: string, quantity: number, unit_price: number}[]>([])
+  const [manualAmount, setManualAmount] = useState('')
+
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (isOpen) {
+      setDesc('')
+      setName('')
+      setEmail('')
+      setInternalNote('')
+      setLineItems([])
+      setManualAmount('')
+      setError('')
+    }
+  }, [isOpen])
+
+  if (!isOpen) return null
+
+  const calculatedTotal = lineItems.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0)
+  const finalAmount = lineItems.length > 0 ? calculatedTotal : parseFloat(manualAmount || '0')
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (finalAmount < 0.5) { setError('Amount must be at least $0.50'); return }
+    if (lineItems.length > 0 && lineItems.some(i => !i.description.trim() || i.quantity <= 0 || i.unit_price < 0)) {
+      setError('Please ensure all line items have a valid description, quantity, and price.')
+      return
+    }
+
+    setLoading(true)
+    setError('')
+    const res = await fetch('/api/admin/payment-links', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        description: desc,
+        amount: finalAmount,
+        customer_name: name,
+        customer_email: email,
+        internal_note: internalNote,
+        line_items: lineItems.length > 0 ? lineItems : null
+      })
+    })
+    const json = await res.json()
+    setLoading(false)
+    if (!res.ok) { setError(json.error || 'Failed to create'); return }
+    onClose()
+    onCreated(json)
+  }
+
+  const addLineItem = () => setLineItems(prev => [...prev, { description: '', quantity: 1, unit_price: 0 }])
+  const updateLineItem = (index: number, field: string, value: any) => {
+    setLineItems(prev => {
+      const updated = [...prev]
+      updated[index] = { ...updated[index], [field]: value }
+      return updated
+    })
+  }
+  const removeLineItem = (index: number) => setLineItems(prev => prev.filter((_, i) => i !== index))
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !loading && onClose()} />
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-3xl shadow-2xl p-6 w-full max-w-lg relative z-10 border border-[#cce7f0] max-h-[90vh] overflow-y-auto">
+        <h3 className="text-xl font-extrabold text-[#0c2340] mb-4">Create Custom Payment Link</h3>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs font-semibold text-[#4a7fa5] uppercase mb-1 block">Invoice Summary / Title</label>
+              <Input required placeholder="e.g. Filter Installation & Maintenance" value={desc} onChange={e => setDesc(e.target.value)} />
+            </div>
+
+            <div className="bg-[#f0f9ff] rounded-2xl p-4 border border-[#cce7f0]">
+              <div className="flex justify-between items-center mb-3">
+                <label className="text-xs font-semibold text-[#4a7fa5] uppercase">Line Items (Optional)</label>
+                <Button type="button" size="sm" variant="ghost" className="h-6 text-xs text-[#0097a7] hover:bg-[#e0f7fa]" onClick={addLineItem}>
+                  <Plus className="w-3 h-3 mr-1" /> Add Item
+                </Button>
+              </div>
+              
+              {lineItems.length > 0 ? (
+                <div className="space-y-3">
+                  {lineItems.map((item, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <Input placeholder="Item description" className="flex-1 text-xs h-8" value={item.description} onChange={e => updateLineItem(i, 'description', e.target.value)} required />
+                      <Input type="number" min="1" placeholder="Qty" className="w-16 text-xs h-8 text-center" value={item.quantity} onChange={e => updateLineItem(i, 'quantity', parseInt(e.target.value) || 0)} required />
+                      <Input type="number" step="0.01" min="0" placeholder="$ Price" className="w-24 text-xs h-8 text-right" value={item.unit_price || ''} onChange={e => updateLineItem(i, 'unit_price', parseFloat(e.target.value) || 0)} required />
+                      <Button type="button" variant="ghost" className="h-8 w-8 p-0 text-red-500 hover:bg-red-50 shrink-0" onClick={() => removeLineItem(i)}><Trash2 className="w-3 h-3" /></Button>
+                    </div>
+                  ))}
+                  <div className="text-right text-sm font-bold text-[#0c2340] pt-2 border-t border-[#cce7f0]">
+                    Total: ${calculatedTotal.toFixed(2)}
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <Input type="number" step="0.01" required min="0.5" placeholder="Total Amount (CAD)" value={manualAmount} onChange={e => setManualAmount(e.target.value)} className="text-lg font-bold text-center" />
+                  <p className="text-[10px] text-[#4a7fa5] mt-1 text-center">Add line items above to automatically calculate the total.</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-[#f0f9ff]">
+            <p className="text-xs text-[#4a7fa5] mb-3 flex items-center gap-1.5"><User className="w-3.5 h-3.5" /> Customer Info (Optional)</p>
+            <div className="space-y-3">
+              <Input placeholder="Customer Name" value={name} onChange={e => setName(e.target.value)} />
+              <Input type="email" placeholder="Customer Email (Sends link automatically)" value={email} onChange={e => setEmail(e.target.value)} />
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-[#f0f9ff]">
+            <label className="text-xs font-semibold text-[#4a7fa5] uppercase mb-1 block">Internal Note (Private)</label>
+            <Input placeholder="Notes for staff..." value={internalNote} onChange={e => setInternalNote(e.target.value)} />
+          </div>
+
+          {error && <p className="text-red-500 text-xs flex items-center gap-1"><AlertTriangle className="w-3.5 h-3.5" /> {error}</p>}
+          <div className="flex gap-3 pt-2">
+            <Button type="button" variant="outline" className="flex-1 text-[#4a7fa5]" onClick={onClose} disabled={loading}>Cancel</Button>
+            <Button type="submit" className="flex-1 bg-[#0097a7] text-white hover:bg-[#006064]" disabled={loading}>{loading ? 'Creating...' : 'Generate Link'}</Button>
+          </div>
+        </form>
+      </motion.div>
+    </div>
+  )
+}
