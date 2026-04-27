@@ -12,7 +12,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { supabase } from '@/lib/supabase'
 import { exportCSV } from '@/lib/csv'
-import { exportCSV } from '@/lib/csv'
 
 // ── Shared Types & Helpers ──────────────────────────────────────────────────
 type TxnRow = {
@@ -59,6 +58,13 @@ export default function PaymentsPage() {
   const [searchOrders, setSearchOrders] = useState('')
   const [filterOrders, setFilterOrders] = useState('all')
   const [refundDlg, setRefundDlg] = useState<RefundDialog | null>(null)
+  const [txns, setTxns] = useState<TxnRow[]>([])
+  const [toast, setToast] = useState<string | null>(null)
+
+  const showToast = (msg: string) => {
+    setToast(msg)
+    setTimeout(() => setToast(null), 3000)
+  }
 
   // Fetch Data
   const fetchOrders = async () => {
@@ -106,13 +112,13 @@ export default function PaymentsPage() {
       setRefundDlg(d => d ? { ...d, loading: false, error: json.error ?? 'Refund failed' } : null)
       return
     }
-    setTxns(prev => prev.map(t => t.id === refundDlg.orderId ? { ...t, payment_status: 'refunded', status: 'cancelled', refund_amount: amt } : t))
+    setTxns((prev: TxnRow[]) => prev.map((t: TxnRow) => t.id === refundDlg.orderId ? { ...t, payment_status: 'refunded', status: 'cancelled', refund_amount: amt } : t))
     setRefundDlg(null)
     showToast(`Refund of $${amt.toFixed(2)} processed`)
   }
 
   const handleCleanup = async () => {
-    const pendingCount = txns.filter(t => (t.payment_status ?? 'pending') === 'pending').length
+    const pendingCount = txns.filter((t: TxnRow) => (t.payment_status ?? 'pending') === 'pending').length
     if (pendingCount === 0) return showToast('No pending orders to clean up')
     if (!confirm(`Delete all ${pendingCount} pending test orders? This cannot be undone.`)) return
     
@@ -122,7 +128,7 @@ export default function PaymentsPage() {
       await supabase.from('order_items').delete().in('order_id', pendingIds)
       const { error } = await supabase.from('orders').delete().in('id', pendingIds)
       if (error) throw error
-      setTxns(prev => prev.filter(t => !pendingIds.includes(t.id)))
+      setTxns((prev: TxnRow[]) => prev.filter((t: TxnRow) => !pendingIds.includes(t.id)))
       showToast(`Cleaned up ${pendingCount} orders`)
     } catch (err) {
       console.error('Cleanup error:', err)
@@ -133,8 +139,8 @@ export default function PaymentsPage() {
   }
 
   const filteredOrders = txns
-    .filter(t => filterOrders === 'all' || (t.payment_status ?? 'pending') === filterOrders)
-    .filter(t => {
+    .filter((t: TxnRow) => filterOrders === 'all' || (t.payment_status ?? 'pending') === filterOrders)
+    .filter((t: TxnRow) => {
       const q = searchOrders.toLowerCase()
       return shortId(t.id).toLowerCase().includes(q) || (t.profile?.name ?? t.customer_name ?? '').toLowerCase().includes(q) || getZoneName(t.zones).toLowerCase().includes(q) || (t.square_payment_id ?? '').toLowerCase().includes(q)
     })
@@ -191,7 +197,7 @@ export default function PaymentsPage() {
                 <RefreshCw className={`w-4 h-4 ${loadingOrders ? 'animate-spin' : ''}`} />
               </Button>
               <Button size="sm" variant="outline" className="border-[#cce7f0] text-[#4a7fa5] gap-2"
-                onClick={() => exportCSV('payments.csv', filteredOrders.map(t => ({ id: shortId(t.id), amount: t.total, status: t.payment_status }))) }>
+                onClick={() => exportCSV('payments.csv', filteredOrders.map((t: TxnRow) => ({ id: shortId(t.id), amount: t.total, status: t.payment_status }))) }>
                 <Download className="w-4 h-4" /> Export
               </Button>
             </div>
@@ -200,7 +206,7 @@ export default function PaymentsPage() {
           {/* KPI Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white dark:bg-[#1e293b] rounded-2xl p-4 border border-[#cce7f0] shadow-sm">
-              <p className="text-xl font-extrabold text-[#0c2340]">${filteredOrders.reduce((s, t) => s + (t.payment_status === 'paid' ? t.total : 0), 0).toFixed(2)}</p>
+              <p className="text-xl font-extrabold text-[#0c2340]">${filteredOrders.reduce((s: number, t: TxnRow) => s + (t.payment_status === 'paid' ? t.total : 0), 0).toFixed(2)}</p>
               <p className="text-xs text-[#4a7fa5]">Filtered Paid Revenue</p>
             </div>
             <div className="bg-white dark:bg-[#1e293b] rounded-2xl p-4 border border-[#cce7f0] shadow-sm">
@@ -228,7 +234,7 @@ export default function PaymentsPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#f0f9ff] dark:divide-white/5">
-                    {filteredOrders.map(txn => {
+                    {filteredOrders.map((txn: TxnRow) => {
                       const pb = paymentBadge(txn.payment_status)
                       return (
                         <tr key={txn.id} className="hover:bg-[#f0f9ff] dark:hover:bg-white/5">
