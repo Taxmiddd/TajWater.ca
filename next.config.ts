@@ -3,26 +3,6 @@ import type { NextConfig } from "next";
 // Force redeploy: 2026-03-28T12:23:00
 
 const nextConfig: NextConfig = {
-  async rewrites() {
-    return {
-      beforeFiles: [
-        // pay.tajwater.ca root → /pay
-        {
-          source: '/',
-          has: [{ type: 'host', value: 'pay.tajwater.ca' }],
-          destination: '/pay',
-        },
-        // pay.tajwater.ca/[path] → /pay/[path]
-        {
-          source: '/:path+',
-          has: [{ type: 'host', value: 'pay.tajwater.ca' }],
-          destination: '/pay/:path+',
-        },
-      ],
-      afterFiles: [],
-      fallback: [],
-    }
-  },
   images: {
     remotePatterns: [
       {
