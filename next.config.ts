@@ -19,6 +19,8 @@ const nextConfig: NextConfig = {
           destination: '/pay/:path+',
         },
       ],
+      afterFiles: [],
+      fallback: [],
     }
   },
   images: {
