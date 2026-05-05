@@ -172,11 +172,6 @@ const localBusinessJsonLd = {
             availability: 'https://schema.org/InStock',
             url: `${BASE_URL}/shop`,
           },
-          aggregateRating: {
-            '@type': 'AggregateRating',
-            ratingValue: 5.0,
-            reviewCount: 128,
-          },
         },
       },
       {

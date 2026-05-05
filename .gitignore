@@ -50,3 +50,5 @@ AUDIT.md
 .claude/
 memory/
 docs/plans/
+COMMIT_MESSAGE.txt
+GIT-PUSH-INSTRUCTIONS.md
