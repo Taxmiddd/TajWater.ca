@@ -8,6 +8,7 @@ const types = [
     minerals: 'Calcium, magnesium, potassium — naturally occurring',
     bestFor: 'Daily drinking, cooking, children and families',
     price: '$8.99/jug',
+    href: '/spring-water-delivery-vancouver',
   },
   {
     name: 'Alkaline Water',
@@ -16,6 +17,7 @@ const types = [
     minerals: 'Calcium, magnesium, potassium — enhanced',
     bestFor: 'Active lifestyles, health-conscious households, post-workout hydration',
     price: '$12.99/jug',
+    href: '/alkaline-water-delivery-vancouver',
   },
   {
     name: 'Distilled Water',
@@ -24,6 +26,7 @@ const types = [
     minerals: 'None — 99.9% pure H₂O',
     bestFor: 'CPAP machines, steam irons, aquariums, laboratory, medical use',
     price: '$9.99/jug',
+    href: '/distilled-water-delivery-vancouver',
   },
 ]
 
@@ -63,9 +66,14 @@ export default function WaterGuide() {
                   <dd className="text-[#0c2340] font-medium">{type.bestFor}</dd>
                 </div>
               </dl>
-              <div className="mt-auto pt-3 border-t border-[#cce7f0]">
-                <span className="text-xl font-extrabold text-[#0097a7]">{type.price}</span>
-                <span className="text-xs text-[#4a7fa5] ml-1">delivered free</span>
+              <div className="mt-auto pt-3 border-t border-[#cce7f0] flex items-center justify-between">
+                <div>
+                  <span className="text-xl font-extrabold text-[#0097a7]">{type.price}</span>
+                  <span className="text-xs text-[#4a7fa5] ml-1">delivered free</span>
+                </div>
+                <Link href={type.href} className="text-xs font-semibold text-[#0097a7] hover:underline">
+                  Learn more →
+                </Link>
               </div>
             </div>
           ))}

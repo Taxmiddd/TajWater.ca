@@ -16,6 +16,14 @@ const BLOG_POSTS = [
   { slug: 'is-vancouver-tap-water-safe-to-drink', date: '2026-04-22' },
   { slug: 'how-much-does-water-delivery-cost-metro-vancouver', date: '2026-04-29' },
   { slug: 'switching-water-delivery-providers-metro-vancouver', date: '2026-05-06' },
+  { slug: 'water-delivery-vs-home-water-filter-metro-vancouver', date: '2026-05-13' },
+  { slug: 'best-water-for-babies-toddlers-metro-vancouver', date: '2026-05-20' },
+]
+
+const PRODUCT_PAGES = [
+  'spring-water-delivery-vancouver',
+  'alkaline-water-delivery-vancouver',
+  'distilled-water-delivery-vancouver',
 ]
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -27,7 +35,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/about`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
     { url: `${BASE_URL}/contact`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.6 },
     { url: `${BASE_URL}/blog`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${BASE_URL}/faq`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
   ]
+
+  const productPages: MetadataRoute.Sitemap = PRODUCT_PAGES.map((slug) => ({
+    url: `${BASE_URL}/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly' as const,
+    priority: 0.9,
+  }))
 
   const cityPages: MetadataRoute.Sitemap = CITIES.map((city) => ({
     url: `${BASE_URL}/areas/${city}`,
@@ -43,5 +59,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
-  return [...staticPages, ...cityPages, ...blogPages]
+  return [...staticPages, ...productPages, ...cityPages, ...blogPages]
 }

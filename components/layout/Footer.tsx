@@ -96,9 +96,13 @@ export default function Footer() {
                 { label: 'Our Services', href: '/services' },
                 { label: 'Delivery Areas', href: '/areas' },
                 { label: 'Shop', href: '/shop' },
+                { label: 'Blog', href: '/blog' },
+                { label: 'FAQ', href: '/faq' },
+                { label: 'Spring Water Delivery', href: '/spring-water-delivery-vancouver' },
+                { label: 'Alkaline Water Delivery', href: '/alkaline-water-delivery-vancouver' },
+                { label: 'Distilled Water Delivery', href: '/distilled-water-delivery-vancouver' },
                 { label: 'About Us', href: '/about' },
                 { label: 'Contact', href: '/contact' },
-                { label: 'Customer Login', href: '/auth/login' },
               ].map((l) => (
                 <li key={l.href}>
                   <Link href={l.href} className="text-[#b3e5fc] hover:text-white text-sm transition-colors hover:translate-x-1 inline-block duration-200">
