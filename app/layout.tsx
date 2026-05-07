@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Geist } from 'next/font/google'
+import Script from 'next/script'
 import './globals.css'
 import ConditionalShell from '@/components/layout/ConditionalShell'
 
@@ -217,6 +218,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
       </head>
       <body className="antialiased bg-[#f0f9ff]" suppressHydrationWarning>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-2W69604D7L"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-2W69604D7L');
+          `}
+        </Script>
         <ConditionalShell>{children}</ConditionalShell>
       </body>
     </html>
