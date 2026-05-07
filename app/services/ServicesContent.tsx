@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Droplets, Settings, Building2, RefreshCw, Clock, Shield, CheckCircle2, ChevronDown, Phone, ArrowRight, LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -43,27 +43,7 @@ interface ServicesContentProps {
 
 export default function ServicesContent({ initialServices }: ServicesContentProps) {
   const [openFaq, setOpenFaq] = useState<number | null>(null)
-  const [services, setServices] = useState<Service[]>(initialServices)
-  const [loading, setLoading] = useState(initialServices.length === 0)
-
-  useEffect(() => {
-    if (initialServices.length > 0) {
-      setServices(initialServices)
-      setLoading(false)
-    } else {
-      const fetchServices = async () => {
-        const { supabase } = await import('@/lib/supabase')
-        const { data } = await supabase
-          .from('services')
-          .select('*')
-          .eq('active', true)
-          .order('sort_order')
-        if (data) setServices(data)
-        setLoading(false)
-      }
-      fetchServices()
-    }
-  }, [initialServices])
+  const [services] = useState<Service[]>(initialServices)
 
   return (
     <div className="min-h-screen">
@@ -78,10 +58,10 @@ export default function ServicesContent({ initialServices }: ServicesContentProp
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <span className="inline-block px-4 py-1.5 rounded-full bg-white/20 text-white text-sm font-semibold mb-4">Our Services</span>
             <h1 className="text-3xl sm:text-5xl font-extrabold text-white mb-5">
-              Water Solutions for<br /><span className="gradient-text-light">Every Need</span>
+              Water Delivery Services<br /><span className="gradient-text-light">in Metro Vancouver</span>
             </h1>
             <p className="text-[#b3e5fc] text-xl max-w-2xl mx-auto">
-              From single-household deliveries to enterprise supply chains — we have you covered across Metro Vancouver.
+              5-gallon water jug delivery, water filter installation, and commercial bulk water supply across Vancouver, Burnaby, Surrey, Coquitlam, Richmond, Langley, and 16 more Metro Vancouver cities.
             </p>
           </motion.div>
         </div>

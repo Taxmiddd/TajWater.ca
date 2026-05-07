@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     description: 'Affordable and Competitive 5-gallon jug delivery, filter installation, and commercial supply in Vancouver. Same-day delivery available.',
     images: [
       {
-        url: '/og-image.png',
+        url: '/opengraph-image',
         width: 1200,
         height: 630,
         alt: 'TajWater — Pure Water Delivered to Your Door in Metro Vancouver',
@@ -61,7 +61,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'TajWater — Vancouver\'s Best Drinking Water Supplier | 5 Gallon Jugs',
     description: 'Affordable and Competitive 5-gallon jug delivery, filter installation, and commercial supply in Vancouver. Order now.',
-    images: ['/og-image.png'],
+    images: ['/opengraph-image'],
   },
   alternates: {
     canonical: BASE_URL,
@@ -89,8 +89,8 @@ const localBusinessJsonLd = {
   description: '5-gallon water jug delivery across Metro Vancouver. Spring, alkaline & distilled water, filter installation, and commercial supply.',
   url: BASE_URL,
   logo: `${BASE_URL}/logo/tajcyan.svg`,
-  image: `${BASE_URL}/og-image.png`,
-  telephone: process.env.NEXT_PUBLIC_COMPANY_PHONE ?? '+16041234567',
+  image: `${BASE_URL}/opengraph-image`,
+  telephone: process.env.NEXT_PUBLIC_COMPANY_PHONE ?? '+17785047880',
   email: process.env.NEXT_PUBLIC_COMPANY_EMAIL ?? 'info@tajwater.ca',
   priceRange: '$$',
   currenciesAccepted: 'CAD',
@@ -163,7 +163,7 @@ const localBusinessJsonLd = {
           '@type': 'Product',
           name: '5 Gallon Spring Water Jug',
           category: 'Water',
-          image: `${BASE_URL}/og-image.png`,
+          image: `${BASE_URL}/opengraph-image`,
           description: 'Premium spring water in a 20L BPA-free jug.',
           offers: {
             '@type': 'Offer',

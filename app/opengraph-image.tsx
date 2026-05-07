@@ -10,123 +10,217 @@ export default async function Image() {
     (
       <div
         style={{
-          background: 'linear-gradient(135deg, #006064 0%, #0097a7 40%, #00bcd4 70%, #1565c0 100%)',
+          background: 'linear-gradient(135deg, #003d4d 0%, #006064 35%, #0097a7 65%, #0277bd 100%)',
           width: '100%',
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontFamily: 'sans-serif',
+          fontFamily: 'system-ui, -apple-system, sans-serif',
           position: 'relative',
           overflow: 'hidden',
         }}
       >
-        {/* Water wave decoration */}
+        {/* Background circle decorations */}
         <div
           style={{
             position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: '180px',
-            background: 'rgba(255,255,255,0.08)',
-            borderRadius: '50% 50% 0 0',
-            transform: 'scaleX(1.4)',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: '120px',
+            top: '-120px',
+            right: '-120px',
+            width: '500px',
+            height: '500px',
+            borderRadius: '50%',
             background: 'rgba(255,255,255,0.05)',
-            borderRadius: '50% 50% 0 0',
-            transform: 'scaleX(1.6)',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '-80px',
+            left: '-80px',
+            width: '400px',
+            height: '400px',
+            borderRadius: '50%',
+            background: 'rgba(255,255,255,0.04)',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            top: '80px',
+            right: '220px',
+            width: '180px',
+            height: '180px',
+            borderRadius: '50%',
+            background: 'rgba(255,255,255,0.06)',
           }}
         />
 
-        {/* Logo text */}
+        {/* Wave at bottom */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '160px',
+            background: 'rgba(0,0,0,0.15)',
+            borderRadius: '60% 60% 0 0 / 40px 40px 0 0',
+          }}
+        />
+
+        {/* Main content */}
         <div
           style={{
             display: 'flex',
-            alignItems: 'center',
-            gap: '16px',
-            marginBottom: '24px',
+            flexDirection: 'column',
+            padding: '56px 72px',
+            height: '100%',
+            position: 'relative',
+            zIndex: 10,
           }}
         >
-          <div
-            style={{
-              width: '70px',
-              height: '70px',
-              borderRadius: '50%',
-              background: 'rgba(255,255,255,0.2)',
-              border: '3px solid rgba(255,255,255,0.5)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '36px',
-            }}
-          >
-            💧
-          </div>
-          <span
-            style={{
-              fontSize: '64px',
-              fontWeight: 900,
-              color: 'white',
-              letterSpacing: '-2px',
-              textShadow: '0 2px 20px rgba(0,0,0,0.3)',
-            }}
-          >
-            TajWater
-          </span>
-        </div>
+          {/* Top row: Logo + badge */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '36px' }}>
+            {/* Logo */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div
+                style={{
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '18px',
+                  background: 'rgba(255,255,255,0.2)',
+                  border: '2px solid rgba(255,255,255,0.4)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '34px',
+                }}
+              >
+                💧
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span
+                  style={{
+                    fontSize: '42px',
+                    fontWeight: 900,
+                    color: 'white',
+                    letterSpacing: '-1px',
+                    lineHeight: 1,
+                  }}
+                >
+                  TajWater
+                </span>
+                <span style={{ fontSize: '15px', color: 'rgba(255,255,255,0.7)', letterSpacing: '0.5px' }}>
+                  tajwater.ca
+                </span>
+              </div>
+            </div>
 
-        <div
-          style={{
-            fontSize: '28px',
-            color: 'rgba(255,255,255,0.9)',
-            fontWeight: 400,
-            textAlign: 'center',
-            maxWidth: '700px',
-            lineHeight: 1.4,
-            textShadow: '0 1px 10px rgba(0,0,0,0.2)',
-          }}
-        >
-          Pure Water Delivered to Your Door
-        </div>
-
-        <div
-          style={{
-            marginTop: '28px',
-            display: 'flex',
-            gap: '12px',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-          }}
-        >
-          {['Vancouver', 'Burnaby', 'Richmond', 'Surrey', '+ 12 More Zones'].map((zone) => (
-            <span
-              key={zone}
+            {/* Price badge */}
+            <div
               style={{
-                background: 'rgba(255,255,255,0.2)',
-                color: 'white',
-                padding: '6px 16px',
-                borderRadius: '20px',
-                fontSize: '16px',
-                border: '1px solid rgba(255,255,255,0.3)',
+                background: 'rgba(255,255,255,0.15)',
+                border: '2px solid rgba(255,255,255,0.3)',
+                borderRadius: '16px',
+                padding: '10px 24px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
               }}
             >
-              {zone}
+              <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.8)', fontWeight: 600, letterSpacing: '0.5px' }}>
+                STARTING FROM
+              </span>
+              <span style={{ fontSize: '38px', fontWeight: 900, color: 'white', lineHeight: 1.1 }}>
+                $8.99
+              </span>
+              <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.8)' }}>per 5-gallon jug</span>
+            </div>
+          </div>
+
+          {/* Headline */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '32px' }}>
+            <span
+              style={{
+                fontSize: '58px',
+                fontWeight: 900,
+                color: 'white',
+                lineHeight: 1.05,
+                letterSpacing: '-1.5px',
+              }}
+            >
+              Pure Water Delivery
             </span>
-          ))}
+            <span
+              style={{
+                fontSize: '58px',
+                fontWeight: 900,
+                color: 'rgba(183,234,247,0.95)',
+                lineHeight: 1.05,
+                letterSpacing: '-1.5px',
+              }}
+            >
+              Across Metro Vancouver
+            </span>
+          </div>
+
+          {/* Key features row */}
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            {[
+              { icon: '🚚', text: 'Free Delivery' },
+              { icon: '⚡', text: 'Same-Day Available' },
+              { icon: '📍', text: '21 Cities Covered' },
+              { icon: '❌', text: 'No Contracts Ever' },
+              { icon: '💦', text: 'Spring · Alkaline · Distilled' },
+            ].map((item) => (
+              <div
+                key={item.text}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: 'rgba(255,255,255,0.14)',
+                  border: '1px solid rgba(255,255,255,0.22)',
+                  borderRadius: '40px',
+                  padding: '8px 18px',
+                }}
+              >
+                <span style={{ fontSize: '16px' }}>{item.icon}</span>
+                <span style={{ fontSize: '16px', color: 'white', fontWeight: 600 }}>{item.text}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Bottom city list */}
+          <div
+            style={{
+              marginTop: 'auto',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}
+          >
+            <span style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', fontWeight: 600, marginRight: '4px' }}>
+              SERVING:
+            </span>
+            {['Vancouver', 'Burnaby', 'Richmond', 'Surrey', 'Coquitlam', 'Langley', 'North Van', '+ 14 more'].map((city) => (
+              <span
+                key={city}
+                style={{
+                  fontSize: '13px',
+                  color: 'rgba(255,255,255,0.75)',
+                  padding: '3px 10px',
+                  background: 'rgba(255,255,255,0.08)',
+                  borderRadius: '20px',
+                }}
+              >
+                {city}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
     ),
     { ...size }
   )
 }
-

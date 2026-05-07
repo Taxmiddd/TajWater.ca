@@ -18,13 +18,13 @@ export const metadata: Metadata = {
     description: 'Order 20L spring, alkaline & distilled water jugs, dispensers, and accessories. Fast Metro Vancouver delivery. Subscribe and save 15%.',
     url: '/shop',
     type: 'website',
-    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'TajWater Shop — Order Water Online Vancouver' }],
+    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'TajWater Shop — Order Water Online Vancouver' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Shop — Order Water Online | TajWater Vancouver',
     description: 'Order 20L jugs, dispensers, and filter products. Fast Metro Vancouver delivery.',
-    images: ['/og-image.png'],
+    images: ['/opengraph-image'],
   },
   alternates: {
     canonical: '/shop',

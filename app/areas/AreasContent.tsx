@@ -3,21 +3,33 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MapPin, Search, CheckCircle2, XCircle, ArrowRight, Clock, Send } from 'lucide-react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 
 const HARDCODED_ZONES = [
-  { name: 'North Vancouver', fee: 'Free', schedule: 'Mon, Wed, Fri', color: '#0097a7', districts: ['Lynn Valley', 'Capilano', 'Deep Cove', 'Seymour'] },
-  { name: 'West Vancouver', fee: '$2.00', schedule: 'Tue, Thu, Sat', color: '#1565c0', districts: ['Dundarave', 'Ambleside', 'Horseshoe Bay', 'Caulfeild'] },
-  { name: 'Vancouver', fee: 'Free', schedule: 'Daily', color: '#006064', districts: ['Downtown', 'Kitsilano', 'East Van', 'Marpole', 'Kerrisdale'] },
-  { name: 'Richmond', fee: 'Free', schedule: 'Mon–Sat', color: '#00acc1', districts: ['Steveston', 'City Centre', 'Brighouse', 'Shellmont'] },
-  { name: 'Burnaby', fee: 'Free', schedule: 'Mon–Sat', color: '#0097a7', districts: ['Metrotown', 'Brentwood', 'Heights', 'South Slope'] },
-  { name: 'Coquitlam', fee: '$1.50', schedule: 'Tue, Thu, Sat', color: '#1565c0', districts: ['Port Coquitlam', 'Maillardville', 'Burke Mountain'] },
-  { name: 'Port Moody', fee: '$1.50', schedule: 'Tue, Thu', color: '#006064', districts: ['Inlet Centre', 'Heritage Woods', 'Glenayre'] },
-  { name: 'Surrey', fee: 'Free', schedule: 'Mon–Sat', color: '#00acc1', districts: ['City Centre', 'Newton', 'Fleetwood', 'Cloverdale', 'White Rock'] },
-  { name: 'Delta', fee: '$2.00', schedule: 'Mon, Wed, Fri', color: '#0097a7', districts: ['Ladner', 'Tsawwassen', 'North Delta'] },
-  { name: 'Langley', fee: '$2.50', schedule: 'Tue, Thu, Sat', color: '#1565c0', districts: ['Langley City', 'Township', 'Willoughby', 'Brookswood'] },
+  { name: 'Vancouver', slug: 'vancouver', fee: 'Free', schedule: 'Daily', color: '#006064', districts: ['Downtown', 'Kitsilano', 'East Van', 'Marpole', 'Kerrisdale'] },
+  { name: 'Burnaby', slug: 'burnaby', fee: 'Free', schedule: 'Mon–Sat', color: '#0097a7', districts: ['Metrotown', 'Brentwood', 'Heights', 'South Slope'] },
+  { name: 'Richmond', slug: 'richmond', fee: 'Free', schedule: 'Mon–Sat', color: '#00acc1', districts: ['Steveston', 'City Centre', 'Brighouse', 'Shellmont'] },
+  { name: 'Surrey', slug: 'surrey', fee: 'Free', schedule: 'Mon–Sat', color: '#00acc1', districts: ['City Centre', 'Newton', 'Fleetwood', 'Cloverdale', 'White Rock'] },
+  { name: 'Coquitlam', slug: 'coquitlam', fee: 'Free', schedule: 'Tue, Thu, Sat', color: '#1565c0', districts: ['Maillardville', 'Burke Mountain', 'Westwood Plateau'] },
+  { name: 'Port Coquitlam', slug: 'port-coquitlam', fee: 'Free', schedule: 'Tue, Thu, Sat', color: '#0097a7', districts: ['Mary Hill', 'Citadel', 'Riverwood', 'Birchland'] },
+  { name: 'Port Moody', slug: 'port-moody', fee: 'Free', schedule: 'Tue, Thu', color: '#006064', districts: ['Inlet Centre', 'Heritage Woods', 'Glenayre'] },
+  { name: 'North Vancouver', slug: 'north-vancouver', fee: 'Free', schedule: 'Mon, Wed, Fri', color: '#0097a7', districts: ['Lynn Valley', 'Capilano', 'Deep Cove', 'Seymour'] },
+  { name: 'West Vancouver', slug: 'west-vancouver', fee: 'Free', schedule: 'Tue, Thu, Sat', color: '#1565c0', districts: ['Dundarave', 'Ambleside', 'Horseshoe Bay', 'Caulfeild'] },
+  { name: 'Langley', slug: 'langley', fee: 'Free', schedule: 'Tue, Thu, Sat', color: '#1565c0', districts: ['Langley City', 'Willoughby', 'Brookswood'] },
+  { name: 'Langley Township', slug: 'langley-township', fee: 'Free', schedule: 'Tue, Thu, Sat', color: '#00acc1', districts: ['Fort Langley', 'Aldergrove', 'Walnut Grove'] },
+  { name: 'Walnut Grove', slug: 'walnut-grove', fee: 'Free', schedule: 'Tue, Thu, Sat', color: '#0097a7', districts: ['Town Centre', 'Walnut Grove North', 'Topham Park'] },
+  { name: 'Cloverdale', slug: 'cloverdale', fee: 'Free', schedule: 'Mon, Wed, Fri', color: '#006064', districts: ['Clayton', 'Clayton Heights', 'Cloverdale Town Centre'] },
+  { name: 'Delta', slug: 'delta', fee: 'Free', schedule: 'Mon, Wed, Fri', color: '#0097a7', districts: ['Ladner', 'North Delta', 'Sunbury'] },
+  { name: 'Tsawwassen', slug: 'tsawwassen', fee: 'Free', schedule: 'Mon, Wed, Fri', color: '#1565c0', districts: ['Tsawwassen Heights', 'Beach Grove', 'Boundary Bay'] },
+  { name: 'White Rock', slug: 'white-rock', fee: 'Free', schedule: 'Mon, Wed, Fri', color: '#00acc1', districts: ['East Beach', 'West Beach', 'Hillcrest'] },
+  { name: 'Maple Ridge', slug: 'maple-ridge', fee: 'Free', schedule: 'Wed, Fri', color: '#0097a7', districts: ['Albion', 'Haney', 'Silver Valley'] },
+  { name: 'Pitt Meadows', slug: 'pitt-meadows', fee: 'Free', schedule: 'Wed, Fri', color: '#006064', districts: ['Central Pitt Meadows', 'South Bonson', 'North Meadows'] },
+  { name: 'Mary Hill', slug: 'mary-hill', fee: 'Free', schedule: 'Tue, Thu, Sat', color: '#1565c0', districts: ['Mary Hill', 'Citadel Heights', 'Riverwood'] },
+  { name: 'Squamish', slug: 'squamish', fee: 'Free', schedule: 'Thursdays', color: '#0097a7', districts: ['Downtown Squamish', 'Garibaldi', 'Hospital Hill'] },
+  { name: 'Whistler', slug: 'whistler', fee: 'Free', schedule: 'Thursdays', color: '#006064', districts: ['Village', 'Creekside', 'Alta Lake', 'Brio'] },
 ]
 
 interface Zone {
@@ -31,7 +43,7 @@ interface AreasContentProps {
 }
 
 export default function AreasContent({ initialDbZones }: AreasContentProps) {
-  const [displayZones, setDisplayZones] = useState(HARDCODED_ZONES)
+  const [displayZones, setDisplayZones] = useState<typeof HARDCODED_ZONES>(HARDCODED_ZONES)
   const [search, setSearch] = useState('')
   const [result, setResult] = useState<typeof HARDCODED_ZONES[0] | null | 'notfound'>(null)
   const [checking, setChecking] = useState(false)
@@ -44,6 +56,7 @@ export default function AreasContent({ initialDbZones }: AreasContentProps) {
         const existing = HARDCODED_ZONES.find(hz => hz.name.toLowerCase() === dbZone.name.toLowerCase())
         return {
           name: dbZone.name,
+          slug: existing?.slug || dbZone.name.toLowerCase().replace(/\s+/g, '-'),
           fee: dbZone.delivery_fee === 0 ? 'Free' : `$${dbZone.delivery_fee.toFixed(2)}`,
           schedule: dbZone.schedule,
           color: existing?.color || ['#0097a7', '#1565c0', '#006064', '#00acc1'][i % 4],
@@ -63,6 +76,7 @@ export default function AreasContent({ initialDbZones }: AreasContentProps) {
             const existing = HARDCODED_ZONES.find(hz => hz.name.toLowerCase() === dbZone.name.toLowerCase())
             return {
               name: dbZone.name,
+              slug: existing?.slug || dbZone.name.toLowerCase().replace(/\s+/g, '-'),
               fee: dbZone.delivery_fee === 0 ? 'Free' : `$${dbZone.delivery_fee.toFixed(2)}`,
               schedule: dbZone.schedule,
               color: existing?.color || ['#0097a7', '#1565c0', '#006064', '#00acc1'][i % 4],
@@ -149,7 +163,7 @@ export default function AreasContent({ initialDbZones }: AreasContentProps) {
                           <div className="flex items-center gap-1.5 text-[#0097a7]"><Clock className="w-3.5 h-3.5 shrink-0" /><span>{result.schedule}</span></div>
                         </div>
                       </div>
-                      <Button size="sm" className="bg-[#0097a7] hover:bg-[#006064] text-white rounded-lg shrink-0">Order <ArrowRight className="w-3 h-3 ml-1" /></Button>
+                      <Link href={`/areas/${result.slug}`} className="inline-flex items-center gap-1 px-3 py-1.5 bg-[#0097a7] hover:bg-[#006064] text-white text-sm font-semibold rounded-lg shrink-0 transition-colors">View Area <ArrowRight className="w-3 h-3" /></Link>
                     </div>
                   ) : (
                     <div className="flex items-center gap-3">
@@ -201,24 +215,52 @@ export default function AreasContent({ initialDbZones }: AreasContentProps) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.07 }}
-                className="water-card bg-white rounded-2xl p-5 border border-[#cce7f0]"
               >
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: zone.color + '22' }}>
-                    <MapPin className="w-4 h-4" style={{ color: zone.color }} />
+                <Link
+                  href={`/areas/${zone.slug}`}
+                  className="group block water-card bg-white rounded-2xl p-5 border border-[#cce7f0] hover:border-[#0097a7]/40 hover:shadow-md transition-all h-full"
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: zone.color + '22' }}>
+                      <MapPin className="w-4 h-4" style={{ color: zone.color }} />
+                    </div>
+                    <h3 className="font-bold text-[#0c2340] text-sm group-hover:text-[#0097a7] transition-colors">{zone.name}</h3>
                   </div>
-                  <h3 className="font-bold text-[#0c2340] text-sm">{zone.name}</h3>
-                </div>
-                <div className="space-y-1.5 text-xs text-[#4a7fa5]">
-                  <div className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {zone.schedule}</div>
-                </div>
-                <div className="mt-3 flex flex-wrap gap-1">
-                  {zone.districts.slice(0, 3).map((d) => (
-                    <span key={d} className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: zone.color + '18', color: zone.color }}>{d}</span>
-                  ))}
-                  {zone.districts.length > 3 && <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#f0f9ff] text-[#4a7fa5]">+{zone.districts.length - 3}</span>}
-                </div>
+                  <div className="space-y-1.5 text-xs text-[#4a7fa5]">
+                    <div className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {zone.schedule}</div>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-1">
+                    {zone.districts.slice(0, 3).map((d) => (
+                      <span key={d} className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: zone.color + '18', color: zone.color }}>{d}</span>
+                    ))}
+                    {zone.districts.length > 3 && <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#f0f9ff] text-[#4a7fa5]">+{zone.districts.length - 3}</span>}
+                  </div>
+                </Link>
               </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Static city links — SEO internal linking */}
+      <section className="py-16 bg-white border-t border-[#cce7f0]">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl font-extrabold text-[#0c2340] text-center mb-3">
+            Water Delivery Service Pages — All Metro Vancouver Cities
+          </h2>
+          <p className="text-[#4a7fa5] text-center text-sm mb-8">
+            Click any city to see delivery schedules, pricing, neighbourhoods served, and frequently asked questions.
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            {HARDCODED_ZONES.map((zone) => (
+              <Link
+                key={zone.slug}
+                href={`/areas/${zone.slug}`}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#cce7f0] bg-[#f0f9ff] hover:border-[#0097a7]/40 hover:bg-[#e0f7fa] transition-all text-sm font-medium text-[#0c2340] hover:text-[#0097a7]"
+              >
+                <MapPin className="w-3.5 h-3.5 text-[#0097a7] shrink-0" />
+                {zone.name} Water Delivery
+              </Link>
             ))}
           </div>
         </div>

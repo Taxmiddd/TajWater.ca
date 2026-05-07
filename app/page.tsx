@@ -9,6 +9,7 @@ import TrustSignals from '@/components/home/TrustSignals'
 import WaterGuide from '@/components/home/WaterGuide'
 import ServicesOverview from '@/components/home/ServicesOverview'
 import LocalSEOBoost from '@/components/home/LocalSEOBoost'
+import CompetitorSwitch from '@/components/home/CompetitorSwitch'
 import PromotionSection from '@/components/home/PromotionSection'
 import EnhancedTestimonials from '@/components/home/EnhancedTestimonials'
 import ExpandedFAQ from '@/components/home/ExpandedFAQ'
@@ -48,6 +49,7 @@ export default async function HomePage() {
       <WaterGuide />
       <ServicesOverview />
       <LocalSEOBoost />
+      <CompetitorSwitch />
       <PromotionSection />
       <EnhancedTestimonials />
       <ExpandedFAQ />

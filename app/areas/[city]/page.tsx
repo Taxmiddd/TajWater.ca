@@ -293,13 +293,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       url: `/areas/${city}`,
       type: 'website',
-      images: [{ url: '/og-image.png', width: 1200, height: 630, alt: `TajWater Water Delivery ${data.name}` }],
+      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: `TajWater Water Delivery ${data.name}` }],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${title} | TajWater`,
       description,
-      images: ['/og-image.png'],
+      images: ['/opengraph-image'],
     },
     alternates: {
       canonical: `/areas/${city}`,
@@ -346,6 +346,16 @@ export default async function CityPage({ params }: Props) {
       : undefined,
   }
 
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: data.faq.map((item) => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: { '@type': 'Answer', text: item.a },
+    })),
+  }
+
   const breadcrumbJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -360,6 +370,7 @@ export default async function CityPage({ params }: Props) {
     <>
       <Script id="city-jsonld" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Script id="breadcrumb-jsonld" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <Script id="city-faq-jsonld" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
 
       <div className="min-h-screen">
         {/* Hero */}

@@ -91,7 +91,10 @@ export default function WaterGuide() {
             <Link href="/contact" className="text-[#0097a7] font-semibold hover:underline">
               Call or WhatsApp us
             </Link>{' '}
-            and we will recommend the best option for your household.
+            and we will recommend the best option for your household. Or read our full guide:{' '}
+            <Link href="/blog/spring-vs-alkaline-vs-distilled-water-vancouver" className="text-[#0097a7] font-semibold hover:underline">
+              Spring vs Alkaline vs Distilled Water in Vancouver →
+            </Link>
           </p>
         </div>
       </div>

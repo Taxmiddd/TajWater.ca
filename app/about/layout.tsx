@@ -19,13 +19,13 @@ export const metadata: Metadata = {
     description: 'Family-owned since 2010, TajWater is Metro Vancouver\'s trusted source for clean, fresh water. Learn about our mission, team, and certifications.',
     url: '/about',
     type: 'website',
-    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'About TajWater — Pure Water Delivered with Care' }],
+    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'About TajWater — Pure Water Delivered with Care' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'About TajWater — Pure Water, Delivered with Care',
     description: 'Family-owned since 2010. Metro Vancouver\'s trusted water delivery company.',
-    images: ['/og-image.png'],
+    images: ['/opengraph-image'],
   },
   alternates: {
     canonical: '/about',

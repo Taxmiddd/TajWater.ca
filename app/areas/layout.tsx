@@ -23,13 +23,13 @@ export const metadata: Metadata = {
     description: 'Serving 21 zones across Metro Vancouver with same-day and scheduled water delivery. Check if we deliver to your area.',
     url: '/areas',
     type: 'website',
-    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'TajWater Delivery Areas Metro Vancouver' }],
+    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'TajWater Delivery Areas Metro Vancouver' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Delivery Areas — TajWater Metro Vancouver',
     description: 'Serving 21 zones across Metro Vancouver. Check your delivery zone.',
-    images: ['/og-image.png'],
+    images: ['/opengraph-image'],
   },
   alternates: {
     canonical: '/areas',

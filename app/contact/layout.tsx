@@ -19,13 +19,13 @@ export const metadata: Metadata = {
     description: 'Reach TajWater by phone, WhatsApp, or email for water delivery orders, filter quotes, and support across Metro Vancouver.',
     url: '/contact',
     type: 'website',
-    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Contact TajWater — Metro Vancouver Water Delivery' }],
+    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Contact TajWater — Metro Vancouver Water Delivery' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Contact TajWater — Call, WhatsApp or Email Us',
     description: 'Call, WhatsApp, or email TajWater for delivery orders and support across Metro Vancouver.',
-    images: ['/og-image.png'],
+    images: ['/opengraph-image'],
   },
   alternates: {
     canonical: '/contact',

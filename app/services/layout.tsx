@@ -18,13 +18,13 @@ export const metadata: Metadata = {
     description: 'Premium water delivery, filter installation, and commercial supply across Metro Vancouver. Flexible scheduling and competitive pricing.',
     url: '/services',
     type: 'website',
-    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'TajWater Water Delivery Services' }],
+    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'TajWater Water Delivery Services' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Water Delivery Services — TajWater Vancouver',
     description: 'Premium water delivery, filter installation, and commercial supply across Metro Vancouver.',
-    images: ['/og-image.png'],
+    images: ['/opengraph-image'],
   },
   alternates: {
     canonical: '/services',
