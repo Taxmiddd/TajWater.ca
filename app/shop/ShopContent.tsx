@@ -159,9 +159,6 @@ export default function ShopContent({ initialProducts }: ShopContentProps) {
                         <Badge className="absolute top-4 left-4 text-[10px] z-10" style={{ background: color }}>
                           {product.category}
                         </Badge>
-                        {product.category === 'subscription' && (
-                          <Badge className="absolute top-4 right-4 bg-amber-500 text-[10px] z-10 shadow-sm">Save 15%</Badge>
-                        )}
                         {product.stock === 0 && (
                           <Badge className="absolute bottom-4 right-4 bg-red-500 text-[10px] z-10 shadow-sm">Out Of Stock</Badge>
                         )}

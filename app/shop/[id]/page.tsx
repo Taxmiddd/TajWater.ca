@@ -56,7 +56,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     openGraph: {
-      title: `${title} | TajWater`,
+      title: `${title} | Taj Water`,
       description,
       url,
       type: 'website',
@@ -64,7 +64,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${title} | TajWater`,
+      title: `${title} | Taj Water`,
       description,
       images: product.image_url ? [product.image_url] : [],
     },
@@ -90,7 +90,7 @@ export default async function ProductPage({ params }: Props) {
     description: product.description || `High-quality ${product.name} delivered to your door in Metro Vancouver.`,
     brand: {
       '@type': 'Brand',
-      name: 'TajWater',
+      name: 'Taj Water',
     },
     sku: product.id,
     mpn: product.id,
@@ -104,7 +104,7 @@ export default async function ProductPage({ params }: Props) {
       availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
       seller: {
         '@type': 'Organization',
-        name: 'TajWater',
+        name: 'Taj Water',
       },
     },
     aggregateRating: {

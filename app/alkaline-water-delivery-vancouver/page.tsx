@@ -3,26 +3,23 @@ import Link from 'next/link'
 import { CheckCircle, Droplets, Zap, Shield, Star, MapPin } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Alkaline Water Delivery Vancouver — pH 9.5+ | TajWater $12.99/Jug',
-  description: 'Alkaline water delivery in Metro Vancouver. pH 9.5+ ionized water delivered to your door in 5-gallon jugs. Same-day available, free delivery, no contract. From $10.39/jug with subscription.',
+  title: 'Alkaline Water Delivery Vancouver — 5-Gallon Jugs $10.99 | Taj Water',
+  description: 'Alkaline water delivery in Metro Vancouver. pH balanced alkaline water delivered to your door in 5-gallon jugs. Same-day available, free delivery, no contract. $10.99/jug.',
   keywords: [
     'alkaline water delivery Vancouver',
     'alkaline water delivery Metro Vancouver',
-    'ionized water delivery Vancouver',
-    'pH 9.5 water delivery Vancouver',
     'alkaline water delivery Burnaby',
     'alkaline water delivery Surrey',
     'alkaline water delivery Coquitlam',
     '5 gallon alkaline water Vancouver',
     'alkaline water jug delivery BC',
-    'high pH water delivery Vancouver',
     'alkaline water subscription Vancouver',
     'best alkaline water Vancouver',
   ],
   alternates: { canonical: 'https://tajwater.ca/alkaline-water-delivery-vancouver' },
   openGraph: {
-    title: 'Alkaline Water Delivery Vancouver — pH 9.5+ | TajWater',
-    description: 'pH 9.5+ ionized alkaline water delivered to your door in Metro Vancouver. Same-day available, free delivery, no contract.',
+    title: 'Alkaline Water Delivery Vancouver — $10.99/Jug | Taj Water',
+    description: 'pH balanced alkaline water delivered to your door in Metro Vancouver. Same-day available, free delivery, no contract.',
     url: 'https://tajwater.ca/alkaline-water-delivery-vancouver',
     type: 'website',
     images: [{ url: 'https://tajwater.ca/opengraph-image', width: 1200, height: 630 }],
@@ -35,14 +32,14 @@ const jsonLd = {
     {
       '@type': 'Product',
       name: 'Alkaline Water — 5-Gallon Jug Delivery',
-      description: 'pH 9.5+ ionized alkaline water delivered in BPA-free 5-gallon jugs across Metro Vancouver. Micro-clustered molecules for better hydration, rich in electrolytes.',
-      brand: { '@type': 'Brand', name: 'TajWater' },
+      description: 'pH balanced alkaline water delivered in BPA-free 5-gallon jugs across Metro Vancouver. Rich in electrolytes and perfect for an active lifestyle.',
+      brand: { '@type': 'Brand', name: 'Taj Water' },
       image: 'https://tajwater.ca/opengraph-image',
       sku: 'TW-ALK-5GAL',
       mpn: 'TW-ALK-5GAL',
       offers: {
         '@type': 'Offer',
-        price: '12.99',
+        price: '10.99',
         priceCurrency: 'CAD',
         priceValidUntil: '2026-12-31',
         availability: 'https://schema.org/InStock',
@@ -58,10 +55,10 @@ const jsonLd = {
         },
         seller: {
           '@type': 'LocalBusiness',
-          name: 'Taj Water Ltd',
+          name: 'Taj Water',
           address: {
             '@type': 'PostalAddress',
-            streetAddress: '1770 McLean Ave Unit 7',
+            streetAddress: '1770 McLean Ave',
             addressLocality: 'Port Coquitlam',
             addressRegion: 'BC',
             postalCode: 'V3C 4K8',
@@ -84,10 +81,10 @@ const jsonLd = {
       mainEntity: [
         {
           '@type': 'Question',
-          name: 'What is the pH level of TajWater alkaline water?',
+          name: 'What is alkaline water?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'TajWater alkaline water is ionized to pH 9.5 or above. Each batch is tested and certified before delivery. The elevated pH is achieved through an electrolysis ionization process that also micro-clusters water molecules for better cellular absorption.',
+            text: 'Alkaline water is pH balanced water with a higher pH than regular tap water. It contains trace electrolytes — calcium, magnesium, and potassium — and is popular among active and health-conscious individuals for its smooth taste and hydrating qualities.',
           },
         },
         {
@@ -95,7 +92,7 @@ const jsonLd = {
           name: 'How much does alkaline water delivery cost in Vancouver?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'TajWater alkaline water costs $12.99 per 5-gallon jug at the standard rate, or from $10.39/jug with a weekly subscription. Delivery is always free across Metro Vancouver. No minimum order, no setup fees, no contracts.',
+            text: 'Taj Water alkaline water is $10.99 per 5-gallon jug with free delivery across Metro Vancouver. Subscription plans start at $29.99/week. No minimum order, no setup fees, no contracts.',
           },
         },
         {
@@ -103,7 +100,7 @@ const jsonLd = {
           name: 'What is the difference between alkaline water and spring water?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Spring water has a neutral pH around 7.0–7.4 and is sourced from a natural underground spring. Alkaline water has a pH of 9.5+ and is produced through ionization. Alkaline water is often chosen by people seeking potential benefits like neutralizing acidity, while spring water is preferred for its natural mineral content and taste.',
+            text: 'Spring water is sourced from a natural underground spring and retains its natural mineral profile. Alkaline water is processed to have a higher, balanced pH and contains trace electrolytes. Alkaline water is often preferred by people with active lifestyles, while spring water is the most popular everyday choice for families.',
           },
         },
         {
@@ -111,15 +108,15 @@ const jsonLd = {
           name: 'Do you deliver alkaline water to Burnaby, Surrey, and Coquitlam?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Yes. TajWater delivers alkaline water to all 21 Metro Vancouver cities including Burnaby, Surrey, Richmond, Coquitlam, Port Coquitlam, North Vancouver, West Vancouver, Langley, Delta, Port Moody, White Rock, Maple Ridge, Pitt Meadows, Squamish, Whistler, and more. Delivery is free on every order.',
+            text: 'Yes. Taj Water delivers alkaline water to all 21 Metro Vancouver cities including Burnaby, Surrey, Richmond, Coquitlam, Port Coquitlam, North Vancouver, West Vancouver, Langley, Delta, Port Moody, White Rock, Maple Ridge, Pitt Meadows, Squamish, Whistler, and more. Delivery is free on every order.',
           },
         },
         {
           '@type': 'Question',
-          name: 'Is TajWater alkaline water safe for babies and children?',
+          name: 'Is alkaline water safe for babies and children?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Alkaline water at pH 9.5 is generally not recommended for infants under 12 months, as babies need neutral pH water for formula. For children over 1 year, alkaline water is safe. TajWater recommends distilled or spring water for infants and speaking with your pediatrician if unsure.',
+            text: 'Alkaline water is generally not recommended for infants under 12 months. For children over 1 year, alkaline water is safe. Taj Water recommends distilled or spring water for infants — please consult your pediatrician if unsure.',
           },
         },
       ],
@@ -163,26 +160,26 @@ export default function AlkalineWaterDeliveryVancouver() {
         <section className="hero-gradient py-20 sm:py-28">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <div className="inline-flex items-center gap-2 bg-white/20 text-white text-sm font-semibold px-4 py-1.5 rounded-full mb-6">
-              <Zap className="w-3.5 h-3.5" /> pH 9.5+ Ionized Alkaline Water
+              <Zap className="w-3.5 h-3.5" /> pH Balanced Alkaline Water
             </div>
             <h1 className="text-4xl sm:text-6xl font-extrabold text-white mb-6 leading-tight">
               Alkaline Water Delivery<br />
               <span className="text-[#b3e5fc]">Metro Vancouver</span>
             </h1>
             <p className="text-[#b3e5fc] text-lg sm:text-xl max-w-3xl mx-auto mb-10">
-              pH 9.5+ ionized alkaline water delivered to your home or office in 5-gallon BPA-free jugs.
+              pH balanced alkaline water delivered to your home or office in 5-gallon BPA-free jugs.
               Free delivery across all 21 Metro Vancouver cities. Same-day available before 12pm.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
               <Link href="/shop" className="btn-primary text-lg px-8 py-4">
-                Order Alkaline Water — $12.99/Jug
+                Order Alkaline Water — $10.99/Jug
               </Link>
               <Link href="/contact" className="bg-white/20 hover:bg-white/30 text-white font-bold px-8 py-4 rounded-xl transition-colors">
                 Get a Subscription Quote
               </Link>
             </div>
             <div className="flex flex-wrap justify-center gap-4 text-white/90 text-sm">
-              {['Free Delivery', 'Same-Day Available', 'No Contract', 'Cancel Anytime', 'pH 9.5+'].map((f) => (
+              {['Free Delivery', 'Same-Day Available', 'No Contract', 'Cancel Anytime', 'pH Balanced'].map((f) => (
                 <span key={f} className="flex items-center gap-1.5">
                   <CheckCircle className="w-4 h-4 text-[#80deea]" /> {f}
                 </span>
@@ -210,16 +207,17 @@ export default function AlkalineWaterDeliveryVancouver() {
                   What is Alkaline Water?
                 </h2>
                 <p className="text-[#4a7fa5] leading-relaxed mb-4">
-                  Alkaline water has a pH level above 7.0 — typically between 8 and 9.5. TajWater's alkaline water is
-                  ionized to pH 9.5 through an electrolysis process that separates water into alkaline and acidic components.
+                  Alkaline water is pH balanced water that has been processed to have a higher pH than regular
+                  tap or spring water. It contains trace electrolytes — calcium, magnesium, and potassium — that
+                  contribute to its balanced composition and smooth taste.
                 </p>
                 <p className="text-[#4a7fa5] leading-relaxed mb-4">
-                  The ionization process also micro-clusters water molecules, which many people report leads to faster
-                  absorption and a smoother, silkier taste compared to regular water.
+                  Many customers find alkaline water has a silkier, smoother taste compared to regular water.
+                  It is the top choice among Taj Water's active and health-conscious customers across Metro Vancouver.
                 </p>
                 <p className="text-[#4a7fa5] leading-relaxed">
-                  Alkaline water contains trace electrolytes — calcium, magnesium, potassium — that contribute to its
-                  elevated pH and are naturally present in ionized water.
+                  Sourced, processed, and delivered locally from our Port Coquitlam facility — not shipped from
+                  distant warehouses.
                 </p>
               </div>
               <div className="bg-white rounded-2xl border border-[#cce7f0] overflow-hidden shadow-sm">
@@ -229,14 +227,14 @@ export default function AlkalineWaterDeliveryVancouver() {
                 <table className="w-full text-sm">
                   <tbody>
                     {[
-                      ['pH Level', '9.5 or above'],
-                      ['Process', 'Electrolysis ionization'],
+                      ['Water Type', 'pH Balanced Alkaline'],
                       ['Electrolytes', 'Ca, Mg, K (trace)'],
                       ['Jug Size', '5 gallon (18.9L)'],
                       ['Jug Material', 'BPA-free polycarbonate'],
-                      ['Batch Testing', 'pH tested every batch'],
+                      ['Batch Testing', 'Quality tested every batch'],
                       ['Best For', 'Active lifestyle, hydration'],
-                      ['Price', '$12.99/jug | From $10.39 (sub)'],
+                      ['Price', '$10.99/jug one-time'],
+                      ['Subscription', 'From $29.99/week'],
                     ].map(([label, value], i) => (
                       <tr key={label} className={i % 2 === 0 ? 'bg-white' : 'bg-[#f0f9ff]'}>
                         <td className="px-5 py-3 font-semibold text-[#0c2340] border-b border-[#cce7f0]">{label}</td>
@@ -257,39 +255,39 @@ export default function AlkalineWaterDeliveryVancouver() {
               Why Metro Vancouver Residents Choose Alkaline Water
             </h2>
             <p className="text-[#4a7fa5] text-center max-w-2xl mx-auto mb-12 text-lg">
-              Alkaline water is the most popular choice among TajWater's active, health-conscious customers.
+              Alkaline water is the most popular choice among Taj Water's active, health-conscious customers.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
                 {
                   icon: <Zap className="w-7 h-7 text-[#0097a7]" />,
                   title: 'Smoother Taste',
-                  desc: 'Most people notice a silkier, less "flat" taste compared to neutral-pH water. The micro-clustering reduces harshness.',
+                  desc: 'Most people notice a silkier, less "flat" taste compared to regular water — making it easier and more enjoyable to stay hydrated.',
                 },
                 {
                   icon: <Droplets className="w-7 h-7 text-[#0097a7]" />,
-                  title: 'Faster Absorption',
-                  desc: 'Ionized micro-clustered molecules are reported to absorb at the cellular level faster than standard water molecules.',
-                },
-                {
-                  icon: <Shield className="w-7 h-7 text-[#0097a7]" />,
                   title: 'Electrolyte Content',
                   desc: 'Contains trace calcium, magnesium, and potassium — naturally occurring electrolytes that support overall hydration.',
                 },
                 {
+                  icon: <Shield className="w-7 h-7 text-[#0097a7]" />,
+                  title: 'pH Balanced',
+                  desc: 'Our alkaline water is pH balanced for a clean, smooth drinking experience that many customers prefer over standard tap or spring water.',
+                },
+                {
                   icon: <CheckCircle className="w-7 h-7 text-[#0097a7]" />,
-                  title: 'Neutralizes Acidity',
-                  desc: 'Many customers with acid reflux or high-acidity diets report relief from drinking alkaline water regularly.',
+                  title: 'BPA-Free Jugs',
+                  desc: 'Delivered in sanitized, BPA-free 5-gallon polycarbonate jugs. Jugs are collected and cleaned on every delivery.',
                 },
                 {
                   icon: <Star className="w-7 h-7 text-[#0097a7]" />,
-                  title: 'Popular with Athletes',
-                  desc: 'Sports-active households in Coquitlam, North Vancouver, and Burnaby choose alkaline water for post-workout hydration.',
+                  title: 'Popular with Active Households',
+                  desc: 'Sports-active households in Coquitlam, North Vancouver, and Burnaby choose alkaline water for everyday hydration.',
                 },
                 {
                   icon: <MapPin className="w-7 h-7 text-[#0097a7]" />,
                   title: 'Locally Delivered',
-                  desc: 'Sourced, ionized, and delivered locally from our Port Coquitlam facility — not shipped from distant warehouses.',
+                  desc: 'Sourced and delivered locally from our Port Coquitlam facility — not shipped from distant warehouses.',
                 },
               ].map((item) => (
                 <div key={item.title} className="bg-[#f0f9ff] rounded-2xl p-6 border border-[#cce7f0]">
@@ -315,26 +313,26 @@ export default function AlkalineWaterDeliveryVancouver() {
               {[
                 {
                   plan: 'One-Time Order',
-                  price: '$12.99',
+                  price: '$10.99',
                   unit: 'per jug',
                   features: ['No commitment', 'Order anytime', 'Free delivery', 'Jug swap included'],
                   cta: 'Order Now',
                   highlight: false,
                 },
                 {
-                  plan: 'Bi-Weekly Subscription',
-                  price: '$11.49',
-                  unit: 'per jug',
-                  features: ['Every 2 weeks', 'Cancel anytime', 'Free delivery', 'Priority scheduling'],
-                  cta: 'Subscribe & Save',
+                  plan: 'Weekly Subscription',
+                  price: '$29.99',
+                  unit: 'per week',
+                  features: ['Weekly delivery', 'Cancel anytime', 'Free delivery', 'Priority scheduling'],
+                  cta: 'Subscribe Weekly',
                   highlight: true,
                 },
                 {
-                  plan: 'Weekly Subscription',
-                  price: '$10.39',
-                  unit: 'per jug',
-                  features: ['Every week', 'Best value', 'Free delivery', 'Dedicated route'],
-                  cta: 'Best Value',
+                  plan: 'Monthly Subscription',
+                  price: '$59.99',
+                  unit: 'per month',
+                  features: ['Monthly delivery', 'Cancel anytime', 'Free delivery', 'Dedicated route'],
+                  cta: 'Subscribe Monthly',
                   highlight: false,
                 },
               ].map((tier) => (
@@ -349,7 +347,7 @@ export default function AlkalineWaterDeliveryVancouver() {
                   )}
                   <h3 className="text-[#0c2340] font-bold text-lg mb-1">{tier.plan}</h3>
                   <div className="text-3xl font-extrabold text-[#0097a7] mb-1">{tier.price}</div>
-                  <div className="text-[#4a7fa5] text-sm mb-5">{tier.unit} · 5-gallon jug</div>
+                  <div className="text-[#4a7fa5] text-sm mb-5">{tier.unit}</div>
                   <ul className="space-y-2 mb-6">
                     {tier.features.map((f) => (
                       <li key={f} className="flex items-center gap-2 text-sm text-[#4a7fa5]">
@@ -393,12 +391,12 @@ export default function AlkalineWaterDeliveryVancouver() {
                 </thead>
                 <tbody>
                   {[
-                    ['pH Level', '9.5+', '7.0–7.4', '7.0 (neutral)'],
-                    ['Source', 'Ionized municipal/filtered', 'Natural underground spring', 'Purified by distillation'],
+                    ['Water Type', 'pH Balanced Alkaline', 'Natural Spring', 'Pure Distilled'],
+                    ['Source', 'Processed & balanced', 'Natural underground spring', 'Purified by distillation'],
                     ['Minerals', 'Trace electrolytes (Ca, Mg, K)', 'Natural minerals intact', 'None (pure H₂O)'],
                     ['Taste', 'Silky, smooth', 'Crisp, natural', 'Very flat, pure'],
-                    ['Price (5 gal)', '$12.99/jug', '$8.99/jug', '$9.99/jug'],
-                    ['Best For', 'Active lifestyle, acid reduction', 'Everyday drinking, families', 'Medical, CPAP, appliances'],
+                    ['Price (5 gal)', '$10.99/jug', '$8.99/jug', '$9.99/jug'],
+                    ['Best For', 'Active lifestyle, hydration', 'Everyday drinking, families', 'Medical, CPAP, appliances'],
                     ['Infant Use', 'Not recommended under 12mo', 'Generally safe', 'Recommended for formula'],
                   ].map(([feat, alk, spring, dist], i) => (
                     <tr key={feat} className={i % 2 === 0 ? 'bg-white' : 'bg-[#f8feff]'}>
@@ -456,24 +454,24 @@ export default function AlkalineWaterDeliveryVancouver() {
             <div className="space-y-6">
               {[
                 {
-                  q: 'What is the pH level of TajWater alkaline water?',
-                  a: 'TajWater alkaline water is ionized to pH 9.5 or above. Each batch is tested and certified before delivery. The elevated pH is achieved through an electrolysis ionization process that also micro-clusters water molecules for better cellular absorption.',
+                  q: 'What is alkaline water?',
+                  a: 'Alkaline water is pH balanced water that has been processed to have a higher pH than regular tap or spring water. It contains trace electrolytes — calcium, magnesium, and potassium — and is popular among active and health-conscious individuals for its smooth taste and hydrating qualities.',
                 },
                 {
                   q: 'How much does alkaline water delivery cost in Vancouver?',
-                  a: 'TajWater alkaline water costs $12.99 per 5-gallon jug at the standard rate, or from $10.39/jug with a weekly subscription. Delivery is always free across Metro Vancouver. No minimum order, no setup fees, no contracts.',
+                  a: 'Taj Water alkaline water is $10.99 per 5-gallon jug with free delivery across Metro Vancouver. Subscription plans start at $29.99/week. No minimum order, no setup fees, no contracts.',
                 },
                 {
                   q: 'What is the difference between alkaline water and spring water?',
-                  a: 'Spring water has a neutral pH around 7.0–7.4 and is sourced from a natural underground spring. Alkaline water has a pH of 9.5+ and is produced through ionization. Alkaline water is often chosen by people seeking potential benefits like neutralizing acidity, while spring water is preferred for its natural mineral content and taste.',
+                  a: 'Spring water is sourced from a natural underground spring and retains its natural mineral profile. Alkaline water is processed to have a higher, balanced pH and contains trace electrolytes. Alkaline water is often preferred by people with active lifestyles, while spring water is the most popular everyday choice for families.',
                 },
                 {
                   q: 'Do you deliver alkaline water to Burnaby, Surrey, and Coquitlam?',
-                  a: 'Yes. TajWater delivers alkaline water to all 21 Metro Vancouver cities including Burnaby, Surrey, Richmond, Coquitlam, Port Coquitlam, North Vancouver, West Vancouver, Langley, Delta, Port Moody, White Rock, Maple Ridge, Pitt Meadows, Squamish, Whistler, and more. Delivery is free on every order.',
+                  a: 'Yes. Taj Water delivers alkaline water to all 21 Metro Vancouver cities including Burnaby, Surrey, Richmond, Coquitlam, Port Coquitlam, North Vancouver, West Vancouver, Langley, Delta, Port Moody, White Rock, Maple Ridge, Pitt Meadows, Squamish, Whistler, and more. Delivery is free on every order.',
                 },
                 {
                   q: 'Is alkaline water safe for babies and children?',
-                  a: 'Alkaline water at pH 9.5 is generally not recommended for infants under 12 months, as babies need neutral pH water for formula. For children over 1 year, alkaline water is safe. TajWater recommends distilled or spring water for infants — please consult your pediatrician if unsure.',
+                  a: 'Alkaline water is generally not recommended for infants under 12 months. For children over 1 year, alkaline water is safe. Taj Water recommends distilled or spring water for infants — please consult your pediatrician if unsure.',
                 },
               ].map((item) => (
                 <div key={item.q} className="bg-[#f0f9ff] rounded-2xl border border-[#cce7f0] p-6">
@@ -492,12 +490,12 @@ export default function AlkalineWaterDeliveryVancouver() {
               Order Alkaline Water Delivery Today
             </h2>
             <p className="text-[#b3e5fc] text-lg mb-8">
-              pH 9.5+ ionized alkaline water delivered to your door anywhere in Metro Vancouver.
+              pH balanced alkaline water delivered to your door anywhere in Metro Vancouver.
               Free delivery. Same-day available. No contract required.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/shop" className="bg-white text-[#0097a7] font-bold px-8 py-4 rounded-xl hover:bg-[#f0f9ff] transition-colors text-lg">
-                Order Now — $12.99/Jug
+                Order Now — $10.99/Jug
               </Link>
               <Link href="/contact" className="bg-white/20 hover:bg-white/30 text-white font-bold px-8 py-4 rounded-xl transition-colors">
                 Contact Us

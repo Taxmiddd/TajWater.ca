@@ -62,16 +62,14 @@ export async function POST(req: NextRequest) {
       priceMap[p.id] = p.price
     }
 
-    // 3. Recalculate subtotal server-side (apply 10% discount for subscribe items)
-    const SUBSCRIBE_DISCOUNT = 0.10
+    // 3. Recalculate subtotal server-side using DB prices
     let subtotal = 0
     for (const item of items as CartItem[]) {
       const price = priceMap[item.product_id]
       if (price === undefined) {
         return NextResponse.json({ error: 'Invalid product in cart' }, { status: 400 })
       }
-      const unitPrice = item.subscribeFrequency ? price * (1 - SUBSCRIBE_DISCOUNT) : price
-      subtotal += unitPrice * item.quantity
+      subtotal += price * item.quantity
     }
 
     // 4. Validate discount code server-side if provided
@@ -149,9 +147,7 @@ export async function POST(req: NextRequest) {
       order_id: order.id,
       product_id: item.product_id,
       quantity: item.quantity,
-      price: item.subscribeFrequency
-        ? Math.round(priceMap[item.product_id] * (1 - SUBSCRIBE_DISCOUNT) * 100) / 100
-        : priceMap[item.product_id],
+      price: priceMap[item.product_id],
     }))
     const { error: itemsError } = await db.from('order_items').insert(orderItems)
     if (itemsError) console.error('Order items error:', itemsError)
@@ -171,7 +167,7 @@ export async function POST(req: NextRequest) {
             frequency: freq,
             quantity: item.quantity,
             zone_id: zoneId,
-            price: Math.round(priceMap[item.product_id] * (1 - SUBSCRIBE_DISCOUNT) * 100) / 100,
+            price: priceMap[item.product_id],
             status: 'active',
             next_delivery: nextDelivery.toISOString(),
           }

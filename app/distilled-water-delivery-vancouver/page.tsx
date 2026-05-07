@@ -37,7 +37,7 @@ const jsonLd = {
       '@type': 'Product',
       name: 'Distilled Water — 5-Gallon Jug Delivery',
       description: '100% pure distilled water delivered in BPA-free 5-gallon jugs across Metro Vancouver. Free of all minerals, chlorine, and contaminants. Ideal for CPAP machines, humidifiers, baby formula, medical equipment, and appliances.',
-      brand: { '@type': 'Brand', name: 'TajWater' },
+      brand: { '@type': 'Brand', name: 'Taj Water' },
       image: 'https://tajwater.ca/opengraph-image',
       sku: 'TW-DIST-5GAL',
       mpn: 'TW-DIST-5GAL',
@@ -88,7 +88,7 @@ const jsonLd = {
           name: 'Is TajWater distilled water safe for CPAP machines?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Yes. TajWater distilled water is 100% mineral-free and meets the purity requirements for CPAP and BiPAP humidifier chambers. Using distilled water prevents mineral buildup (white scale) in your humidifier, extends machine life, and reduces the risk of bacterial growth. It is the recommended water type for all major CPAP brands including ResMed and Philips Respironics.',
+            text: 'Yes. Taj Water distilled water is 100% mineral-free and meets the purity requirements for CPAP and BiPAP humidifier chambers. Using distilled water prevents mineral buildup (white scale) in your humidifier, extends machine life, and reduces the risk of bacterial growth. It is the recommended water type for all major CPAP brands.',
           },
         },
         {
@@ -96,7 +96,7 @@ const jsonLd = {
           name: 'How much does distilled water delivery cost in Vancouver?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'TajWater distilled water costs $9.99 per 5-gallon jug on a one-time basis, or from $7.99/jug with a weekly subscription. Delivery is always free across Metro Vancouver. There is no minimum order, no setup fee, and no contract required.',
+            text: 'Taj Water distilled water costs $9.99 per 5-gallon jug on a one-time basis. Subscription plans start at $29.99/week or $59.99/month. Delivery is always free across Metro Vancouver. There is no minimum order, no setup fee, and no contract required.',
           },
         },
         {
@@ -104,7 +104,7 @@ const jsonLd = {
           name: 'Can I use distilled water for baby formula?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Yes, distilled water is recommended by many pediatricians for mixing infant formula because it contains no fluoride, chlorine, or other minerals that could interfere with formula nutrition ratios. Health Canada recommends using distilled or purified water for formula if your local tap water quality is uncertain. TajWater distilled water is ideal for this purpose.',
+            text: 'Yes, distilled water is recommended by many pediatricians for mixing infant formula because it contains no fluoride, chlorine, or other minerals that could interfere with formula nutrition ratios. Health Canada recommends using distilled or purified water for formula if your local tap water quality is uncertain. Taj Water distilled water is ideal for this purpose.',
           },
         },
         {
@@ -120,7 +120,7 @@ const jsonLd = {
           name: 'Do you deliver distilled water to North Vancouver, Burnaby, and Surrey?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Yes. TajWater delivers distilled water to all 21 Metro Vancouver cities including North Vancouver, Burnaby, Surrey, Richmond, Vancouver, Coquitlam, Port Coquitlam, West Vancouver, Langley, Delta, Port Moody, White Rock, Maple Ridge, Pitt Meadows, Squamish, Whistler, and more. Delivery is always free.',
+            text: 'Yes. Taj Water delivers distilled water to all 21 Metro Vancouver cities including North Vancouver, Burnaby, Surrey, Richmond, Vancouver, Coquitlam, Port Coquitlam, West Vancouver, Langley, Delta, Port Moody, White Rock, Maple Ridge, Pitt Meadows, Squamish, Whistler, and more. Delivery is always free.',
           },
         },
       ],
@@ -232,14 +232,14 @@ export default function DistilledWaterDeliveryVancouver() {
                 <table className="w-full text-sm">
                   <tbody>
                     {[
-                      ['pH Level', '~7.0 (neutral)'],
+                      ['Water Type', '100% Pure Distilled'],
                       ['Process', 'Distillation (boil + condense)'],
-                      ['TDS Level', '< 5 ppm (near zero)'],
                       ['Minerals', 'None — pure H₂O'],
                       ['Jug Size', '5 gallon (18.9L)'],
                       ['Jug Material', 'BPA-free polycarbonate'],
                       ['Best For', 'CPAP, formula, appliances'],
-                      ['Price', '$9.99/jug | From $7.99 (sub)'],
+                      ['Price', '$9.99/jug one-time'],
+                      ['Subscription', 'From $29.99/week'],
                     ].map(([label, value], i) => (
                       <tr key={label} className={i % 2 === 0 ? 'bg-white' : 'bg-[#f0f9ff]'}>
                         <td className="px-5 py-3 font-semibold text-[#0c2340] border-b border-[#cce7f0]">{label}</td>
@@ -267,7 +267,7 @@ export default function DistilledWaterDeliveryVancouver() {
                 {
                   icon: <Heart className="w-7 h-7 text-[#0097a7]" />,
                   title: 'CPAP & BiPAP Machines',
-                  desc: 'The #1 reason Metro Vancouver residents order distilled water. Required by ResMed, Philips Respironics, and all major CPAP brands for humidifier chambers. Prevents mineral scale buildup and bacterial growth.',
+                  desc: 'The #1 reason Metro Vancouver residents order distilled water. Required by all major CPAP brands for humidifier chambers. Prevents mineral scale buildup and bacterial growth.',
                 },
                 {
                   icon: <Shield className="w-7 h-7 text-[#0097a7]" />,
@@ -324,7 +324,7 @@ export default function DistilledWaterDeliveryVancouver() {
                       'Prevents mineral scale in humidifier chamber',
                       'Reduces bacterial and mold growth risk',
                       'Maintains consistent humidity output',
-                      'Required by ResMed, Philips Respironics, Fisher & Paykel',
+                      'Required by all major CPAP brands',
                       'Extends machine lifespan by years',
                     ].map((item) => (
                       <li key={item} className="flex items-start gap-2">
@@ -337,9 +337,9 @@ export default function DistilledWaterDeliveryVancouver() {
                   <h3 className="font-bold text-[#0c2340] mb-3">TajWater CPAP subscription</h3>
                   <ul className="space-y-2 text-sm text-[#4a7fa5]">
                     {[
-                      'Weekly or bi-weekly delivery schedule',
+                      'Weekly or monthly delivery schedule',
                       'Never run out — automatic delivery',
-                      'From $7.99/jug on weekly plan',
+                      'From $29.99/week subscription',
                       'Same-day available if you run out',
                       'Cancel or pause anytime',
                     ].map((item) => (
@@ -379,19 +379,19 @@ export default function DistilledWaterDeliveryVancouver() {
                   highlight: false,
                 },
                 {
-                  plan: 'Bi-Weekly Subscription',
-                  price: '$8.99',
-                  unit: 'per jug',
-                  features: ['Every 2 weeks', 'Cancel anytime', 'Free delivery', 'Priority scheduling'],
-                  cta: 'Subscribe & Save',
+                  plan: 'Weekly Subscription',
+                  price: '$29.99',
+                  unit: 'per week',
+                  features: ['Weekly delivery', 'Cancel anytime', 'Free delivery', 'Auto-replenishment'],
+                  cta: 'Best for CPAP',
                   highlight: true,
                 },
                 {
-                  plan: 'Weekly Subscription',
-                  price: '$7.99',
-                  unit: 'per jug',
-                  features: ['Every week', 'Best for CPAP', 'Free delivery', 'Auto-replenishment'],
-                  cta: 'Best for CPAP',
+                  plan: 'Monthly Subscription',
+                  price: '$59.99',
+                  unit: 'per month',
+                  features: ['Monthly delivery', 'Cancel anytime', 'Free delivery', 'Priority scheduling'],
+                  cta: 'Subscribe Monthly',
                   highlight: false,
                 },
               ].map((tier) => (
@@ -450,11 +450,10 @@ export default function DistilledWaterDeliveryVancouver() {
                 </thead>
                 <tbody>
                   {[
-                    ['pH Level', '~7.0 (neutral)', '7.0–7.4', '9.5+'],
+                    ['Water Type', 'Pure Distilled', 'Natural Spring', 'pH Balanced Alkaline'],
                     ['Minerals', 'None — pure H₂O', 'Natural minerals', 'Trace electrolytes'],
-                    ['TDS Level', '< 5 ppm', '50–150 ppm', '50–200 ppm'],
                     ['Taste', 'Very flat, pure', 'Crisp, natural', 'Silky, smooth'],
-                    ['Price (5 gal)', '$9.99/jug', '$8.99/jug', '$12.99/jug'],
+                    ['Price (5 gal)', '$9.99/jug', '$8.99/jug', '$10.99/jug'],
                     ['Best For', 'CPAP, medical, appliances', 'Everyday drinking', 'Active lifestyle'],
                     ['Infant Safe', 'Yes — recommended', 'Generally safe', 'Not under 12 months'],
                     ['Appliance Safe', 'Yes — ideal', 'No (mineral scale)', 'No (mineral scale)'],
@@ -514,16 +513,16 @@ export default function DistilledWaterDeliveryVancouver() {
             <div className="space-y-6">
               {[
                 {
-                  q: 'Is TajWater distilled water safe for CPAP machines?',
-                  a: 'Yes. TajWater distilled water is 100% mineral-free and meets the purity requirements for CPAP and BiPAP humidifier chambers. Using distilled water prevents mineral buildup (white scale) in your humidifier, extends machine life, and reduces the risk of bacterial growth. It is the recommended water type for all major CPAP brands including ResMed and Philips Respironics.',
+                  q: 'Is Taj Water distilled water safe for CPAP machines?',
+                  a: 'Yes. Taj Water distilled water is 100% mineral-free and meets the purity requirements for CPAP and BiPAP humidifier chambers. Using distilled water prevents mineral buildup (white scale) in your humidifier, extends machine life, and reduces the risk of bacterial growth. It is the recommended water type for all major CPAP brands.',
                 },
                 {
                   q: 'How much does distilled water delivery cost in Vancouver?',
-                  a: 'TajWater distilled water costs $9.99 per 5-gallon jug on a one-time basis, or from $7.99/jug with a weekly subscription. Delivery is always free across Metro Vancouver. There is no minimum order, no setup fee, and no contract required.',
+                  a: 'Taj Water distilled water costs $9.99 per 5-gallon jug on a one-time basis. Subscription plans start at $29.99/week or $59.99/month. Delivery is always free across Metro Vancouver. There is no minimum order, no setup fee, and no contract required.',
                 },
                 {
                   q: 'Can I use distilled water for baby formula?',
-                  a: 'Yes, distilled water is recommended by many pediatricians for mixing infant formula because it contains no fluoride, chlorine, or other minerals that could interfere with formula nutrition ratios. TajWater distilled water is ideal for this purpose.',
+                  a: 'Yes, distilled water is recommended by many pediatricians for mixing infant formula because it contains no fluoride, chlorine, or other minerals that could interfere with formula nutrition ratios. Taj Water distilled water is ideal for this purpose.',
                 },
                 {
                   q: 'What is distilled water good for besides CPAP machines?',
@@ -531,7 +530,7 @@ export default function DistilledWaterDeliveryVancouver() {
                 },
                 {
                   q: 'Do you deliver distilled water to North Vancouver, Burnaby, and Surrey?',
-                  a: 'Yes. TajWater delivers distilled water to all 21 Metro Vancouver cities including North Vancouver, Burnaby, Surrey, Richmond, Vancouver, Coquitlam, Port Coquitlam, West Vancouver, Langley, Delta, Port Moody, White Rock, Maple Ridge, Pitt Meadows, Squamish, Whistler, and more. Delivery is always free.',
+                  a: 'Yes. Taj Water delivers distilled water to all 21 Metro Vancouver cities including North Vancouver, Burnaby, Surrey, Richmond, Vancouver, Coquitlam, Port Coquitlam, West Vancouver, Langley, Delta, Port Moody, White Rock, Maple Ridge, Pitt Meadows, Squamish, Whistler, and more. Delivery is always free.',
                 },
               ].map((item) => (
                 <div key={item.q} className="bg-white rounded-2xl border border-[#cce7f0] p-6">

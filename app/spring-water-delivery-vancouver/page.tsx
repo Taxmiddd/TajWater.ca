@@ -29,8 +29,8 @@ const productSchema = {
   '@context': 'https://schema.org',
   '@type': 'Product',
   name: '5-Gallon Natural Spring Water Jug Delivery',
-  description: 'Fresh natural spring water sourced from BC mountain aquifers, delivered in 5-gallon (20L) BPA-free polycarbonate jugs to homes and offices across Metro Vancouver. pH 7.2–7.8, naturally occurring calcium, magnesium, and potassium.',
-  brand: { '@type': 'Brand', name: 'TajWater' },
+  description: 'Fresh natural spring water sourced from BC mountain aquifers, delivered in 5-gallon (20L) BPA-free polycarbonate jugs to homes and offices across Metro Vancouver. Naturally occurring calcium, magnesium, and potassium.',
+  brand: { '@type': 'Brand', name: 'Taj Water' },
   category: 'Water Delivery',
   offers: {
     '@type': 'Offer',
@@ -63,10 +63,10 @@ const faqSchema = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
   mainEntity: [
-    { '@type': 'Question', name: 'Where does TajWater spring water come from?', acceptedAnswer: { '@type': 'Answer', text: 'TajWater spring water is sourced from protected natural underground aquifers in British Columbia. The water is independently tested for over 200 contaminants and meets or exceeds Health Canada drinking water standards. It contains naturally occurring calcium, magnesium, and potassium at levels beneficial for daily hydration.' } },
-    { '@type': 'Question', name: 'What is the pH of TajWater spring water?', acceptedAnswer: { '@type': 'Answer', text: 'TajWater spring water has a naturally balanced pH of 7.2–7.8, which is ideal for daily drinking. Unlike distilled water (which is slightly acidic at pH 5.5–7.0), spring water retains its natural mineral profile, making it the most popular choice for families and offices.' } },
-    { '@type': 'Question', name: 'How much does spring water delivery cost in Vancouver?', acceptedAnswer: { '@type': 'Answer', text: 'TajWater spring water is $8.99 per 5-gallon (20L) jug with free delivery across all Metro Vancouver zones. Subscription customers ordering 10+ jugs pay from $6.49/jug. There are no zone surcharges, no minimum orders, and no contracts.' } },
-    { '@type': 'Question', name: 'Are TajWater spring water jugs BPA-free?', acceptedAnswer: { '@type': 'Answer', text: 'Yes. All TajWater 5-gallon jugs are made from BPA-free, food-grade polycarbonate. They are sanitized and inspected before every refill to ensure safety and freshness. Our jugs meet NSF/ANSI 11 standards for water contact materials.' } },
+    { '@type': 'Question', name: 'Where does Taj Water spring water come from?', acceptedAnswer: { '@type': 'Answer', text: 'Taj Water spring water is sourced from protected natural underground aquifers in British Columbia. The water is independently tested for over 200 contaminants and meets or exceeds Health Canada drinking water standards. It contains naturally occurring calcium, magnesium, and potassium at levels beneficial for daily hydration.' } },
+    { '@type': 'Question', name: 'Is Taj Water spring water pH balanced?', acceptedAnswer: { '@type': 'Answer', text: 'Yes. Taj Water spring water is naturally pH balanced, which is ideal for daily drinking. It retains its natural mineral profile, making it the most popular choice for families and offices across Metro Vancouver.' } },
+    { '@type': 'Question', name: 'How much does spring water delivery cost in Vancouver?', acceptedAnswer: { '@type': 'Answer', text: 'Taj Water spring water is $8.99 per 5-gallon (20L) jug with free delivery across all Metro Vancouver zones. Subscription plans start at $29.99/week or $59.99/month. There are no zone surcharges, no minimum orders, and no contracts.' } },
+    { '@type': 'Question', name: 'Are Taj Water spring water jugs BPA-free?', acceptedAnswer: { '@type': 'Answer', text: 'Yes. All Taj Water 5-gallon jugs are made from BPA-free, food-grade polycarbonate. They are sanitized and inspected before every refill to ensure safety and freshness.' } },
   ],
 }
 
@@ -109,9 +109,9 @@ export default function SpringWaterPage() {
                 <dl className="space-y-4">
                   {[
                     { label: 'Source', value: 'Natural underground aquifer, British Columbia' },
-                    { label: 'pH Level', value: '7.2–7.8 (naturally balanced)' },
+                    { label: 'Water Type', value: 'pH Balanced Natural Spring' },
                     { label: 'Minerals', value: 'Calcium, magnesium, potassium — naturally occurring' },
-                    { label: 'Testing', value: '200+ contaminant tests per batch, NSF/ANSI certified' },
+                    { label: 'Testing', value: '200+ contaminant tests per batch' },
                     { label: 'Jug size', value: '5 gallon (20 litres), BPA-free polycarbonate' },
                     { label: 'Best for', value: 'Daily drinking, cooking, families, offices' },
                   ].map((item) => (
@@ -126,10 +126,9 @@ export default function SpringWaterPage() {
                 <h3 className="text-xl font-extrabold text-[#0c2340] mb-6">Spring Water Pricing</h3>
                 <div className="space-y-3">
                   {[
-                    { tier: '1–4 jugs', price: '$8.99/jug', note: 'Free delivery' },
-                    { tier: '5–9 jugs', price: '$7.99/jug', note: 'Free delivery' },
-                    { tier: '10+ jugs', price: '$6.99/jug', note: 'Free delivery + priority' },
-                    { tier: 'Subscription', price: 'From $6.49/jug', note: 'Cancel anytime' },
+                    { tier: 'One-Time Order', price: '$8.99/jug', note: 'Free delivery' },
+                    { tier: 'Weekly Subscription', price: '$29.99/week', note: 'Cancel anytime' },
+                    { tier: 'Monthly Subscription', price: '$59.99/month', note: 'Cancel anytime' },
                   ].map((row) => (
                     <div key={row.tier} className="flex justify-between items-center py-2 border-b border-[#cce7f0]">
                       <span className="text-sm font-medium text-[#0c2340]">{row.tier}</span>
@@ -140,7 +139,7 @@ export default function SpringWaterPage() {
                     </div>
                   ))}
                 </div>
-                <p className="text-xs text-[#4a7fa5] mt-4">One-time $12 bottle deposit per jug on first order — fully refundable.</p>
+                <p className="text-xs text-[#4a7fa5] mt-4">All prices in CAD. Delivery always free. No setup fee.</p>
                 <Link href="/shop" className="block mt-6 text-center bg-[#0097a7] text-white font-bold py-3 rounded-xl hover:bg-[#007a87] transition-colors">
                   Order Spring Water Now
                 </Link>
@@ -159,10 +158,10 @@ export default function SpringWaterPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {[
                 { title: 'Natural mineral content', body: 'Spring water retains naturally occurring calcium, magnesium, and potassium — minerals that contribute to daily nutritional intake and give water its pleasant, clean taste.' },
-                { title: 'Balanced pH', body: 'At pH 7.2–7.8, natural spring water sits in the optimal neutral-to-slightly-alkaline range. It\'s the most natural state of drinking water, as nature intended.' },
+                { title: 'Naturally pH Balanced', body: 'Natural spring water is naturally pH balanced — retaining its mineral profile as nature intended. It\'s the most natural state of drinking water for everyday use.' },
                 { title: 'Great taste', body: 'Because spring water retains its mineral profile, it has a noticeably cleaner, fresher taste than tap water (which often carries a chlorine aftertaste) or distilled water (which can taste flat).' },
                 { title: 'Safe for all ages', body: 'The mineral content and neutral pH make spring water suitable for adults, children, and infants (for formula preparation). It\'s the safest all-purpose drinking water for families.' },
-                { title: 'Independently tested', body: 'Every batch of TajWater spring water is tested for over 200 contaminants including heavy metals, bacteria, chlorine, and chloramines. Certificates available on request.' },
+                { title: 'Independently tested', body: 'Every batch of Taj Water spring water is tested for over 200 contaminants including heavy metals, bacteria, chlorine, and chloramines. Certificates available on request.' },
                 { title: 'Most affordable delivered water', body: 'At $8.99 per 5-gallon jug, spring water is the most cost-effective option we offer. That works out to roughly $0.45 per litre — far less than single-use bottled water.' },
               ].map((item) => (
                 <div key={item.title} className="bg-white rounded-2xl border border-[#cce7f0] p-6">
@@ -191,9 +190,9 @@ export default function SpringWaterPage() {
                 </thead>
                 <tbody>
                   {[
-                    ['Price/jug', '$8.99', '$12.99', '$9.99'],
-                    ['pH', '7.2–7.8', '8.0–9.5', '5.5–7.0'],
-                    ['Minerals', 'Natural', 'Enhanced', 'None'],
+                    ['Price/jug', '$8.99', '$10.99', '$9.99'],
+                    ['Water Type', 'Natural Spring', 'pH Balanced Alkaline', 'Pure Distilled'],
+                    ['Minerals', 'Natural', 'Trace electrolytes', 'None'],
                     ['Best for', 'Daily drinking, all ages', 'Active lifestyles', 'Medical equipment, CPAP'],
                     ['Taste', 'Clean, fresh', 'Smooth, slightly sweet', 'Flat, pure'],
                   ].map(([label, s, a, d], i) => (

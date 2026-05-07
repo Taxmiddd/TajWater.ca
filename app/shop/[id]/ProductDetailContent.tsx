@@ -18,34 +18,29 @@ const categoryColors: Record<string, string> = {
 const categoryEmoji: Record<string, string> = {
   water: '💧', equipment: '🔧', subscription: '🔄', accessories: '🧹',
 }
-const SUBSCRIBE_DISCOUNT = 0.10
 
-export default function ProductDetailContent({ 
-  product, 
+export default function ProductDetailContent({
+  product,
   relatedProducts,
   loading: initialLoading = false
-}: { 
-  product: Product | null, 
+}: {
+  product: Product | null,
   relatedProducts: Product[],
   loading?: boolean
 }) {
   const router = useRouter()
   const [loading] = useState(initialLoading)
-  const [subscribeMode, setSubscribeMode] = useState(false)
-  const [subFreq, setSubFreq] = useState<'weekly' | 'biweekly' | 'monthly'>('weekly')
   const [added, setAdded] = useState(false)
   const { items, addItem, updateQuantity } = useCart()
 
   const qty = product ? (items.find((i) => i.product.id === product.id)?.quantity ?? 0) : 0
-  const canSubscribe = product?.category === 'water' || product?.category === 'subscription'
 
   const handleAdd = () => {
     if (!product) return
-    const freq = subscribeMode ? subFreq : undefined
     if (qty > 0) {
       updateQuantity(product.id, qty + 1)
     } else {
-      addItem(product, freq)
+      addItem(product, undefined)
     }
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)
@@ -53,8 +48,7 @@ export default function ProductDetailContent({
 
   const handleBuyNow = () => {
     if (!product) return
-    const freq = subscribeMode ? subFreq : undefined
-    if (qty === 0) addItem(product, freq)
+    if (qty === 0) addItem(product, undefined)
     router.push('/checkout')
   }
 
@@ -79,7 +73,7 @@ export default function ProductDetailContent({
   if (!product) return null
 
   const color = categoryColors[product.category] ?? '#0097a7'
-  const displayPrice = subscribeMode ? product.price * (1 - SUBSCRIBE_DISCOUNT) : product.price
+  const displayPrice = product.price
 
   return (
     <div className="min-h-screen bg-[#f0f9ff] pt-20">
@@ -162,48 +156,6 @@ export default function ProductDetailContent({
                 ))}
               </div>
 
-              {/* Subscribe & Save toggle */}
-              {canSubscribe && (
-                <div className="mb-5">
-                  <div className="flex rounded-xl border border-[#cce7f0] overflow-hidden text-sm font-medium mb-3">
-                    <button
-                      onClick={() => setSubscribeMode(false)}
-                      className={`flex-1 py-2.5 transition-all ${!subscribeMode ? 'bg-[#0097a7] text-white' : 'text-[#4a7fa5] hover:bg-[#f0f9ff]'}`}
-                    >
-                      One-Time Purchase
-                    </button>
-                    <button
-                      onClick={() => setSubscribeMode(true)}
-                      className={`flex-1 py-2.5 transition-all ${subscribeMode ? 'bg-[#0097a7] text-white' : 'text-[#4a7fa5] hover:bg-[#f0f9ff]'}`}
-                    >
-                      Subscribe &amp; Save 10%
-                    </button>
-                  </div>
-                  <AnimatePresence>
-                    {subscribeMode && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="overflow-hidden"
-                      >
-                        <p className="text-xs text-[#4a7fa5] mb-2">Delivery frequency:</p>
-                        <div className="flex gap-2">
-                          {(['weekly', 'biweekly', 'monthly'] as const).map((f) => (
-                            <button
-                              key={f}
-                              onClick={() => setSubFreq(f)}
-                              className={`flex-1 py-2 rounded-xl text-xs font-medium transition-all ${subFreq === f ? 'bg-[#0097a7] text-white shadow-md' : 'border border-[#cce7f0] text-[#4a7fa5] hover:border-[#0097a7]'}`}
-                            >
-                              {f.charAt(0).toUpperCase() + f.slice(1)}
-                            </button>
-                          ))}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              )}
             </div>
 
             {/* Price + Add to cart */}
@@ -212,25 +164,18 @@ export default function ProductDetailContent({
                 <div>
                   <div className="flex items-baseline gap-2">
                     <span className="text-4xl font-extrabold" style={{ color }}>${displayPrice.toFixed(2)}</span>
-                    {subscribeMode && (
-                      <span className="text-sm text-[#4a7fa5] line-through">${product.price.toFixed(2)}</span>
-                    )}
                   </div>
-                  {subscribeMode ? (
-                    <p className="text-sm text-green-600 font-medium">You save ${(product.price * SUBSCRIBE_DISCOUNT).toFixed(2)} per delivery</p>
-                  ) : (
-                    <p className="text-sm text-[#4a7fa5]">
-                      {product.category === 'subscription' && !product.unit_label 
-                        ? 'per month' 
-                        : product.unit_label 
-                          ? (product.unit_label.toLowerCase().includes('per') || 
-                             product.unit_label.startsWith('/') || 
-                             product.unit_label.toLowerCase().startsWith('each') 
-                               ? product.unit_label 
-                               : `per ${product.unit_label}`) 
-                          : 'per unit'}
-                    </p>
-                  )}
+                  <p className="text-sm text-[#4a7fa5]">
+                    {product.category === 'subscription' && !product.unit_label
+                      ? 'per month'
+                      : product.unit_label
+                        ? (product.unit_label.toLowerCase().includes('per') ||
+                           product.unit_label.startsWith('/') ||
+                           product.unit_label.toLowerCase().startsWith('each')
+                             ? product.unit_label
+                             : `per ${product.unit_label}`)
+                        : 'per unit'}
+                  </p>
                 </div>
                 <div className="text-right">
                   <p className={`font-bold ${product.stock > 0 ? 'text-green-600' : 'text-red-500'}`}>

@@ -59,7 +59,7 @@ const faqSections = [
     faqs: [
       {
         q: 'How much does water delivery cost?',
-        a: 'TajWater pricing is: Spring Water — $8.99/jug (one-time) or from $6.49/jug (weekly subscription). Alkaline Water — $12.99/jug (one-time) or from $10.39/jug (weekly). Distilled Water — $9.99/jug (one-time) or from $7.99/jug (weekly). All prices are per 5-gallon (18.9L) jug and include free delivery. Prices are in CAD.'
+        a: 'Taj Water pricing is: Spring Water — $8.99/jug one-time. Alkaline Water — $10.99/jug one-time. Distilled Water — $9.99/jug one-time. Subscription plans start at $29.99/week or $59.99/month. All prices include free delivery and are in CAD.'
       },
       {
         q: 'Are there any contracts or minimum commitments?',
@@ -67,7 +67,7 @@ const faqSections = [
       },
       {
         q: 'How do subscriptions work?',
-        a: 'Choose weekly or bi-weekly delivery. Your jugs arrive on a fixed schedule with the locked-in subscription price. You can pause deliveries when you go on vacation, change your schedule, or cancel anytime. Subscriptions save you 20–30% compared to one-time orders.'
+        a: 'Choose weekly ($29.99/week) or monthly ($59.99/month) delivery. Your jugs arrive on a fixed schedule. You can pause deliveries when you go on vacation, change your schedule, or cancel anytime with no penalty.'
       },
       {
         q: 'Is there a minimum order quantity?',
@@ -75,7 +75,7 @@ const faqSections = [
       },
       {
         q: 'What payment methods do you accept?',
-        a: 'We accept all major credit cards (Visa, Mastercard, Amex), e-transfer, and cash on delivery. Commercial accounts with net-30 invoicing are available for businesses ordering 10 or more jugs per delivery.'
+        a: 'We accept all major credit cards (Visa, Mastercard, Amex), e-transfer, and cash on delivery. Commercial accounts with net-30 invoicing are available for businesses — contact us for details.'
       },
     ]
   },
@@ -84,11 +84,11 @@ const faqSections = [
     faqs: [
       {
         q: 'What types of water do you deliver?',
-        a: 'TajWater delivers three types of water: (1) Natural Spring Water — sourced from a natural underground spring, pH 7.0–7.4, with natural minerals intact. $8.99/jug. (2) Alkaline Water — ionized to pH 9.5+, micro-clustered molecules, trace electrolytes. $12.99/jug. (3) Distilled Water — 100% pure H₂O, all minerals removed, ideal for CPAP machines and appliances. $9.99/jug.'
+        a: 'Taj Water delivers three types of water: (1) Natural Spring Water — sourced from a natural underground spring, naturally pH balanced, with natural minerals intact. $8.99/jug. (2) Alkaline Water — pH balanced alkaline water with trace electrolytes. $10.99/jug. (3) Distilled Water — 100% pure H₂O, all minerals removed, ideal for CPAP machines and appliances. $9.99/jug.'
       },
       {
         q: 'What is the difference between spring, alkaline, and distilled water?',
-        a: 'Spring water is natural water from an underground source with minerals intact — the most popular choice for everyday drinking. Alkaline water is ionized to pH 9.5+, preferred by health-conscious and active individuals. Distilled water has all minerals removed and is used for CPAP machines, baby formula, humidifiers, and appliances that require pure H₂O.'
+        a: 'Spring water is natural water from an underground source with minerals intact — the most popular choice for everyday drinking. Alkaline water is pH balanced with trace electrolytes, preferred by health-conscious and active individuals. Distilled water has all minerals removed and is used for CPAP machines, baby formula, humidifiers, and appliances that require pure H₂O.'
       },
       {
         q: 'Which water type is best for drinking?',
@@ -96,7 +96,7 @@ const faqSections = [
       },
       {
         q: 'Which water is best for CPAP machines?',
-        a: 'Distilled water is the only recommended water for CPAP humidifier chambers. All major CPAP brands (ResMed, Philips Respironics, Fisher & Paykel) specify distilled water to prevent mineral scale buildup and bacterial growth. TajWater distilled water is $9.99/jug, or from $7.99/jug on a weekly subscription — ideal for CPAP users.'
+        a: 'Distilled water is the only recommended water for CPAP humidifier chambers. All major CPAP brands specify distilled water to prevent mineral scale buildup and bacterial growth. Taj Water distilled water is $9.99/jug one-time, or from $29.99/week on a subscription — ideal for CPAP users.'
       },
       {
         q: 'Which water is safe for baby formula?',
@@ -104,7 +104,7 @@ const faqSections = [
       },
       {
         q: 'Is alkaline water actually better for you?',
-        a: 'The scientific evidence on health benefits of alkaline water is mixed. Many customers report that alkaline water tastes smoother and that they drink more water because of it — which is a real benefit. People with acid reflux often report relief from drinking alkaline water. TajWater does not make medical claims, but many of our customers love alkaline water and have been ordering it for years.'
+        a: 'Many customers report that alkaline water tastes smoother and that they drink more water because of it — which is a real benefit. Taj Water does not make medical claims, but many of our customers love alkaline water and have been ordering it for years.'
       },
     ]
   },
@@ -117,7 +117,7 @@ const faqSections = [
       },
       {
         q: 'Are the jugs BPA-free?',
-        a: 'Yes. All TajWater jugs are made from BPA-free polycarbonate. The jugs are designed for reuse and are rigorously sanitized between uses. Our cleaning process follows NSF/ANSI standards for food-grade containers.'
+        a: 'Yes. All Taj Water jugs are made from BPA-free polycarbonate. The jugs are designed for reuse and are rigorously sanitized between uses.'
       },
       {
         q: 'Do I need to own a water dispenser?',
@@ -141,12 +141,12 @@ const faqSections = [
         a: 'TajWater has been serving Metro Vancouver families and businesses for over 5 years. We started as a small local delivery service and have grown to serve thousands of households across 21 cities while remaining family-owned and locally operated.'
       },
       {
-        q: 'Is TajWater water tested and certified?',
-        a: 'Yes. TajWater water is tested and certified to NSF/ANSI standards. Every batch is tested for purity, pH, and mineral content before delivery. Our facility follows all BC Environmental regulations for water bottling and distribution.'
+        q: 'Is Taj Water water tested and certified?',
+        a: 'Yes. Every batch is tested for purity and mineral content before delivery. Our facility follows all BC Environmental regulations for water bottling and distribution.'
       },
       {
         q: 'Do you offer commercial water delivery for businesses?',
-        a: 'Yes. TajWater serves offices, restaurants, gyms, hotels, medical facilities, and industrial businesses across Metro Vancouver. Commercial accounts receive custom pricing for 10+ jugs per delivery, net-30 invoicing, dedicated account management, and priority scheduling. Contact us at info@tajwater.ca for a commercial quote.'
+        a: 'Yes. Taj Water serves offices, restaurants, gyms, hotels, medical facilities, and industrial businesses across Metro Vancouver. Commercial accounts receive net-30 invoicing, dedicated account management, and priority scheduling. Contact us at info@tajwater.ca for a commercial quote.'
       },
     ]
   },
