@@ -27,11 +27,11 @@ const posts = [
     category: 'Pricing',
   },
   {
-    slug: 'switching-from-canadian-springs-primo-culligan-to-local-water-delivery-vancouver',
-    title: 'Switching from Canadian Springs, Primo, or Culligan in Metro Vancouver',
-    description: 'A plain comparison of the major water delivery providers in Metro Vancouver — what you pay, what the fine print says, and how to switch to a local provider without hassle.',
+    slug: 'switching-water-delivery-providers-metro-vancouver',
+    title: 'Time to Switch Your Water Delivery Provider in Metro Vancouver?',
+    description: 'Missed deliveries, hidden fees, locked contracts — if your current water delivery company isn\'t working for you, switching to a local Metro Vancouver provider is easier than you think.',
     date: '2026-05-06',
-    readTime: '7 min read',
+    readTime: '6 min read',
     category: "Buyer's Guide",
   },
 ]

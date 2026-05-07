@@ -4,7 +4,7 @@ import Script from 'next/script'
 
 export const metadata: Metadata = {
   title: 'How Much Does Water Delivery Cost in Metro Vancouver? (2026 Price Guide)',
-  description: 'Transparent 2026 pricing for 5-gallon water jug delivery across Metro Vancouver. Compare TajWater, Aqua Blue, Element H2O, Pureaqua, and other providers. Find the best value for home and office delivery.',
+  description: 'Transparent 2026 pricing for 5-gallon water jug delivery across Metro Vancouver. See TajWater\'s full pricing for spring, alkaline, and distilled water — no quotes needed.',
   keywords: [
     'water delivery cost Vancouver 2026',
     'how much does water delivery cost Vancouver',
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     'water delivery price comparison BC',
     'cheapest water delivery Metro Vancouver',
     'water delivery subscription Vancouver',
-    'Aqua Blue water price vs TajWater',
+    'water delivery price Metro Vancouver',
   ],
   alternates: { canonical: '/blog/how-much-does-water-delivery-cost-metro-vancouver' },
   openGraph: {
@@ -117,40 +117,37 @@ export default function ArticlePage() {
               Same pricing applies across all 21 Metro Vancouver delivery zones — no zone surcharges.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-[#0c2340] mt-10 mb-4">Other Metro Vancouver Providers — Comparison</h2>
+            <h2 className="text-2xl font-extrabold text-[#0c2340] mt-10 mb-4">What to Expect When Comparing Providers</h2>
+            <p className="text-[#4a7fa5] leading-relaxed mb-4">
+              Water delivery pricing across Metro Vancouver varies widely. When evaluating any provider, look for these key factors:
+            </p>
             <div className="overflow-x-auto rounded-xl border border-[#cce7f0] mb-8">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-[#e0f7fa]">
-                    <th className="text-left px-4 py-3 font-bold text-[#0c2340]">Provider</th>
-                    <th className="text-left px-4 py-3 font-bold text-[#0c2340]">RO / Spring</th>
-                    <th className="text-left px-4 py-3 font-bold text-[#0c2340]">Alkaline</th>
-                    <th className="text-left px-4 py-3 font-bold text-[#0c2340]">Delivery Fee</th>
-                    <th className="text-left px-4 py-3 font-bold text-[#0c2340]">Pricing Transparency</th>
+                    <th className="text-left px-4 py-3 font-bold text-[#0c2340]">Factor</th>
+                    <th className="text-left px-4 py-3 font-bold text-[#0c2340]">TajWater</th>
+                    <th className="text-left px-4 py-3 font-bold text-[#0c2340]">What to watch for</th>
                   </tr>
                 </thead>
                 <tbody>
                   {[
-                    ['TajWater', '$8.99', '$12.99', 'Free (all zones)', 'Fully transparent'],
-                    ['Aqua Blue Water', '$7.50', '$8.50', 'Included (bi-weekly only)', 'Transparent'],
-                    ['Pureaqua Water', 'Quote required', 'Quote required', 'Included', 'Not published'],
-                    ['Element H2O', 'Not published', 'Not published', 'Not published', 'Not published'],
-                    ['Coastal Water Store', 'Not published', 'Not published', 'Not published', 'Not published'],
-                  ].map(([prov, ro, alk, del, trans], i) => (
-                    <tr key={prov} className={i < 4 ? 'border-b border-[#cce7f0]' : ''}>
-                      <td className={`px-4 py-3 font-medium ${prov === 'TajWater' ? 'text-[#0097a7]' : 'text-[#0c2340]'}`}>{prov}</td>
-                      <td className="px-4 py-3 text-[#4a7fa5]">{ro}</td>
-                      <td className="px-4 py-3 text-[#4a7fa5]">{alk}</td>
-                      <td className="px-4 py-3 text-[#4a7fa5]">{del}</td>
-                      <td className="px-4 py-3 text-[#4a7fa5]">{trans}</td>
+                    ['Spring water price', '$8.99/jug', 'Some providers require a quote — pricing not published online'],
+                    ['Delivery fee', 'Always free', 'Many providers add $5–$15 per delivery on top of jug price'],
+                    ['Contracts', 'Never required', 'Some services lock you in for 12–24 months'],
+                    ['Cancellation', 'Anytime, no fee', 'Early termination fees are common with national providers'],
+                    ['Same-day delivery', 'Yes (before 12pm)', 'Less common with larger or national providers'],
+                    ['Zone surcharges', 'None — flat pricing', 'Outer Metro Vancouver areas often cost more with some services'],
+                  ].map(([factor, taj, watch], i, arr) => (
+                    <tr key={factor} className={i < arr.length - 1 ? 'border-b border-[#cce7f0]' : ''}>
+                      <td className="px-4 py-3 font-medium text-[#0c2340]">{factor}</td>
+                      <td className="px-4 py-3 font-semibold text-[#0097a7]">{taj}</td>
+                      <td className="px-4 py-3 text-[#4a7fa5]">{watch}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            <p className="text-xs text-[#4a7fa5] mb-8">
-              Competitor prices sourced from publicly available information as of May 2026. "Not published" indicates pricing was not available on the provider's website — a quote or account registration is required.
-            </p>
 
             <h2 className="text-2xl font-extrabold text-[#0c2340] mt-10 mb-4">Is Water Delivery Worth It?</h2>
             <p className="text-[#4a7fa5] leading-relaxed mb-4">

@@ -28,7 +28,7 @@ export default function ComparisonShowcase() {
       ],
     },
     {
-      category: 'TajWater vs Competitors (Culligan, Sparkletts)',
+      category: 'TajWater vs Other Providers',
       items: [
         { feature: 'Local Ownership', tajwater: '✓ Metro Vancouver family business', alternative: 'National/international corps' },
         { feature: 'Hidden Fees', tajwater: 'None - transparent pricing', alternative: 'Setup fees, cancellation fees common' },

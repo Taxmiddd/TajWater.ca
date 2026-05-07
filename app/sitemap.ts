@@ -15,7 +15,7 @@ const BLOG_POSTS = [
   { slug: 'spring-vs-alkaline-vs-distilled-water-vancouver', date: '2026-04-15' },
   { slug: 'is-vancouver-tap-water-safe-to-drink', date: '2026-04-22' },
   { slug: 'how-much-does-water-delivery-cost-metro-vancouver', date: '2026-04-29' },
-  { slug: 'switching-from-canadian-springs-primo-culligan-to-local-water-delivery-vancouver', date: '2026-05-06' },
+  { slug: 'switching-water-delivery-providers-metro-vancouver', date: '2026-05-06' },
 ]
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

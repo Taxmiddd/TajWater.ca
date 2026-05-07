@@ -98,8 +98,8 @@ export default function LocalSEOSection() {
             Switching Water Delivery Providers in Metro Vancouver?
           </h3>
           <p className="text-[#4a7fa5] text-center max-w-3xl mx-auto mb-8">
-            Many Metro Vancouver residents switch to TajWater from larger national providers like Canadian Springs,
-            Primo Water, and Culligan — or from older local companies — looking for better pricing, more flexible scheduling,
+            Many Metro Vancouver residents switch to TajWater from providers that raised prices without notice,
+            missed deliveries, or required long contracts — looking for better pricing, more flexible scheduling,
             and faster local service. Here is what you get when you switch:
           </p>
           <div className="overflow-x-auto rounded-2xl border border-[#cce7f0] bg-white">
