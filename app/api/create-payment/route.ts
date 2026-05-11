@@ -243,7 +243,8 @@ export async function POST(req: NextRequest) {
       squareCustomerId = profile.square_customer_id ?? await createSquareCustomer(getSquareClient(), profile, userId, address)
 
       if (sourceId) {
-        const card = await saveSquareCard(getSquareClient(), userId, sourceId, squareCustomerId, address?.name ?? profile.name ?? undefined, address)
+        const billingName: string | undefined = (address?.name || profile.name) || undefined
+        const card = await saveSquareCard(getSquareClient(), userId, sourceId as string, squareCustomerId as string, billingName, address)
         squareCardId = card.id
         squareCardBrand = card.cardBrand ?? null
         squareCardLast4 = card.last4 ?? null

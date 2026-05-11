@@ -4,7 +4,7 @@ import ProductDetailContent from './ProductDetailContent'
 import Script from 'next/script'
 
 type Props = {
-  params: { slug: string[] }
+  params: Promise<{ slug: string[] }>
 }
 
 async function getProduct(slugOrId: string) {
@@ -31,7 +31,8 @@ async function getRelatedProducts(category: string, id: string) {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const slugOrId = params.slug?.[0] ?? ''
+  const { slug: paramSlug } = await params
+  const slugOrId = paramSlug?.[0] ?? ''
   const product = await getProduct(slugOrId)
 
   if (!product) {
@@ -76,7 +77,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ProductPage({ params }: Props) {
-  const slugOrId = params.slug?.[0] ?? ''
+  const { slug: paramSlug } = await params
+  const slugOrId = paramSlug?.[0] ?? ''
   const product = await getProduct(slugOrId)
   
   if (!product) return null

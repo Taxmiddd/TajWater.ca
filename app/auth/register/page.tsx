@@ -50,20 +50,18 @@ function RegisterContent() {
       zoneId = zoneRow?.id ?? null
     }
 
-    const { data: signUpData, error } = await supabase.auth.signUp(
-      {
-        email: form.email,
-        password: form.password,
-      },
-      {
+    const { data: signUpData, error } = await supabase.auth.signUp({
+      email: form.email,
+      password: form.password,
+      options: {
         data: {
           name: form.name,
           phone: form.phone,
           address: form.address,
           zone_id: zoneId,
         },
-      }
-    )
+      },
+    })
     if (error) {
       setError(error.message)
       setLoading(false)

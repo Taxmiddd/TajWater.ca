@@ -314,9 +314,9 @@ export default async function CityPage({ params }: Props) {
 
   // Hardcoded featured products to ensure 100% static stability without DB hits at runtime
   const products = [
-    { id: 'spring-5g', name: '5 Gallon Spring Water', price: 8.99, category: 'water' },
-    { id: 'alkaline-5g', name: '5 Gallon Alkaline Water', price: 12.99, category: 'water' },
-    { id: 'distilled-5g', name: '5 Gallon Distilled Water', price: 9.99, category: 'water' },
+    { id: 'spring-5g', slug: 'spring-water', name: '5 Gallon Spring Water', price: 8.99, category: 'water' },
+    { id: 'alkaline-5g', slug: 'alkaline-water', name: '5 Gallon Alkaline Water', price: 12.99, category: 'water' },
+    { id: 'distilled-5g', slug: 'distilled-water', name: '5 Gallon Distilled Water', price: 9.99, category: 'water' },
   ]
 
   const jsonLd = {

@@ -52,3 +52,5 @@ memory/
 docs/plans/
 COMMIT_MESSAGE.txt
 GIT-PUSH-INSTRUCTIONS.md
+.vscode
+.claude 
