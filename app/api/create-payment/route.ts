@@ -25,15 +25,6 @@ function buildSquareAddress(address: { street?: string | null; zone?: string | n
   }
 }
 
-function inferSubscriptionFrequency(item: { subscribeFrequency?: 'weekly' | 'biweekly' | 'monthly'; category?: string; name?: string }) {
-  if (item.subscribeFrequency) return item.subscribeFrequency
-  const text = (item.name ?? '').toLowerCase()
-  if (text.includes('weekly')) return 'weekly'
-  if (text.includes('monthly')) return 'monthly'
-  if (text.includes('biweekly') || text.includes('bi-weekly') || text.includes('bi weekly') || text.includes('fortnight')) return 'biweekly'
-  if (item.category === 'subscription') return 'weekly'
-  return undefined
-}
 
 async function createSquareCustomer(square: any, profile: any, userId: string, address: any) {
   const { givenName, familyName } = parseSquareCustomerName(profile.name ?? address?.name)
@@ -110,33 +101,37 @@ export async function POST(req: NextRequest) {
       deliveryFee = zoneRow?.delivery_fee ?? 0
     }
 
-    // 2. Fetch fresh product prices from DB — client-supplied prices are untrusted
+    // 2. Fetch fresh product prices and details from DB — client-supplied data is untrusted
     const productIds = items.map((i: { product_id: string }) => i.product_id)
     const { data: products, error: productError } = await db
       .from('products')
-      .select('id, price, active')
+      .select('id, price, active, category, subscription_interval')
       .in('id', productIds)
 
     if (productError || !products) {
       return NextResponse.json({ error: 'Failed to fetch product prices' }, { status: 500 })
     }
 
-    const priceMap: Record<string, number> = {}
+    const productMap: Record<string, { price: number; category: string; subscription_interval: string | null }> = {}
     for (const p of products) {
       if (!p.active) {
         return NextResponse.json({ error: `Product is no longer available` }, { status: 400 })
       }
-      priceMap[p.id] = p.price
+      productMap[p.id] = { 
+        price: p.price, 
+        category: p.category, 
+        subscription_interval: p.subscription_interval ?? null 
+      }
     }
 
     // 3. Recalculate subtotal server-side using DB prices
     let subtotal = 0
     for (const item of items as CartItem[]) {
-      const price = priceMap[item.product_id]
-      if (price === undefined) {
+      const pInfo = productMap[item.product_id]
+      if (!pInfo) {
         return NextResponse.json({ error: 'Invalid product in cart' }, { status: 400 })
       }
-      subtotal += price * item.quantity
+      subtotal += pInfo.price * item.quantity
     }
 
     // 4. Validate discount code server-side if provided
@@ -214,7 +209,7 @@ export async function POST(req: NextRequest) {
       order_id: order.id,
       product_id: item.product_id,
       quantity: item.quantity,
-      price: priceMap[item.product_id],
+      price: productMap[item.product_id].price,
     }))
     const { error: itemsError } = await db.from('order_items').insert(orderItems)
     if (itemsError) console.error('Order items error:', itemsError)
@@ -228,7 +223,7 @@ export async function POST(req: NextRequest) {
     let squareCardExpMonth: number | null = null
     let squareCardExpYear: number | null = null
 
-    const subscriptionItems = (items as CartItem[]).filter(i => i.subscribeFrequency)
+    const subscriptionItems = (items as CartItem[]).filter(i => productMap[i.product_id].category === 'subscription')
     if (!isOffline && subscriptionItems.length > 0 && userId) {
       const { data: profile, error: profileError } = await db
         .from('profiles')
@@ -313,20 +308,21 @@ export async function POST(req: NextRequest) {
       .eq('id', order.id)
 
     if (userId) {
-      const subscribeItems = (items as CartItem[]).filter(i => i.subscribeFrequency || i.category === 'subscription')
+      const subscribeItems = (items as CartItem[]).filter(i => productMap[i.product_id].category === 'subscription')
       if (subscribeItems.length > 0) {
         const now = new Date()
         const subRows = subscribeItems.map(item => {
-          const freq = inferSubscriptionFrequency(item) ?? 'weekly'
+          const pInfo = productMap[item.product_id]
+          const freq = (pInfo.subscription_interval as any) || 'weekly'
           const nextDelivery = new Date(now)
-          nextDelivery.setDate(now.getDate() + (freq === 'weekly' ? 7 : freq === 'biweekly' ? 14 : 30))
+          nextDelivery.setDate(now.getDate() + (freq === 'weekly' ? 7 : freq === 'biweekly' ? 14 : freq === 'daily' ? 1 : 30))
           return {
             user_id: userId,
             product_id: item.product_id,
             frequency: freq,
             quantity: item.quantity,
             zone_id: zoneId,
-            price: priceMap[item.product_id],
+            price: pInfo.price,
             status: 'active',
             next_delivery: nextDelivery.toISOString(),
             next_payment_at: nextDelivery.toISOString(),
