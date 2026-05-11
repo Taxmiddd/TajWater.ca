@@ -222,6 +222,8 @@ export default function CheckoutPage() {
             quantity: i.quantity,
             price: i.product.price,
             subscribeFrequency: i.subscribeFrequency,
+            category: i.product.category,
+            name: i.product.name,
           })),
           address: {
             name: address.name,

@@ -148,7 +148,7 @@ export default function ShopContent({ initialProducts }: ShopContentProps) {
                 return (
                   <motion.div key={product.id} layout initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ delay: i * 0.06 }}
                     className="water-card bg-white rounded-3xl border border-[#cce7f0] overflow-hidden shadow-sm hover:shadow-md hover:border-[#0097a7]/30 transition-all">
-                    <Link href={`/shop/${product.id}`}>
+                    <Link href={`/shop/${product.slug ?? product.id}`}>
                       <div className="aspect-[4/5] flex items-center justify-center relative overflow-hidden cursor-pointer" style={{ background: `linear-gradient(135deg, ${color}10, ${color}20)` }}>
                         {product.image_url ? (
                           // eslint-disable-next-line @next/next/no-img-element
@@ -168,7 +168,7 @@ export default function ShopContent({ initialProducts }: ShopContentProps) {
                     </Link>
 
                     <div className="p-5">
-                      <Link href={`/shop/${product.id}`} className="group block mb-4">
+                      <Link href={`/shop/${product.slug ?? product.id}`} className="group block mb-4">
                         <h3 className="font-bold text-[#0c2340] mb-1.5 group-hover:text-[#0097a7] transition-colors">{product.name}</h3>
                         <p className="text-[#4a7fa5] text-xs leading-relaxed line-clamp-2">{product.description}</p>
                       </Link>

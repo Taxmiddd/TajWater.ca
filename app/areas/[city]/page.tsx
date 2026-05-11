@@ -453,7 +453,7 @@ export default async function CityPage({ params }: Props) {
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 {products.map((p) => (
-                  <Link key={p.id} href={`/shop/${p.id}`} className="group block">
+                  <Link key={p.id} href={`/shop/${p.slug ?? p.id}`} className="group block">
                     <div className="bg-[#f0f9ff] rounded-2xl p-6 border border-[#cce7f0] hover:border-[#0097a7]/40 hover:shadow-md transition-all text-center">
                       <div className="text-4xl mb-3">💧</div>
                       <h3 className="font-bold text-[#0c2340] group-hover:text-[#0097a7] transition-colors mb-1">{p.name}</h3>

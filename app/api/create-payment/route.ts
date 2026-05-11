@@ -5,6 +5,68 @@ import { rateLimit } from '@/lib/ratelimit'
 import { resend, buildOrderConfirmationEmail, buildAdminOrderNotificationEmail } from '@/lib/email'
 import { generateInvoicePDF, type InvoiceOrderData } from '@/lib/generateInvoice'
 
+function parseSquareCustomerName(fullName: string | null | undefined) {
+  const cleaned = typeof fullName === 'string' ? fullName.trim() : ''
+  const parts = cleaned.split(/\s+/).filter(Boolean)
+  return {
+    givenName: parts[0] || undefined,
+    familyName: parts.slice(1).join(' ') || undefined,
+  }
+}
+
+function buildSquareAddress(address: { street?: string | null; zone?: string | null; postal?: string | null } | null | undefined) {
+  if (!address?.street) return undefined
+  return {
+    addressLine1: address.street,
+    locality: address.zone,
+    administrativeDistrictLevel1: 'BC',
+    postalCode: address.postal ?? undefined,
+    country: 'CA',
+  }
+}
+
+function inferSubscriptionFrequency(item: { subscribeFrequency?: 'weekly' | 'biweekly' | 'monthly'; category?: string; name?: string }) {
+  if (item.subscribeFrequency) return item.subscribeFrequency
+  const text = (item.name ?? '').toLowerCase()
+  if (text.includes('weekly')) return 'weekly'
+  if (text.includes('monthly')) return 'monthly'
+  if (text.includes('biweekly') || text.includes('bi-weekly') || text.includes('bi weekly') || text.includes('fortnight')) return 'biweekly'
+  if (item.category === 'subscription') return 'weekly'
+  return undefined
+}
+
+async function createSquareCustomer(square: any, profile: any, userId: string, address: any) {
+  const { givenName, familyName } = parseSquareCustomerName(profile.name ?? address?.name)
+  const response = await square.customers.create({
+    givenName,
+    familyName,
+    emailAddress: profile.email ?? address?.email ?? undefined,
+    phoneNumber: profile.phone ?? address?.phone ?? undefined,
+    address: buildSquareAddress(address),
+    referenceId: userId,
+    note: 'TajWater subscription customer',
+  })
+  const customer = response.customer
+  if (!customer?.id) throw new Error('Unable to create Square customer')
+  return customer.id
+}
+
+async function saveSquareCard(square: any, userId: string, sourceId: string, customerId: string, billingName: string | undefined, address: any) {
+  const response = await square.cards.create({
+    idempotencyKey: crypto.randomUUID(),
+    sourceId,
+    card: {
+      customerId,
+      cardholderName: billingName,
+      billingAddress: buildSquareAddress(address),
+      referenceId: userId,
+    },
+  })
+  const card = response.card
+  if (!card?.id) throw new Error('Unable to save card on file')
+  return card
+}
+
 export async function POST(req: NextRequest) {
   // Rate limit: max 10 payment creations per IP per minute
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
@@ -15,17 +77,22 @@ export async function POST(req: NextRequest) {
   try {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { amount, items, address, userId, notes, discountCodeId, discountAmount: clientDiscountAmount, sourceId, paymentMethod = 'square_online' } = await req.json()
-    type CartItem = { product_id: string; quantity: number; subscribeFrequency?: 'weekly' | 'biweekly' | 'monthly' }
+    type CartItem = { product_id: string; quantity: number; subscribeFrequency?: 'weekly' | 'biweekly' | 'monthly'; category?: string; name?: string }
     type RawItem = { quantity: number; price: number; products: { name: string } | null }
 
     const isOffline = paymentMethod === 'cash_on_delivery' || paymentMethod === 'card_on_delivery'
 
-    if (!sourceId && !isOffline) {
+    const isSubscriptionOrder = Array.isArray(items) && (items as CartItem[]).some(i => !!i.subscribeFrequency || i.category === 'subscription')
+    if (!sourceId && !isOffline && !isSubscriptionOrder) {
       return NextResponse.json({ error: 'Payment source token is required' }, { status: 400 })
     }
 
     if (!Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: 'No items provided' }, { status: 400 })
+    }
+
+    if (isSubscriptionOrder && !userId) {
+      return NextResponse.json({ error: 'Subscription checkout requires a logged-in account' }, { status: 400 })
     }
 
     const db = createServerClient()
@@ -152,40 +219,69 @@ export async function POST(req: NextRequest) {
     const { error: itemsError } = await db.from('order_items').insert(orderItems)
     if (itemsError) console.error('Order items error:', itemsError)
 
-    // 9b. Create subscription rows for any subscribe-frequency items
-    if (userId) {
-      const subscribeItems = (items as CartItem[]).filter(i => i.subscribeFrequency)
-      if (subscribeItems.length > 0) {
-        const now = new Date()
-        const subRows = subscribeItems.map(item => {
-          const freq = item.subscribeFrequency!
-          const nextDelivery = new Date(now)
-          nextDelivery.setDate(now.getDate() + (freq === 'weekly' ? 7 : freq === 'biweekly' ? 14 : 30))
-          return {
-            user_id: userId,
-            product_id: item.product_id,
-            frequency: freq,
-            quantity: item.quantity,
-            zone_id: zoneId,
-            price: priceMap[item.product_id],
-            status: 'active',
-            next_delivery: nextDelivery.toISOString(),
-          }
-        })
-        const { error: subError } = await db.from('subscriptions').insert(subRows)
-        if (subError) console.error('Subscription creation error:', subError)
-      }
-    }
-
     // 10. Process Square payment ONLY if online
     let squarePaymentId: string | null = null
+    let squareCustomerId: string | null = null
+    let squareCardId: string | null = null
+    let squareCardBrand: string | null = null
+    let squareCardLast4: string | null = null
+    let squareCardExpMonth: number | null = null
+    let squareCardExpYear: number | null = null
+
+    const subscriptionItems = (items as CartItem[]).filter(i => i.subscribeFrequency)
+    if (!isOffline && subscriptionItems.length > 0 && userId) {
+      const { data: profile, error: profileError } = await db
+        .from('profiles')
+        .select('name, email, phone, delivery_address, zone_id, square_customer_id, square_card_id, square_card_brand, square_card_last4, square_card_exp_month, square_card_exp_year')
+        .eq('id', userId)
+        .single()
+
+      if (profileError || !profile) {
+        return NextResponse.json({ error: 'Failed to fetch profile for subscription billing' }, { status: 500 })
+      }
+
+      squareCustomerId = profile.square_customer_id ?? await createSquareCustomer(getSquareClient(), profile, userId, address)
+
+      if (sourceId) {
+        const card = await saveSquareCard(getSquareClient(), userId, sourceId, squareCustomerId, address?.name ?? profile.name ?? undefined, address)
+        squareCardId = card.id
+        squareCardBrand = card.cardBrand ?? null
+        squareCardLast4 = card.last4 ?? null
+        squareCardExpMonth = card.expMonth ? Number(card.expMonth) : null
+        squareCardExpYear = card.expYear ? Number(card.expYear) : null
+      } else if (profile.square_card_id) {
+        squareCardId = profile.square_card_id
+        squareCardBrand = profile.square_card_brand ?? null
+        squareCardLast4 = profile.square_card_last4 ?? null
+        squareCardExpMonth = profile.square_card_exp_month ?? null
+        squareCardExpYear = profile.square_card_exp_year ?? null
+      } else {
+        return NextResponse.json({ error: 'Subscription billing requires a saved card.' }, { status: 400 })
+      }
+
+      if (!squareCardId) {
+        return NextResponse.json({ error: 'Failed to save payment card for subscription billing' }, { status: 500 })
+      }
+
+      await db.from('profiles').update({
+        square_customer_id: squareCustomerId,
+        square_card_id: squareCardId,
+        square_card_brand: squareCardBrand,
+        square_card_last4: squareCardLast4,
+        square_card_exp_month: squareCardExpMonth,
+        square_card_exp_year: squareCardExpYear,
+      }).eq('id', userId)
+    }
+
     if (!isOffline) {
       const square = getSquareClient()
       const amountCents = Math.round(serverTotal * 100)
       const idempotencyKey = crypto.randomUUID()
+      const paymentSourceId = squareCardId ?? sourceId!
 
       const response = await square.payments.create({
-        sourceId: sourceId!,
+        sourceId: paymentSourceId,
+        customerId: squareCustomerId ?? undefined,
         idempotencyKey,
         amountMoney: {
           amount: BigInt(amountCents),
@@ -214,6 +310,38 @@ export async function POST(req: NextRequest) {
         status: 'processing',
       })
       .eq('id', order.id)
+
+    if (userId) {
+      const subscribeItems = (items as CartItem[]).filter(i => i.subscribeFrequency || i.category === 'subscription')
+      if (subscribeItems.length > 0) {
+        const now = new Date()
+        const subRows = subscribeItems.map(item => {
+          const freq = inferSubscriptionFrequency(item) ?? 'weekly'
+          const nextDelivery = new Date(now)
+          nextDelivery.setDate(now.getDate() + (freq === 'weekly' ? 7 : freq === 'biweekly' ? 14 : 30))
+          return {
+            user_id: userId,
+            product_id: item.product_id,
+            frequency: freq,
+            quantity: item.quantity,
+            zone_id: zoneId,
+            price: priceMap[item.product_id],
+            status: 'active',
+            next_delivery: nextDelivery.toISOString(),
+            next_payment_at: nextDelivery.toISOString(),
+            square_customer_id: squareCustomerId,
+            square_card_id: squareCardId,
+            payment_card_brand: squareCardBrand,
+            payment_card_last4: squareCardLast4,
+          }
+        })
+        const { error: subError } = await db.from('subscriptions').insert(subRows)
+        if (subError) {
+          console.error('Subscription creation error:', subError)
+          throw new Error('Failed to create subscription')
+        }
+      }
+    }
 
     // 12. Increment discount code uses_count if applicable
     if (validatedDiscountCodeId) {

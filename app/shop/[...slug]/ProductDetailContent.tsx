@@ -269,7 +269,7 @@ export default function ProductDetailContent({
               {relatedProducts.map((p) => {
                 const c = categoryColors[p.category] ?? '#0097a7'
                 return (
-                  <Link key={p.id} href={`/shop/${p.id}`}>
+                  <Link key={p.id} href={`/shop/${p.slug ?? p.id}`}>
                     <motion.div
                       whileHover={{ y: -4 }}
                       className="bg-white rounded-2xl border border-[#cce7f0] overflow-hidden shadow-sm hover:shadow-md hover:border-[#0097a7]/30 transition-all cursor-pointer"

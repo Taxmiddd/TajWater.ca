@@ -94,28 +94,7 @@ const faqSections = [
       },
     ],
   },
-  {
-    title: 'Subscriptions & Loyalty',
-    icon: '📅',
-    faqs: [
-      {
-        q: 'How much do I save with a subscription?',
-        a: 'Subscriptions save you 20-30% vs. one-off orders. Spring water drops to $6.49/jug, alkaline to $9.49, and distilled to $7.49. Plus, you get priority delivery scheduling.',
-      },
-      {
-        q: 'Do you offer a referral program?',
-        a: 'Yes! Refer a friend and both of you get $25 off your next order once they make their first purchase. Unlimited referrals — keep the savings coming.',
-      },
-      {
-        q: 'Can I gift TajWater to someone?',
-        a: 'Absolutely! Gift cards available in any denomination. Perfect for housewarming gifts, corporate gifts, or anyone who drinks water (everyone!).',
-      },
-      {
-        q: 'Do you offer seasonal promotions?',
-        a: 'Yes, we run seasonal offers throughout the year. Sign up for our newsletter to get exclusive deals and early access to promotions.',
-      },
-    ],
-  },
+
 ]
 
 export default function ExpandedFAQ() {
@@ -161,7 +140,7 @@ export default function ExpandedFAQ() {
               </h2>
             </div>
             <p className="text-[#4a7fa5] text-lg max-w-2xl mx-auto">
-              Everything you need to know about TajWater — from water quality to pricing, delivery, and our subscription options.
+              Everything you need to know about TajWater — from water quality to pricing, delivery, and our service details.
             </p>
           </div>
 

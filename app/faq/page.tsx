@@ -4,20 +4,19 @@ import { HelpCircle, Phone, Mail } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Water Delivery FAQ — Metro Vancouver | TajWater',
-  description: 'Answers to the most common questions about water delivery in Metro Vancouver. Pricing, same-day delivery, subscriptions, CPAP water, areas served, jug swaps, and more.',
+  description: 'Answers to the most common questions about water delivery in Metro Vancouver. Pricing, same-day delivery, CPAP water, areas served, jug swaps, and more.',
   keywords: [
     'water delivery FAQ Vancouver',
     'water delivery questions Metro Vancouver',
     'how does water delivery work Vancouver',
     'water delivery pricing FAQ',
     'CPAP water delivery FAQ',
-    'water jug subscription FAQ',
     'TajWater FAQ',
   ],
   alternates: { canonical: 'https://tajwater.ca/faq' },
   openGraph: {
     title: 'Water Delivery FAQ — Metro Vancouver | TajWater',
-    description: 'Answers to the most common questions about water delivery in Metro Vancouver. Pricing, same-day delivery, subscriptions, CPAP water, and more.',
+    description: 'Answers to the most common questions about water delivery in Metro Vancouver. Pricing, same-day delivery, CPAP water, and more.',
     url: 'https://tajwater.ca/faq',
     type: 'website',
     images: [{ url: 'https://tajwater.ca/opengraph-image', width: 1200, height: 630 }],
@@ -30,7 +29,7 @@ const faqSections = [
     faqs: [
       {
         q: 'How do I order water delivery in Metro Vancouver?',
-        a: 'You can order through our online shop at tajwater.ca/shop, by calling 778-504-7880, or by emailing info@tajwater.ca. For recurring deliveries, you can set up a weekly or bi-weekly subscription. Orders placed before 12pm are eligible for same-day delivery.'
+        a: 'You can order through our online shop at tajwater.ca/shop, by calling 778-504-7880, or by emailing info@tajwater.ca. Orders placed before 12pm are eligible for same-day delivery.'
       },
       {
         q: 'Do you offer same-day water delivery?',
@@ -55,23 +54,15 @@ const faqSections = [
     ]
   },
   {
-    title: 'Pricing & Subscriptions',
+    title: 'Pricing & Payment',
     faqs: [
       {
         q: 'How much does water delivery cost?',
-        a: 'Taj Water pricing is: Spring Water — $8.99/jug one-time. Alkaline Water — $10.99/jug one-time. Distilled Water — $9.99/jug one-time. Subscription plans start at $29.99/week or $59.99/month. All prices include free delivery and are in CAD.'
-      },
-      {
-        q: 'Are there any contracts or minimum commitments?',
-        a: 'No. There is no contract, no minimum order, and no cancellation fee. Subscriptions can be cancelled, paused, or changed at any time with no penalty. We believe in earning your business every delivery.'
-      },
-      {
-        q: 'How do subscriptions work?',
-        a: 'Choose weekly ($29.99/week) or monthly ($59.99/month) delivery. Your jugs arrive on a fixed schedule. You can pause deliveries when you go on vacation, change your schedule, or cancel anytime with no penalty.'
+        a: 'Taj Water pricing is: Spring Water — $8.99/jug one-time. Alkaline Water — $10.99/jug one-time. Distilled Water — $9.99/jug one-time. All prices include free delivery and are in CAD.'
       },
       {
         q: 'Is there a minimum order quantity?',
-        a: 'No. You can order as few as one jug. There is no minimum quantity for one-time orders or subscriptions. Most households order 2–4 jugs per delivery.'
+        a: 'No. You can order as few as one jug. There is no minimum quantity for one-time orders. Most households order 2–4 jugs per delivery.'
       },
       {
         q: 'What payment methods do you accept?',

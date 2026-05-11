@@ -6,7 +6,14 @@ export interface Profile {
   delivery_address: string
   zone_id: string
   avatar_url?: string
+  square_customer_id?: string | null
+  square_card_id?: string | null
+  square_card_brand?: string | null
+  square_card_last4?: string | null
+  square_card_exp_month?: number | null
+  square_card_exp_year?: number | null
   wallet_balance: number
+  is_admin?: boolean
   created_at: string
 }
 
@@ -20,6 +27,7 @@ export interface Zone {
 
 export interface Product {
   id: string
+  slug?: string | null
   name: string
   description: string
   price: number
@@ -65,10 +73,15 @@ export interface Subscription {
   user_id: string
   frequency: 'weekly' | 'biweekly' | 'monthly'
   next_delivery: string
+  next_payment_at?: string | null
   status: 'active' | 'paused' | 'cancelled'
   quantity: number
   zone_id: string
   product_id: string
+  square_customer_id?: string | null
+  square_card_id?: string | null
+  payment_card_brand?: string | null
+  payment_card_last4?: string | null
 }
 
 export interface SupportTicket {

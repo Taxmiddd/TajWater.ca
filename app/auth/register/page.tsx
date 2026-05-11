@@ -50,19 +50,26 @@ function RegisterContent() {
       zoneId = zoneRow?.id ?? null
     }
 
-    const { data: signUpData, error } = await supabase.auth.signUp({
-      email: form.email,
-      password: form.password,
-      options: {
-        data: { name: form.name, phone: form.phone, address: form.address, zone_id: zoneId },
+    const { data: signUpData, error } = await supabase.auth.signUp(
+      {
+        email: form.email,
+        password: form.password,
       },
-    })
+      {
+        data: {
+          name: form.name,
+          phone: form.phone,
+          address: form.address,
+          zone_id: zoneId,
+        },
+      }
+    )
     if (error) {
       setError(error.message)
       setLoading(false)
     } else {
       // Send welcome email (fire-and-forget)
-      if (signUpData.user) {
+      if (signUpData?.user) {
         fetch('/api/welcome-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

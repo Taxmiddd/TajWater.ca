@@ -179,7 +179,7 @@ export default function AdminProductDetailPage() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Link href={`/shop/${product.id}`} target="_blank">
+          <Link href={`/shop/${product.slug ?? product.id}`} target="_blank">
             <Button variant="outline" size="sm" className="border-[#cce7f0] text-[#4a7fa5] gap-1.5">
               <Eye className="w-3.5 h-3.5" /> View on Shop
             </Button>

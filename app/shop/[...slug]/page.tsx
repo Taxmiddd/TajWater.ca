@@ -4,18 +4,18 @@ import ProductDetailContent from './ProductDetailContent'
 import Script from 'next/script'
 
 type Props = {
-  params: Promise<{ id: string }>
+  params: { slug: string[] }
 }
 
-async function getProduct(id: string) {
+async function getProduct(slugOrId: string) {
   const db = createServerClient()
   const { data } = await db
     .from('products')
     .select('*')
-    .eq('id', id)
+    .or(`id.eq.${slugOrId},slug.eq.${slugOrId}`)
     .eq('active', true)
-    .single()
-  return data
+    .limit(1)
+  return Array.isArray(data) ? data[0] : null
 }
 
 async function getRelatedProducts(category: string, id: string) {
@@ -31,8 +31,8 @@ async function getRelatedProducts(category: string, id: string) {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await params
-  const product = await getProduct(id)
+  const slugOrId = params.slug?.[0] ?? ''
+  const product = await getProduct(slugOrId)
 
   if (!product) {
     return {
@@ -48,9 +48,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
   const catText = categoryLabel[product.category] ?? product.category
 
+  const slug = product.slug || product.id
   const title = `${product.name} — ${catText} Vancouver`
   const description = product.description || `Order ${product.name} online. Fast delivery across Metro Vancouver. Competitive prices on ${catText.toLowerCase()}.`
-  const url = `https://tajwater.ca/shop/${id}`
+  const url = `https://tajwater.ca/shop/${slug}`
 
   return {
     title,
@@ -75,13 +76,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ProductPage({ params }: Props) {
-  const { id } = await params
-  const product = await getProduct(id)
+  const slugOrId = params.slug?.[0] ?? ''
+  const product = await getProduct(slugOrId)
   
   if (!product) return null
   
-  const relatedProducts = await getRelatedProducts(product.category, id)
+  const relatedProducts = await getRelatedProducts(product.category, product.id)
 
+  const slug = product.slug || product.id
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -96,7 +98,7 @@ export default async function ProductPage({ params }: Props) {
     mpn: product.id,
     offers: {
       '@type': 'Offer',
-      url: `https://tajwater.ca/shop/${id}`,
+      url: `https://tajwater.ca/shop/${slug}`,
       priceCurrency: 'CAD',
       price: product.price.toFixed(2),
       priceValidUntil: new Date(new Date().getFullYear(), 11, 31).toISOString().split('T')[0],
