@@ -8,14 +8,24 @@ type Props = {
 }
 
 async function getProduct(slugOrId: string) {
+  if (!slugOrId) return null
   const db = createServerClient()
-  const { data } = await db
-    .from('products')
-    .select('*')
-    .or(`id.eq.${slugOrId},slug.eq.${slugOrId}`)
-    .eq('active', true)
-    .limit(1)
-  return Array.isArray(data) ? data[0] : null
+  
+  // Check if input is a valid UUID
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slugOrId)
+  
+  let query = db.from('products').select('*').eq('active', true)
+  
+  if (isUuid) {
+    // If UUID, search in both ID and slug (just in case the slug is also a UUID)
+    query = query.or(`id.eq.${slugOrId},slug.eq.${slugOrId}`)
+  } else {
+    // If not UUID, only search in slug to avoid DB syntax errors
+    query = query.eq('slug', slugOrId)
+  }
+
+  const { data } = await query.limit(1).maybeSingle()
+  return data
 }
 
 async function getRelatedProducts(category: string, id: string) {
