@@ -73,7 +73,7 @@ export default function ShopContent({ initialProducts }: ShopContentProps) {
   const getCartQty = (id: string) => items.find((i) => i.product.id === id)?.quantity ?? 0
 
   const handleAdd = (product: Product) => {
-    addItem(product, undefined)
+    addItem(product)
     setAddedId(product.id)
     setTimeout(() => setAddedId(null), 2500)
   }

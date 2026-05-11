@@ -176,7 +176,7 @@ export default function CheckoutPage() {
             product_id: i.product.id,
             quantity: i.quantity,
             price: i.product.price,
-            subscribeFrequency: i.subscribeFrequency,
+            subscribeFrequency: i.product.subscription_interval ?? null,
           })),
           address: {
             name: address.name,
@@ -221,7 +221,7 @@ export default function CheckoutPage() {
             product_id: i.product.id,
             quantity: i.quantity,
             price: i.product.price,
-            subscribeFrequency: i.subscribeFrequency,
+            subscribeFrequency: i.product.subscription_interval ?? null,
             category: i.product.category,
             name: i.product.name,
           })),

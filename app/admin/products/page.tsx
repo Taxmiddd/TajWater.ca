@@ -15,7 +15,7 @@ import type { Product } from '@/types'
 const categories = ['water', 'equipment', 'subscription', 'accessories']
 const categoryEmoji: Record<string, string> = { water: '💧', equipment: '🔧', subscription: '🔄', accessories: '🧹' }
 
-const empty: Omit<Product, 'id'> = { name: '', description: '', price: 0, image_url: '', stock: 0, category: 'water', active: true, featured: false, unit_label: 'unit', rating: 5.0, review_count: 0 }
+const empty: Omit<Product, 'id'> = { name: '', description: '', price: 0, image_url: '', stock: 0, category: 'water', active: true, featured: false, unit_label: 'unit', rating: 5.0, review_count: 0, subscription_interval: null }
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
@@ -68,7 +68,7 @@ export default function AdminProductsPage() {
   }
 
   const openAdd = () => { setEditing(null); setForm(empty); setDialogOpen(true) }
-  const openEdit = (p: Product) => { setEditing(p); setForm({ name: p.name, description: p.description, price: p.price, image_url: p.image_url, stock: p.stock, category: p.category, active: p.active, featured: p.featured || false, unit_label: p.unit_label || '', rating: p.rating || 5.0, review_count: p.review_count || 0 }); setDialogOpen(true) }
+  const openEdit = (p: Product) => { setEditing(p); setForm({ name: p.name, description: p.description, price: p.price, image_url: p.image_url, stock: p.stock, category: p.category, active: p.active, featured: p.featured || false, unit_label: p.unit_label || '', rating: p.rating || 5.0, review_count: p.review_count || 0, subscription_interval: p.subscription_interval ?? null }); setDialogOpen(true) }
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -362,11 +362,39 @@ export default function AdminProductsPage() {
             </div>
             <div>
               <label className="text-sm font-semibold text-[#0c2340] dark:text-[#f8fafc] mb-1.5 block">Category *</label>
-              <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
+              <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value, subscription_interval: e.target.value !== 'subscription' ? null : (form.subscription_interval ?? 'weekly') })}
                 className="w-full h-10 px-3 rounded-xl border border-[#cce7f0] dark:border-white/10 bg-white dark:bg-white/5 text-[#0c2340] dark:text-white text-sm focus:border-[#0097a7] focus:outline-none transition-colors" required>
                 {categories.map((c) => <option key={c} value={c} className="dark:bg-[#1e293b]">{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
               </select>
             </div>
+
+            {form.category === 'subscription' && (
+              <div>
+                <label className="text-sm font-semibold text-[#0c2340] dark:text-[#f8fafc] mb-1.5 block">Delivery Interval *</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { value: 'daily',    label: '📅 Daily',     sub: 'Every day' },
+                    { value: 'weekly',   label: '📆 Weekly',    sub: 'Every 7 days' },
+                    { value: 'biweekly', label: '🗓️ Biweekly',  sub: 'Every 14 days' },
+                    { value: 'monthly',  label: '📋 Monthly',   sub: 'Every 30 days' },
+                  ].map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setForm({ ...form, subscription_interval: opt.value as Product['subscription_interval'] })}
+                      className={`flex flex-col items-start p-3 rounded-xl border-2 text-left transition-all ${
+                        form.subscription_interval === opt.value
+                          ? 'border-[#0097a7] bg-[#e0f7fa] dark:bg-[#0097a7]/10'
+                          : 'border-[#cce7f0] dark:border-white/10 hover:border-[#0097a7]'
+                      }`}
+                    >
+                      <span className="text-sm font-semibold text-[#0c2340] dark:text-white">{opt.label}</span>
+                      <span className="text-[10px] text-[#4a7fa5]">{opt.sub}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <div>
               <label className="text-sm font-semibold text-[#0c2340] dark:text-[#f8fafc] mb-1.5 block">Product Image</label>
               {form.image_url ? (

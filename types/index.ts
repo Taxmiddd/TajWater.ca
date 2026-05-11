@@ -39,6 +39,7 @@ export interface Product {
   unit_label?: string
   rating?: number
   review_count?: number
+  subscription_interval?: 'daily' | 'weekly' | 'biweekly' | 'monthly' | null
 }
 
 export interface Order {
@@ -71,7 +72,7 @@ export interface OrderItem {
 export interface Subscription {
   id: string
   user_id: string
-  frequency: 'weekly' | 'biweekly' | 'monthly'
+  frequency: 'daily' | 'weekly' | 'biweekly' | 'monthly'
   next_delivery: string
   next_payment_at?: string | null
   status: 'active' | 'paused' | 'cancelled'
@@ -103,7 +104,6 @@ export interface AdminUser {
 export interface CartItem {
   product: Product
   quantity: number
-  subscribeFrequency?: 'weekly' | 'biweekly' | 'monthly'
 }
 
 export interface DeliveryZone {

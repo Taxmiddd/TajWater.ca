@@ -23,7 +23,6 @@ export default function SubscriptionPage() {
   const [sub, setSub] = useState<SubData | null>(null)
   const [loading, setLoading] = useState(true)
   const [qty, setQty] = useState(4)
-  const [freq, setFreq] = useState('weekly')
   const [saved, setSaved] = useState(false)
   const [saving, setSaving] = useState(false)
   const [toggling, setToggling] = useState(false)
@@ -45,13 +44,11 @@ export default function SubscriptionPage() {
           .maybeSingle()
 
         if (data) {
-          // Supabase FK join may return product as an array — normalise to object
           const raw = data as unknown as SubData & { product: SubData['product'] | SubData['product'][] }
           const productNorm: SubData['product'] = Array.isArray(raw.product) ? (raw.product[0] ?? null) : raw.product
           const normalised: SubData = { ...raw, product: productNorm }
           setSub(normalised)
           setQty(normalised.quantity)
-          setFreq(normalised.frequency)
         }
       } finally {
         setLoading(false)
@@ -60,24 +57,9 @@ export default function SubscriptionPage() {
     load()
   }, [])
 
-  const getNextDates = () => {
-    if (!sub?.next_delivery) return []
-    const dates: string[] = []
-    const base = new Date(sub.next_delivery)
-    const intervalDays =
-      freq === 'daily'    ? 1  :
-      freq === 'weekly'   ? 7  :
-      freq === 'biweekly' ? 14 : 30
-    for (let i = 0; i < 4; i++) {
-      const d = new Date(base)
-      d.setDate(d.getDate() + i * intervalDays)
-      dates.push(d.toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' }))
-    }
-    return dates
-  }
-
   const productData = sub?.product ?? null
   const pricePerJug = productData?.price ?? 7.49
+  const freq = sub?.frequency ?? 'weekly'
   const deliveriesPerMonth =
     freq === 'daily'    ? 30 :
     freq === 'weekly'   ? 4  :
@@ -90,12 +72,12 @@ export default function SubscriptionPage() {
     setError('')
     const { error: err } = await supabase
       .from('subscriptions')
-      .update({ quantity: qty, frequency: freq })
+      .update({ quantity: qty })
       .eq('id', sub.id)
     if (err) {
       setError('Failed to save. Please try again.')
     } else {
-      setSub({ ...sub, quantity: qty, frequency: freq })
+      setSub({ ...sub, quantity: qty })
       setSaved(true)
       setTimeout(() => setSaved(false), 2500)
     }
@@ -230,23 +212,10 @@ export default function SubscriptionPage() {
 
         <div>
           <label className="text-sm font-medium text-[#0c2340] mb-3 block">Delivery Frequency</label>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {[
-              { value: 'daily',    label: 'Daily' },
-              { value: 'weekly',   label: 'Weekly' },
-              { value: 'biweekly', label: 'Biweekly' },
-              { value: 'monthly',  label: 'Monthly' },
-            ].map((f) => (
-              <button
-                key={f.value}
-                onClick={() => setFreq(f.value)}
-                className={`py-2.5 rounded-xl text-sm font-medium transition-all ${
-                  freq === f.value ? 'bg-[#0097a7] text-white shadow-md' : 'border border-[#cce7f0] text-[#4a7fa5] hover:border-[#0097a7]'
-                }`}
-              >
-                {f.label}
-              </button>
-            ))}
+          <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-[#f0f9ff] border border-[#cce7f0]">
+            <RefreshCw className="w-4 h-4 text-[#0097a7]" />
+            <span className="font-semibold text-[#0c2340] capitalize">{freq}</span>
+            <span className="text-xs text-[#4a7fa5] ml-1">(set by admin)</span>
           </div>
         </div>
 
@@ -266,7 +235,17 @@ export default function SubscriptionPage() {
       </motion.div>
 
       {/* Upcoming deliveries */}
-      {nextDates.length > 0 && (
+      {sub?.next_delivery && (() => {
+        const intervalDays =
+          freq === 'daily'    ? 1  :
+          freq === 'weekly'   ? 7  :
+          freq === 'biweekly' ? 14 : 30
+        const nextDates = Array.from({ length: 4 }, (_, i) => {
+          const d = new Date(sub.next_delivery!)
+          d.setDate(d.getDate() + i * intervalDays)
+          return d.toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' })
+        })
+        return (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white rounded-3xl border border-[#cce7f0] shadow-sm p-6">
           <h3 className="font-bold text-[#0c2340] mb-4 flex items-center gap-2">
             <Calendar className="w-4 h-4 text-[#0097a7]" /> Upcoming Deliveries
@@ -283,7 +262,8 @@ export default function SubscriptionPage() {
             ))}
           </div>
         </motion.div>
-      )}
+        )
+      })()}
 
       {/* Pause/Cancel */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="flex gap-3">
