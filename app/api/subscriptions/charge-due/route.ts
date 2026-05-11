@@ -6,9 +6,12 @@ export const dynamic = 'force-dynamic'
 
 const AUTH_HEADER = 'x-recurring-charge-secret'
 
-function addNextInterval(dateString: string, frequency: 'weekly' | 'biweekly' | 'monthly') {
+function addNextInterval(dateString: string, frequency: 'daily' | 'weekly' | 'biweekly' | 'monthly') {
   const date = new Date(dateString)
-  const days = frequency === 'weekly' ? 7 : frequency === 'biweekly' ? 14 : 30
+  const days =
+    frequency === 'daily'    ? 1  :
+    frequency === 'weekly'   ? 7  :
+    frequency === 'biweekly' ? 14 : 30
   date.setDate(date.getDate() + days)
   return date.toISOString()
 }

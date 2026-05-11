@@ -35,7 +35,10 @@ function calcMRR(subs: SubRow[]): number {
       const price = s.price ?? (s.product?.price ?? 0)
       const qty = s.quantity ?? 1
       const perDelivery = price * qty
-      const multiplier = s.frequency === 'weekly' ? 4 : s.frequency === 'biweekly' ? 2 : 1
+      const multiplier =
+        s.frequency === 'daily'    ? 30 :
+        s.frequency === 'weekly'   ? 4  :
+        s.frequency === 'biweekly' ? 2  : 1
       return total + perDelivery * multiplier
     }, 0)
 }
@@ -206,7 +209,11 @@ export default function AdminSubscriptionsPage() {
               <tbody>
                 {filtered.map((sub) => {
                   const pricePerDelivery = (sub.price ?? sub.product?.price ?? 0) * (sub.quantity ?? 1)
-                  const monthly = pricePerDelivery * (sub.frequency === 'weekly' ? 4 : sub.frequency === 'biweekly' ? 2 : 1)
+                  const multiplier =
+                    sub.frequency === 'daily'    ? 30 :
+                    sub.frequency === 'weekly'   ? 4  :
+                    sub.frequency === 'biweekly' ? 2  : 1
+                  const monthly = pricePerDelivery * multiplier
                   const isEditingThis = editingDelivery?.id === sub.id
                   return (
                     <tr key={sub.id} className="border-t border-[#f0f9ff] hover:bg-[#f8fbfe]">

@@ -64,7 +64,10 @@ export default function SubscriptionPage() {
     if (!sub?.next_delivery) return []
     const dates: string[] = []
     const base = new Date(sub.next_delivery)
-    const intervalDays = freq === 'weekly' ? 7 : freq === 'biweekly' ? 14 : 30
+    const intervalDays =
+      freq === 'daily'    ? 1  :
+      freq === 'weekly'   ? 7  :
+      freq === 'biweekly' ? 14 : 30
     for (let i = 0; i < 4; i++) {
       const d = new Date(base)
       d.setDate(d.getDate() + i * intervalDays)
@@ -75,7 +78,11 @@ export default function SubscriptionPage() {
 
   const productData = sub?.product ?? null
   const pricePerJug = productData?.price ?? 7.49
-  const monthlyCost = qty * pricePerJug * (freq === 'weekly' ? 4 : freq === 'biweekly' ? 2 : 1)
+  const deliveriesPerMonth =
+    freq === 'daily'    ? 30 :
+    freq === 'weekly'   ? 4  :
+    freq === 'biweekly' ? 2  : 1
+  const monthlyCost = qty * pricePerJug * deliveriesPerMonth
 
   const handleSave = async () => {
     if (!sub) return
@@ -223,16 +230,21 @@ export default function SubscriptionPage() {
 
         <div>
           <label className="text-sm font-medium text-[#0c2340] mb-3 block">Delivery Frequency</label>
-          <div className="flex gap-2">
-            {['weekly', 'biweekly', 'monthly'].map((f) => (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {[
+              { value: 'daily',    label: 'Daily' },
+              { value: 'weekly',   label: 'Weekly' },
+              { value: 'biweekly', label: 'Biweekly' },
+              { value: 'monthly',  label: 'Monthly' },
+            ].map((f) => (
               <button
-                key={f}
-                onClick={() => setFreq(f)}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                  freq === f ? 'bg-[#0097a7] text-white shadow-md' : 'border border-[#cce7f0] text-[#4a7fa5] hover:border-[#0097a7]'
+                key={f.value}
+                onClick={() => setFreq(f.value)}
+                className={`py-2.5 rounded-xl text-sm font-medium transition-all ${
+                  freq === f.value ? 'bg-[#0097a7] text-white shadow-md' : 'border border-[#cce7f0] text-[#4a7fa5] hover:border-[#0097a7]'
                 }`}
               >
-                {f.charAt(0).toUpperCase() + f.slice(1)}
+                {f.label}
               </button>
             ))}
           </div>
