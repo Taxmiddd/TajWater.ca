@@ -81,7 +81,7 @@ export default function OrdersPage() {
 
   const reorder = (order: OrderRow) => {
     order.order_items.forEach(item => {
-      if (item.product && item.product.active) addItem({ ...item.product, description: item.product.description ?? '', image_url: item.product.image_url ?? '' }, undefined)
+      if (item.product && item.product.active) addItem({ ...item.product, description: item.product.description ?? '', image_url: item.product.image_url ?? '' })
     })
   }
 

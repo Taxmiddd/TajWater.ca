@@ -40,7 +40,7 @@ export default function ProductDetailContent({
     if (qty > 0) {
       updateQuantity(product.id, qty + 1)
     } else {
-      addItem(product, undefined)
+      addItem(product)
     }
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)
@@ -48,7 +48,7 @@ export default function ProductDetailContent({
 
   const handleBuyNow = () => {
     if (!product) return
-    if (qty === 0) addItem(product, undefined)
+    if (qty === 0) addItem(product)
     router.push('/checkout')
   }
 

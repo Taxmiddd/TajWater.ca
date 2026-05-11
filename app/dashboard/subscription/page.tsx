@@ -142,7 +142,6 @@ export default function SubscriptionPage() {
     )
   }
 
-  const nextDates = getNextDates()
 
   return (
     <div className="space-y-6 max-w-2xl">
