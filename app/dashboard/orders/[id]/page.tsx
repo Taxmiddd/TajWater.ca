@@ -165,7 +165,7 @@ export default function OrderDetailPage() {
     if (!order) return
     order.order_items.forEach(item => {
       if (item.product?.active) {
-        addItem({ ...item.product, description: item.product.description ?? '', image_url: item.product.image_url ?? '' }, undefined)
+        addItem({ ...item.product, description: item.product.description ?? '', image_url: item.product.image_url ?? '' })
       }
     })
     setReordered(true)
