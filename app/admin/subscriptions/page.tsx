@@ -10,6 +10,7 @@ import { supabase } from '@/lib/supabase'
 
 type SubRow = {
   id: string
+  user_id: string | null
   status: string
   frequency: string
   quantity: number
@@ -52,11 +53,41 @@ export default function AdminSubscriptionsPage() {
 
   const fetchSubs = async () => {
     setLoading(true)
-    const { data } = await supabase
+    const { data: rawData, error } = await supabase
       .from('subscriptions')
-      .select('id, status, frequency, quantity, next_delivery, created_at, price, profile:profiles(name, email), product:products(name, price)')
+      .select('id, user_id, status, frequency, quantity, next_delivery, created_at, price, product:products(name, price)')
       .order('created_at', { ascending: false })
-    if (data) setSubs(data as unknown as SubRow[])
+
+    if (error) {
+      console.error('Fetch subscriptions error:', error)
+      setSubs([])
+      setLoading(false)
+      return
+    }
+
+    if (rawData) {
+      const uids = [...new Set(rawData.map(s => s.user_id).filter(Boolean))] as string[]
+      const profMap: Record<string, { name: string | null; email: string | null }> = {}
+      
+      if (uids.length > 0) {
+        const { data: profs } = await supabase
+          .from('profiles')
+          .select('id, name, email')
+          .in('id', uids)
+        
+        profs?.forEach(p => {
+          profMap[p.id] = { name: p.name, email: p.email }
+        })
+      }
+
+      const merged: SubRow[] = rawData.map(s => ({
+        ...s,
+        profile: s.user_id ? (profMap[s.user_id] ?? null) : null,
+        product: Array.isArray(s.product) ? s.product[0] : s.product
+      })) as unknown as SubRow[]
+
+      setSubs(merged)
+    }
     setLoading(false)
   }
 
