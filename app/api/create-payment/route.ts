@@ -506,9 +506,24 @@ export async function POST(req: NextRequest) {
       deliveryFee,
       discountAmount: discountAmt,
     })
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to create payment'
+  } catch (err: any) {
+    let message = 'Failed to create payment'
+    
+    // Handle Square API errors gracefully
+    if (err.errors && Array.isArray(err.errors) && err.errors.length > 0) {
+      const sqErr = err.errors[0]
+      if (sqErr.code === 'INVALID_CARD_DATA') {
+        message = 'Invalid card data. Please check your card details and try again.'
+      } else if (sqErr.detail) {
+        message = sqErr.detail
+      }
+    } else if (err.message && err.message.includes('INVALID_CARD_DATA')) {
+      message = 'Invalid card data. Please check your card details and try again.'
+    } else if (err instanceof Error) {
+      message = err.message
+    }
+    
     console.error('create-payment error:', err)
-    return NextResponse.json({ error: message }, { status: 500 })
+    return NextResponse.json({ error: message }, { status: 400 })
   }
 }
