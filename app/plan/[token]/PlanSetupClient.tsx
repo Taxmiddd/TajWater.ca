@@ -21,15 +21,7 @@ type PlanInfo = {
   customer_email: string | null
 }
 
-const FREQ_DAYS: Record<string, number> = { daily: 1, weekly: 7, biweekly: 14, monthly: 30 }
 const FREQ_LABEL: Record<string, string> = { daily: 'Daily', weekly: 'Weekly', biweekly: 'Biweekly', monthly: 'Monthly' }
-
-function calcCycleAmount(price: number, quantity: number, frequency: string, paymentCycle: string) {
-  const deliveryDays = FREQ_DAYS[frequency] ?? 7
-  const paymentDays = FREQ_DAYS[paymentCycle] ?? 30
-  const deliveriesPerCycle = Math.max(1, Math.round(paymentDays / deliveryDays))
-  return price * quantity * deliveriesPerCycle
-}
 
 export default function PlanSetupClient({ token, plan }: { token: string; plan: PlanInfo }) {
   const [screen, setScreen] = useState<'form' | 'processing' | 'success' | 'error'>('form')
@@ -37,7 +29,7 @@ export default function PlanSetupClient({ token, plan }: { token: string; plan: 
   const [successMode, setSuccessMode] = useState<'charged' | 'card_verified'>('card_verified')
 
   const isChargeNow = !plan.charge_start_date
-  const cycleAmount = calcCycleAmount(plan.price, plan.quantity, plan.frequency, plan.payment_cycle)
+  const cycleAmount = plan.price
   const alreadyDone = plan.plan_link_status === 'charged' || plan.plan_link_status === 'card_verified'
 
   const handleToken = async (tokenResult: { status: string; token?: string; errors?: Array<{ message: string }> }) => {
@@ -153,10 +145,6 @@ export default function PlanSetupClient({ token, plan }: { token: string; plan: 
                 <span className="font-semibold text-[#0c2340]">{plan.quantity} jug{plan.quantity > 1 ? 's' : ''} / delivery</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#4a7fa5]">Price per jug</span>
-                <span className="font-semibold text-[#0c2340]">${plan.price.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
                 <span className="text-[#4a7fa5]">Delivery schedule</span>
                 <span className="font-semibold text-[#0c2340] capitalize">{FREQ_LABEL[plan.frequency]}</span>
               </div>
@@ -171,7 +159,7 @@ export default function PlanSetupClient({ token, plan }: { token: string; plan: 
                 </div>
               )}
               <div className="border-t border-[#f0f9ff] pt-3 flex justify-between items-center">
-                <span className="text-[#4a7fa5] font-medium">{FREQ_LABEL[plan.payment_cycle]} total</span>
+                <span className="text-[#4a7fa5] font-medium">Per {FREQ_LABEL[plan.payment_cycle].toLowerCase()} cycle</span>
                 <span className="text-2xl font-extrabold text-[#0097a7]">${cycleAmount.toFixed(2)}</span>
               </div>
             </div>

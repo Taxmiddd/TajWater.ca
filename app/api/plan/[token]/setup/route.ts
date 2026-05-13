@@ -14,13 +14,6 @@ function nextCycleDate(paymentCycle: string): string {
   return d.toISOString()
 }
 
-function cycleAmountCents(price: number, quantity: number, frequency: string, paymentCycle: string): bigint {
-  const deliveryDays = FREQ_DAYS[frequency] ?? 7
-  const paymentDays = FREQ_DAYS[paymentCycle] ?? 30
-  const deliveriesPerCycle = Math.max(1, Math.round(paymentDays / deliveryDays))
-  return BigInt(Math.round(price * quantity * deliveriesPerCycle * 100))
-}
-
 export async function POST(req: NextRequest, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params
 
@@ -91,8 +84,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ tok
     const isChargeNow = !plan.charge_start_date
 
     if (isChargeNow) {
-      // 3a. Charge the first full payment cycle amount
-      const amountCents = cycleAmountCents(plan.price, plan.quantity, plan.frequency, plan.payment_cycle)
+      // 3a. Charge the total subscription price for this billing cycle
+      const amountCents = BigInt(Math.round(plan.price * 100))
       const payRes = await square.payments.create({
         idempotencyKey: crypto.randomUUID(),
         sourceId: savedCard.id,

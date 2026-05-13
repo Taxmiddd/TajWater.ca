@@ -14,6 +14,7 @@ type SubRow = {
   user_id: string | null
   status: string
   frequency: string
+  payment_cycle: string
   quantity: number
   next_delivery: string | null
   created_at: string
@@ -42,27 +43,25 @@ const statusBadge = (s: string) => {
   return 'bg-gray-100 text-gray-600'
 }
 
+function monthlyValue(sub: SubRow): number {
+  if (sub.custom_plan) {
+    const price = sub.price ?? 0
+    const cycleDays = FREQ_DAYS[sub.payment_cycle] ?? 30
+    return price * (30 / cycleDays)
+  }
+  const price = sub.price ?? (sub.product?.price ?? 0)
+  const multiplier =
+    sub.frequency === 'daily'    ? 30 :
+    sub.frequency === 'weekly'   ? 4  :
+    sub.frequency === 'biweekly' ? 2  : 1
+  return price * (sub.quantity ?? 1) * multiplier
+}
+
 function calcMRR(subs: SubRow[]): number {
-  return subs
-    .filter(s => s.status === 'active' && s.product)
-    .reduce((total, s) => {
-      const price = s.price ?? (s.product?.price ?? 0)
-      const qty = s.quantity ?? 1
-      const perDelivery = price * qty
-      const multiplier =
-        s.frequency === 'daily'    ? 30 :
-        s.frequency === 'weekly'   ? 4  :
-        s.frequency === 'biweekly' ? 2  : 1
-      return total + perDelivery * multiplier
-    }, 0)
+  return subs.filter(s => s.status === 'active').reduce((total, s) => total + monthlyValue(s), 0)
 }
 
 const FREQ_DAYS: Record<string, number> = { daily: 1, weekly: 7, biweekly: 14, monthly: 30 }
-function calcCycleAmount(price: string, quantity: number, frequency: string, paymentCycle: string) {
-  const p = parseFloat(price) || 0
-  const deliveriesPerCycle = Math.max(1, Math.round((FREQ_DAYS[paymentCycle] ?? 30) / (FREQ_DAYS[frequency] ?? 7)))
-  return (p * quantity * deliveriesPerCycle).toFixed(2)
-}
 
 const emptyPlan = {
   user_id: '',
@@ -106,7 +105,7 @@ export default function AdminSubscriptionsPage() {
     setLoading(true)
     const { data: rawData, error } = await supabase
       .from('subscriptions')
-      .select('id, user_id, status, frequency, quantity, next_delivery, created_at, price, custom_plan, plan_name, product:products(name, price)')
+      .select('id, user_id, status, frequency, payment_cycle, quantity, next_delivery, created_at, price, custom_plan, plan_name, product:products(name, price)')
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -338,12 +337,7 @@ export default function AdminSubscriptionsPage() {
               </thead>
               <tbody>
                 {filtered.map((sub) => {
-                  const pricePerDelivery = (sub.price ?? sub.product?.price ?? 0) * (sub.quantity ?? 1)
-                  const multiplier =
-                    sub.frequency === 'daily'    ? 30 :
-                    sub.frequency === 'weekly'   ? 4  :
-                    sub.frequency === 'biweekly' ? 2  : 1
-                  const monthly = pricePerDelivery * multiplier
+                  const monthly = monthlyValue(sub)
                   const isEditingThis = editingDelivery?.id === sub.id
                   return (
                     <tr key={sub.id} className="border-t border-[#f0f9ff] hover:bg-[#f8fbfe]">
@@ -553,13 +547,11 @@ export default function AdminSubscriptionsPage() {
             {/* Quantity + Price */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-semibold text-[#0c2340] mb-1.5 block">Qty (jugs/delivery) *</label>
-                <Input type="number" min="1" required value={plan.quantity} onChange={e => setPlan(p => ({ ...p, quantity: parseInt(e.target.value) || 1 }))} className="border-[#cce7f0]" />
+                <label className="text-sm font-semibold text-[#0c2340] mb-1.5 block">Qty (jugs/delivery)</label>
+                <Input type="number" min="1" value={plan.quantity} onChange={e => setPlan(p => ({ ...p, quantity: parseInt(e.target.value) || 1 }))} className="border-[#cce7f0]" />
               </div>
               <div>
-                <label className="text-sm font-semibold text-[#0c2340] mb-1.5 block">
-                  Price/Jug ($) *{selectedProduct && <span className="ml-1 text-[10px] text-[#4a7fa5] font-normal">(retail ${selectedProduct.price.toFixed(2)})</span>}
-                </label>
+                <label className="text-sm font-semibold text-[#0c2340] mb-1.5 block">Total Price per Cycle ($) *</label>
                 <Input type="number" step="0.01" min="0" required value={plan.price} onChange={e => setPlan(p => ({ ...p, price: e.target.value }))} placeholder="0.00" className="border-[#cce7f0]" />
               </div>
             </div>
@@ -636,13 +628,13 @@ export default function AdminSubscriptionsPage() {
                   <div className="flex justify-between"><span>Billing:</span><span className="text-[#0c2340] font-medium capitalize">{plan.payment_cycle}</span></div>
                   <div className="flex justify-between font-semibold pt-1.5 border-t border-[#cce7f0] text-[#0097a7]">
                     <span>Per billing cycle:</span>
-                    <span>${calcCycleAmount(String(plan.price), plan.quantity, plan.frequency, plan.payment_cycle)} CAD</span>
+                    <span>${parseFloat(String(plan.price) || '0').toFixed(2)} CAD</span>
                   </div>
                   <div className="flex justify-between text-[10px] pt-0.5">
                     <span>Initial charge:</span>
                     <span className="font-medium">
                       {plan.charge_mode === 'now'
-                        ? `$${calcCycleAmount(String(plan.price), plan.quantity, plan.frequency, plan.payment_cycle)} now`
+                        ? `$${parseFloat(String(plan.price) || '0').toFixed(2)} now`
                         : `$0.99 verify → real charge on ${plan.charge_start_date || '?'}`}
                     </span>
                   </div>
