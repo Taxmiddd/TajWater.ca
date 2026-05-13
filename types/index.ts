@@ -88,6 +88,10 @@ export interface Subscription {
   plan_name?: string | null
   custom_delivery_address?: string | null
   admin_notes?: string | null
+  payment_cycle?: 'daily' | 'weekly' | 'biweekly' | 'monthly'
+  charge_start_date?: string | null
+  plan_link_token?: string | null
+  plan_link_status?: 'pending_card' | 'card_verified' | 'charged'
 }
 
 export interface SupportTicket {

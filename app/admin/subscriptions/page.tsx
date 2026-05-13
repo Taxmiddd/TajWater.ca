@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { RefreshCw, Pause, Play, XCircle, Search, DollarSign, Calendar, CheckCircle2, Plus, X, User, Package, MapPin } from 'lucide-react'
+import { RefreshCw, Pause, Play, XCircle, Search, DollarSign, Calendar, CheckCircle2, Plus, X, User, Package, MapPin, Copy, Check, Link2, CreditCard as CardIcon } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -57,17 +57,27 @@ function calcMRR(subs: SubRow[]): number {
     }, 0)
 }
 
+const FREQ_DAYS: Record<string, number> = { daily: 1, weekly: 7, biweekly: 14, monthly: 30 }
+function calcCycleAmount(price: string, quantity: number, frequency: string, paymentCycle: string) {
+  const p = parseFloat(price) || 0
+  const deliveriesPerCycle = Math.max(1, Math.round((FREQ_DAYS[paymentCycle] ?? 30) / (FREQ_DAYS[frequency] ?? 7)))
+  return (p * quantity * deliveriesPerCycle).toFixed(2)
+}
+
 const emptyPlan = {
   user_id: '',
   product_id: '',
   plan_name: '',
   frequency: 'weekly' as typeof FREQUENCIES[number]['value'],
+  payment_cycle: 'monthly' as typeof FREQUENCIES[number]['value'],
   quantity: 1,
   price: '',
   zone_id: '',
   custom_delivery_address: '',
   next_delivery: '',
   admin_notes: '',
+  charge_mode: 'now' as 'now' | 'later',
+  charge_start_date: '',
 }
 
 export default function AdminSubscriptionsPage() {
@@ -87,6 +97,8 @@ export default function AdminSubscriptionsPage() {
   const [products, setProducts] = useState<ProductOption[]>([])
   const [zones, setZones] = useState<ZoneOption[]>([])
   const [customerSearch, setCustomerSearch] = useState('')
+  const [createdToken, setCreatedToken] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 3000) }
 
@@ -146,8 +158,20 @@ export default function AdminSubscriptionsPage() {
   const openModal = () => {
     setPlan(emptyPlan)
     setCustomerSearch('')
+    setCreatedToken(null)
+    setCopied(false)
     fetchModalData()
     setModalOpen(true)
+  }
+
+  const planLink = createdToken
+    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/plan/${createdToken}`
+    : ''
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(planLink)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   const updateStatus = async (id: string, newStatus: string) => {
@@ -172,21 +196,33 @@ export default function AdminSubscriptionsPage() {
       showToast('Please select a customer and product.')
       return
     }
+    if (plan.charge_mode === 'later' && !plan.charge_start_date) {
+      showToast('Please set the first charge date.')
+      return
+    }
     setSaving(true)
     try {
       const res = await fetch('/api/admin/create-custom-plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...plan,
-          price: parseFloat(String(plan.price)) || 0,
+          user_id: plan.user_id,
+          product_id: plan.product_id,
+          plan_name: plan.plan_name,
+          frequency: plan.frequency,
+          payment_cycle: plan.payment_cycle,
           quantity: parseInt(String(plan.quantity)) || 1,
+          price: parseFloat(String(plan.price)) || 0,
+          zone_id: plan.zone_id,
+          custom_delivery_address: plan.custom_delivery_address,
+          next_delivery: plan.next_delivery,
+          admin_notes: plan.admin_notes,
+          charge_start_date: plan.charge_mode === 'later' ? plan.charge_start_date : null,
         }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to create plan')
-      showToast('Custom plan created!')
-      setModalOpen(false)
+      setCreatedToken(data.token)
       fetchSubs()
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Failed to create plan')
@@ -405,6 +441,40 @@ export default function AdminSubscriptionsPage() {
             </DialogTitle>
           </DialogHeader>
 
+          {/* Success state — show generated link */}
+          {createdToken ? (
+            <div className="mt-4 space-y-5">
+              <div className="flex flex-col items-center text-center py-4">
+                <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-3">
+                  <CheckCircle2 className="w-8 h-8 text-green-600" />
+                </div>
+                <h3 className="text-lg font-extrabold text-[#0c2340] mb-1">Plan Created!</h3>
+                <p className="text-sm text-[#4a7fa5]">Share this link with the customer to set up their payment.</p>
+              </div>
+
+              <div className="bg-[#f0f9ff] rounded-2xl border border-[#cce7f0] p-4">
+                <p className="text-xs font-semibold text-[#4a7fa5] uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                  <Link2 className="w-3.5 h-3.5" /> Customer Setup Link
+                </p>
+                <div className="flex items-center gap-2 bg-white rounded-xl border border-[#cce7f0] px-3 py-2">
+                  <p className="text-xs text-[#0097a7] font-mono flex-1 truncate">{planLink}</p>
+                  <button onClick={copyLink}
+                    className={`flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-all shrink-0 ${copied ? 'bg-green-100 text-green-700' : 'bg-[#0097a7] text-white hover:bg-[#00838f]'}`}>
+                    {copied ? <><Check className="w-3 h-3" /> Copied!</> : <><Copy className="w-3 h-3" /> Copy</>}
+                  </button>
+                </div>
+                <p className="text-[10px] text-[#4a7fa5] mt-2">
+                  {plan.charge_mode === 'later'
+                    ? `Card verification only ($0.99 refundable). First real charge on ${plan.charge_start_date}.`
+                    : `Customer will be charged the first payment immediately when they open this link.`}
+                </p>
+              </div>
+
+              <Button onClick={() => setModalOpen(false)} className="w-full bg-gradient-to-r from-[#0097a7] to-[#1565c0] text-white">
+                Done
+              </Button>
+            </div>
+          ) : (
           <form onSubmit={handleCreatePlan} className="space-y-5 mt-2">
             {/* Customer Selection */}
             <div>
@@ -413,30 +483,18 @@ export default function AdminSubscriptionsPage() {
               </label>
               <div className="relative mb-2">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#0097a7]" />
-                <Input
-                  placeholder="Search customers..."
-                  value={customerSearch}
-                  onChange={e => setCustomerSearch(e.target.value)}
-                  className="pl-9 border-[#cce7f0] text-sm"
-                />
+                <Input placeholder="Search customers..." value={customerSearch} onChange={e => setCustomerSearch(e.target.value)} className="pl-9 border-[#cce7f0] text-sm" />
               </div>
-              <div className="max-h-40 overflow-y-auto border border-[#cce7f0] rounded-xl divide-y divide-[#f0f9ff]">
+              <div className="max-h-36 overflow-y-auto border border-[#cce7f0] rounded-xl divide-y divide-[#f0f9ff]">
                 {filteredCustomers.length === 0 ? (
                   <p className="text-xs text-[#4a7fa5] p-3 text-center">No customers found</p>
                 ) : filteredCustomers.map(c => (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => setPlan(p => ({ ...p, user_id: c.id }))}
-                    className={`w-full text-left px-3 py-2 transition-colors flex items-center gap-2 ${plan.user_id === c.id ? 'bg-[#e0f7fa]' : 'hover:bg-[#f8fbfe]'}`}
-                  >
+                  <button key={c.id} type="button" onClick={() => setPlan(p => ({ ...p, user_id: c.id }))}
+                    className={`w-full text-left px-3 py-2 transition-colors flex items-center gap-2 ${plan.user_id === c.id ? 'bg-[#e0f7fa]' : 'hover:bg-[#f8fbfe]'}`}>
                     <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 ${plan.user_id === c.id ? 'border-[#0097a7] bg-[#0097a7]' : 'border-[#cce7f0]'}`}>
                       {plan.user_id === c.id && <div className="w-full h-full rounded-full flex items-center justify-center"><div className="w-2 h-2 rounded-full bg-white" /></div>}
                     </div>
-                    <div>
-                      <p className="text-xs font-semibold text-[#0c2340]">{c.name ?? 'Unnamed'}</p>
-                      <p className="text-[10px] text-[#4a7fa5]">{c.email}</p>
-                    </div>
+                    <div><p className="text-xs font-semibold text-[#0c2340]">{c.name ?? 'Unnamed'}</p><p className="text-[10px] text-[#4a7fa5]">{c.email}</p></div>
                   </button>
                 ))}
               </div>
@@ -445,12 +503,7 @@ export default function AdminSubscriptionsPage() {
             {/* Plan Name */}
             <div>
               <label className="text-sm font-semibold text-[#0c2340] mb-1.5 block">Plan Name (optional)</label>
-              <Input
-                placeholder="e.g. Family Bundle, Office Supply..."
-                value={plan.plan_name}
-                onChange={e => setPlan(p => ({ ...p, plan_name: e.target.value }))}
-                className="border-[#cce7f0]"
-              />
+              <Input placeholder="e.g. Family Bundle, Office Plan..." value={plan.plan_name} onChange={e => setPlan(p => ({ ...p, plan_name: e.target.value }))} className="border-[#cce7f0]" />
             </div>
 
             {/* Product */}
@@ -458,37 +511,38 @@ export default function AdminSubscriptionsPage() {
               <label className="text-sm font-semibold text-[#0c2340] mb-1.5 flex items-center gap-1.5 block">
                 <Package className="w-3.5 h-3.5 text-[#0097a7]" /> Product *
               </label>
-              <select
-                required
-                value={plan.product_id}
-                onChange={e => {
-                  const prod = products.find(p => p.id === e.target.value)
-                  setPlan(p => ({ ...p, product_id: e.target.value, price: prod ? String(prod.price) : p.price }))
-                }}
-                className="w-full h-10 px-3 rounded-xl border border-[#cce7f0] bg-white text-[#0c2340] text-sm focus:border-[#0097a7] focus:outline-none"
-              >
+              <select required value={plan.product_id}
+                onChange={e => { const prod = products.find(p => p.id === e.target.value); setPlan(p => ({ ...p, product_id: e.target.value, price: prod ? String(prod.price) : p.price })) }}
+                className="w-full h-10 px-3 rounded-xl border border-[#cce7f0] bg-white text-[#0c2340] text-sm focus:border-[#0097a7] focus:outline-none">
                 <option value="">Select product...</option>
-                {products.map(p => (
-                  <option key={p.id} value={p.id}>{p.name} — ${p.price.toFixed(2)}</option>
-                ))}
+                {products.map(p => <option key={p.id} value={p.id}>{p.name} — ${p.price.toFixed(2)}</option>)}
               </select>
             </div>
 
-            {/* Frequency */}
+            {/* Delivery Frequency */}
             <div>
               <label className="text-sm font-semibold text-[#0c2340] mb-2 block">Delivery Frequency *</label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {FREQUENCIES.map(f => (
-                  <button
-                    key={f.value}
-                    type="button"
-                    onClick={() => setPlan(p => ({ ...p, frequency: f.value }))}
-                    className={`flex flex-col items-start p-3 rounded-xl border-2 text-left transition-all ${
-                      plan.frequency === f.value
-                        ? 'border-[#0097a7] bg-[#e0f7fa]'
-                        : 'border-[#cce7f0] hover:border-[#0097a7]'
-                    }`}
-                  >
+                  <button key={f.value} type="button" onClick={() => setPlan(p => ({ ...p, frequency: f.value }))}
+                    className={`flex flex-col items-start p-3 rounded-xl border-2 text-left transition-all ${plan.frequency === f.value ? 'border-[#0097a7] bg-[#e0f7fa]' : 'border-[#cce7f0] hover:border-[#0097a7]'}`}>
+                    <span className="text-sm font-semibold text-[#0c2340]">{f.label}</span>
+                    <span className="text-[10px] text-[#4a7fa5]">{f.sub}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Payment Cycle */}
+            <div>
+              <label className="text-sm font-semibold text-[#0c2340] mb-2 block">
+                Payment Cycle *
+                <span className="ml-1.5 text-[10px] font-normal text-[#4a7fa5]">How often Square charges the customer</span>
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {FREQUENCIES.map(f => (
+                  <button key={f.value} type="button" onClick={() => setPlan(p => ({ ...p, payment_cycle: f.value }))}
+                    className={`flex flex-col items-start p-3 rounded-xl border-2 text-left transition-all ${plan.payment_cycle === f.value ? 'border-[#1565c0] bg-blue-50' : 'border-[#cce7f0] hover:border-[#1565c0]'}`}>
                     <span className="text-sm font-semibold text-[#0c2340]">{f.label}</span>
                     <span className="text-[10px] text-[#4a7fa5]">{f.sub}</span>
                   </button>
@@ -499,36 +553,40 @@ export default function AdminSubscriptionsPage() {
             {/* Quantity + Price */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-semibold text-[#0c2340] mb-1.5 block">Quantity (jugs/delivery) *</label>
-                <Input
-                  type="number"
-                  min="1"
-                  required
-                  value={plan.quantity}
-                  onChange={e => setPlan(p => ({ ...p, quantity: parseInt(e.target.value) || 1 }))}
-                  className="border-[#cce7f0]"
-                />
+                <label className="text-sm font-semibold text-[#0c2340] mb-1.5 block">Qty (jugs/delivery) *</label>
+                <Input type="number" min="1" required value={plan.quantity} onChange={e => setPlan(p => ({ ...p, quantity: parseInt(e.target.value) || 1 }))} className="border-[#cce7f0]" />
               </div>
               <div>
                 <label className="text-sm font-semibold text-[#0c2340] mb-1.5 block">
-                  Price per Jug ($) *
-                  {selectedProduct && (
-                    <span className="ml-1 text-[10px] text-[#4a7fa5] font-normal">
-                      (retail ${selectedProduct.price.toFixed(2)})
-                    </span>
-                  )}
+                  Price/Jug ($) *{selectedProduct && <span className="ml-1 text-[10px] text-[#4a7fa5] font-normal">(retail ${selectedProduct.price.toFixed(2)})</span>}
                 </label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  required
-                  value={plan.price}
-                  onChange={e => setPlan(p => ({ ...p, price: e.target.value }))}
-                  placeholder="0.00"
-                  className="border-[#cce7f0]"
-                />
+                <Input type="number" step="0.01" min="0" required value={plan.price} onChange={e => setPlan(p => ({ ...p, price: e.target.value }))} placeholder="0.00" className="border-[#cce7f0]" />
               </div>
+            </div>
+
+            {/* Initial Charge Timing */}
+            <div className="border-2 border-[#cce7f0] rounded-2xl overflow-hidden">
+              <div className="flex">
+                <button type="button" onClick={() => setPlan(p => ({ ...p, charge_mode: 'now' }))}
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold transition-all ${plan.charge_mode === 'now' ? 'bg-[#0097a7] text-white' : 'text-[#4a7fa5] hover:bg-[#f0f9ff]'}`}>
+                  <CardIcon className="w-4 h-4" /> Charge Now
+                </button>
+                <button type="button" onClick={() => setPlan(p => ({ ...p, charge_mode: 'later' }))}
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold transition-all border-l border-[#cce7f0] ${plan.charge_mode === 'later' ? 'bg-[#0097a7] text-white' : 'text-[#4a7fa5] hover:bg-[#f0f9ff]'}`}>
+                  <Calendar className="w-4 h-4" /> Schedule First Charge
+                </button>
+              </div>
+              <div className="p-3 bg-[#f8fbfe] text-xs text-[#4a7fa5]">
+                {plan.charge_mode === 'now'
+                  ? 'Customer pays the first cycle immediately via the link. Card is saved for future billing.'
+                  : 'Customer verifies their card with a $0.99 CAD refundable hold. First real charge on the date you choose.'}
+              </div>
+              {plan.charge_mode === 'later' && (
+                <div className="px-3 pb-3">
+                  <label className="text-xs font-semibold text-[#0c2340] mb-1.5 block">First Charge Date *</label>
+                  <Input type="date" required value={plan.charge_start_date} onChange={e => setPlan(p => ({ ...p, charge_start_date: e.target.value }))} className="border-[#cce7f0]" />
+                </div>
+              )}
             </div>
 
             {/* Zone + Next Delivery */}
@@ -537,11 +595,8 @@ export default function AdminSubscriptionsPage() {
                 <label className="text-sm font-semibold text-[#0c2340] mb-1.5 flex items-center gap-1.5 block">
                   <MapPin className="w-3.5 h-3.5 text-[#0097a7]" /> Delivery Zone
                 </label>
-                <select
-                  value={plan.zone_id}
-                  onChange={e => setPlan(p => ({ ...p, zone_id: e.target.value }))}
-                  className="w-full h-10 px-3 rounded-xl border border-[#cce7f0] bg-white text-[#0c2340] text-sm focus:border-[#0097a7] focus:outline-none"
-                >
+                <select value={plan.zone_id} onChange={e => setPlan(p => ({ ...p, zone_id: e.target.value }))}
+                  className="w-full h-10 px-3 rounded-xl border border-[#cce7f0] bg-white text-[#0c2340] text-sm focus:border-[#0097a7] focus:outline-none">
                   <option value="">Select zone...</option>
                   {zones.map(z => <option key={z.id} value={z.id}>{z.name}</option>)}
                 </select>
@@ -550,12 +605,7 @@ export default function AdminSubscriptionsPage() {
                 <label className="text-sm font-semibold text-[#0c2340] mb-1.5 flex items-center gap-1.5 block">
                   <Calendar className="w-3.5 h-3.5 text-[#0097a7]" /> First Delivery Date
                 </label>
-                <Input
-                  type="date"
-                  value={plan.next_delivery}
-                  onChange={e => setPlan(p => ({ ...p, next_delivery: e.target.value }))}
-                  className="border-[#cce7f0]"
-                />
+                <Input type="date" value={plan.next_delivery} onChange={e => setPlan(p => ({ ...p, next_delivery: e.target.value }))} className="border-[#cce7f0]" />
               </div>
             </div>
 
@@ -564,24 +614,15 @@ export default function AdminSubscriptionsPage() {
               <label className="text-sm font-semibold text-[#0c2340] mb-1.5 block">
                 Custom Delivery Address <span className="text-[#4a7fa5] font-normal text-xs">(overrides profile address)</span>
               </label>
-              <Input
-                placeholder="123 Main St, Vancouver, BC V6B 1A1"
-                value={plan.custom_delivery_address}
-                onChange={e => setPlan(p => ({ ...p, custom_delivery_address: e.target.value }))}
-                className="border-[#cce7f0]"
-              />
+              <Input placeholder="123 Main St, Vancouver, BC V6B 1A1" value={plan.custom_delivery_address} onChange={e => setPlan(p => ({ ...p, custom_delivery_address: e.target.value }))} className="border-[#cce7f0]" />
             </div>
 
             {/* Admin Notes */}
             <div>
               <label className="text-sm font-semibold text-[#0c2340] mb-1.5 block">Admin Notes (internal)</label>
-              <textarea
-                rows={2}
-                placeholder="e.g. Gate code 5678, call 30 min before..."
-                value={plan.admin_notes}
+              <textarea rows={2} placeholder="e.g. Gate code 5678, call 30 min before..." value={plan.admin_notes}
                 onChange={e => setPlan(p => ({ ...p, admin_notes: e.target.value }))}
-                className="w-full px-3 py-2 rounded-xl border border-[#cce7f0] text-sm text-[#0c2340] focus:border-[#0097a7] focus:outline-none resize-none"
-              />
+                className="w-full px-3 py-2 rounded-xl border border-[#cce7f0] text-sm text-[#0c2340] focus:border-[#0097a7] focus:outline-none resize-none" />
             </div>
 
             {/* Summary */}
@@ -589,25 +630,21 @@ export default function AdminSubscriptionsPage() {
               <div className="bg-[#f0f9ff] rounded-2xl p-4 border border-[#cce7f0] text-sm">
                 <p className="font-semibold text-[#0c2340] mb-2">Plan Summary</p>
                 <div className="space-y-1 text-xs text-[#4a7fa5]">
-                  <div className="flex justify-between">
-                    <span>Customer:</span>
-                    <span className="text-[#0c2340] font-medium">{customers.find(c => c.id === plan.user_id)?.name ?? '—'}</span>
+                  <div className="flex justify-between"><span>Customer:</span><span className="text-[#0c2340] font-medium">{customers.find(c => c.id === plan.user_id)?.name ?? '—'}</span></div>
+                  <div className="flex justify-between"><span>Product:</span><span className="text-[#0c2340] font-medium">{selectedProduct?.name ?? '—'}</span></div>
+                  <div className="flex justify-between"><span>Delivery:</span><span className="text-[#0c2340] font-medium capitalize">{plan.quantity} jug(s) · {plan.frequency}</span></div>
+                  <div className="flex justify-between"><span>Billing:</span><span className="text-[#0c2340] font-medium capitalize">{plan.payment_cycle}</span></div>
+                  <div className="flex justify-between font-semibold pt-1.5 border-t border-[#cce7f0] text-[#0097a7]">
+                    <span>Per billing cycle:</span>
+                    <span>${calcCycleAmount(String(plan.price), plan.quantity, plan.frequency, plan.payment_cycle)} CAD</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Product:</span>
-                    <span className="text-[#0c2340] font-medium">{selectedProduct?.name ?? '—'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Schedule:</span>
-                    <span className="text-[#0c2340] font-medium capitalize">{plan.quantity} jug(s) · {plan.frequency}</span>
-                  </div>
-                  <div className="flex justify-between font-semibold pt-1 border-t border-[#cce7f0] text-[#0097a7]">
-                    <span>Est. Monthly Value:</span>
-                    <span>${(
-                      parseFloat(String(plan.price) || '0') *
-                      plan.quantity *
-                      (plan.frequency === 'daily' ? 30 : plan.frequency === 'weekly' ? 4 : plan.frequency === 'biweekly' ? 2 : 1)
-                    ).toFixed(2)}</span>
+                  <div className="flex justify-between text-[10px] pt-0.5">
+                    <span>Initial charge:</span>
+                    <span className="font-medium">
+                      {plan.charge_mode === 'now'
+                        ? `$${calcCycleAmount(String(plan.price), plan.quantity, plan.frequency, plan.payment_cycle)} now`
+                        : `$0.99 verify → real charge on ${plan.charge_start_date || '?'}`}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -618,10 +655,11 @@ export default function AdminSubscriptionsPage() {
                 <X className="w-4 h-4 mr-1" /> Cancel
               </Button>
               <Button type="submit" disabled={saving || !plan.user_id || !plan.product_id} className="flex-1 bg-gradient-to-r from-[#0097a7] to-[#1565c0] text-white shadow-md">
-                {saving ? 'Creating...' : 'Create Custom Plan'}
+                {saving ? 'Creating...' : 'Create & Generate Link'}
               </Button>
             </div>
           </form>
+          )}
         </DialogContent>
       </Dialog>
     </div>
