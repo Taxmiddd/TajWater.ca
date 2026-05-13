@@ -98,6 +98,9 @@ export default function AdminSubscriptionsPage() {
   const [customerSearch, setCustomerSearch] = useState('')
   const [createdToken, setCreatedToken] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [origin, setOrigin] = useState('https://www.tajwater.ca')
+
+  useEffect(() => { setOrigin(window.location.origin) }, [])
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 3000) }
 
@@ -163,9 +166,7 @@ export default function AdminSubscriptionsPage() {
     setModalOpen(true)
   }
 
-  const planLink = createdToken
-    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/pay/plan/${createdToken}`
-    : ''
+  const planLink = createdToken ? `${origin}/pay/plan/${createdToken}` : ''
 
   const copyLink = () => {
     navigator.clipboard.writeText(planLink)

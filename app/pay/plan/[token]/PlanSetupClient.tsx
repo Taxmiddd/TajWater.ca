@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { PaymentForm, CreditCard } from 'react-square-web-payments-sdk'
-import { CheckCircle2, AlertCircle, ShieldCheck, Droplets, Calendar, CreditCard as CardIcon, RotateCcw } from 'lucide-react'
+import { CheckCircle2, AlertCircle, ShieldCheck, Droplets, Calendar, CreditCard as CardIcon, RotateCcw, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 
 type PlanInfo = {
@@ -23,18 +23,47 @@ type PlanInfo = {
 
 const FREQ_LABEL: Record<string, string> = { daily: 'Daily', weekly: 'Weekly', biweekly: 'Biweekly', monthly: 'Monthly' }
 
-export default function PlanSetupClient({ token, plan }: { token: string; plan: PlanInfo }) {
-  const [screen, setScreen] = useState<'form' | 'processing' | 'success' | 'error'>('form')
+export default function PlanSetupClient({ token }: { token: string }) {
+  const [plan, setPlan] = useState<PlanInfo | null>(null)
+  const [loadError, setLoadError] = useState('')
+  const [screen, setScreen] = useState<'loading' | 'form' | 'processing' | 'success' | 'error'>('loading')
   const [errorMsg, setErrorMsg] = useState('')
   const [successMode, setSuccessMode] = useState<'charged' | 'card_verified'>('card_verified')
 
-  const isChargeNow = !plan.charge_start_date
-  const cycleAmount = plan.price
-  const alreadyDone = plan.plan_link_status === 'charged' || plan.plan_link_status === 'card_verified'
+  useEffect(() => {
+    fetch(`/api/plan/${token}`)
+      .then(async (res) => {
+        if (!res.ok) throw new Error('Plan not found')
+        const data = await res.json()
+        const product = Array.isArray(data.product) ? data.product[0] : data.product
+        const profile = Array.isArray(data.profile) ? data.profile[0] : data.profile
+        setPlan({
+          id: data.id,
+          frequency: data.frequency,
+          payment_cycle: data.payment_cycle,
+          quantity: data.quantity,
+          price: data.price,
+          plan_name: data.plan_name,
+          custom_delivery_address: data.custom_delivery_address,
+          charge_start_date: data.charge_start_date,
+          plan_link_status: data.plan_link_status,
+          product_name: product?.name ?? 'Water Subscription',
+          customer_name: profile?.name ?? null,
+          customer_email: profile?.email ?? null,
+        })
+        setScreen('form')
+      })
+      .catch((err) => {
+        setLoadError(err instanceof Error ? err.message : 'Plan not found')
+        setScreen('error')
+        setErrorMsg(err instanceof Error ? err.message : 'Plan not found')
+      })
+  }, [token])
 
   const handleToken = async (tokenResult: { status: string; token?: string; errors?: Array<{ message: string }> }) => {
     if (tokenResult.status !== 'OK' || !tokenResult.token) {
       setErrorMsg(tokenResult.errors?.[0]?.message ?? 'Card details are invalid. Please try again.')
+      setScreen('error')
       return
     }
     setScreen('processing')
@@ -53,6 +82,35 @@ export default function PlanSetupClient({ token, plan }: { token: string; plan: 
       setScreen('error')
     }
   }
+
+  if (screen === 'loading') {
+    return (
+      <div className="min-h-screen bg-[#f0f9ff] flex items-center justify-center px-4">
+        <div className="flex flex-col items-center gap-4 text-[#4a7fa5]">
+          <Loader2 className="w-10 h-10 animate-spin text-[#0097a7]" />
+          <p className="font-medium">Loading your plan...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (screen === 'error' && loadError) {
+    return (
+      <div className="min-h-screen bg-[#f0f9ff] flex items-center justify-center px-4">
+        <div className="bg-white rounded-3xl border border-red-200 shadow-xl p-10 max-w-md w-full text-center">
+          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-extrabold text-[#0c2340] mb-2">Plan Not Found</h2>
+          <p className="text-red-500 text-sm">{loadError}</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!plan) return null
+
+  const isChargeNow = !plan.charge_start_date
+  const cycleAmount = plan.price
+  const alreadyDone = plan.plan_link_status === 'charged' || plan.plan_link_status === 'card_verified'
 
   if (alreadyDone) {
     return (
