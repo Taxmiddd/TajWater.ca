@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { Package, Truck, CheckCircle2, Clock, MapPin, Phone, CreditCard } from 'lucide-react'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 
 interface TrackPageProps {
@@ -140,9 +141,11 @@ export default async function TrackOrderPage({ params, searchParams }: TrackPage
                   <div key={i} className="flex items-center gap-4 py-3 border-b border-[#f1f5f9] last:border-0">
                     <div className="w-16 h-16 bg-[#f8fafc] rounded-xl flex-shrink-0 overflow-hidden border border-[#e2e8f0]">
                       {item.products?.image_url && (
-                        <img 
-                          src={item.products.image_url} 
-                          alt={item.products.name} 
+                        <Image
+                          src={item.products.image_url}
+                          alt={item.products.name}
+                          width={64}
+                          height={64}
                           className="w-full h-full object-cover"
                         />
                       )}

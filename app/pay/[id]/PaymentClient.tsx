@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PaymentForm, CreditCard } from 'react-square-web-payments-sdk'
-import { CheckCircle2, AlertTriangle, User, Phone, Mail, Droplets, ShieldCheck, CreditCard as CreditCardIcon } from 'lucide-react'
+import { CheckCircle2, AlertTriangle, ShieldCheck, CreditCard as CreditCardIcon } from 'lucide-react'
 import Link from 'next/link'
 import type { PaymentLink } from '@/types'
 

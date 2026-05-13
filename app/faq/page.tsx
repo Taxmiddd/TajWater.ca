@@ -172,8 +172,8 @@ export default function FAQPage() {
               Water Delivery FAQ<br /><span className="text-[#b3e5fc]">Metro Vancouver</span>
             </h1>
             <p className="text-[#b3e5fc] text-lg max-w-2xl mx-auto">
-              Everything you need to know about TajWater's water delivery service in Metro Vancouver.
-              Can't find what you're looking for? Call us at 778-504-7880.
+              Everything you need to know about TajWater&apos;s water delivery service in Metro Vancouver.
+              Can&apos;t find what you&apos;re looking for? Call us at 778-504-7880.
             </p>
           </div>
         </section>

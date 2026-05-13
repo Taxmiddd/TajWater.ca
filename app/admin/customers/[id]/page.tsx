@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowLeft, Mail, Phone, MapPin, ShoppingBag, Send,
   Package, CheckCircle2, Clock, Truck, XCircle,
-  MessageSquare, AlertCircle, User, Calendar, Wallet, Tag, Plus, X,
+  MessageSquare, AlertCircle, User, Calendar, Wallet, Tag, Plus, X, ShieldCheck,
 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -107,6 +107,9 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
   const [sendError,  setSendError]  = useState('')
   const [sendSuccess,setSendSuccess]= useState(false)
   const [adminEmail, setAdminEmail] = useState('')
+
+  // Email confirmation
+  const [confirmingEmail, setConfirmingEmail] = useState(false)
 
   // Toast
   const [toast, setToast] = useState('')
@@ -220,6 +223,20 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
     showToast('Notes saved')
   }
 
+  const handleConfirmEmail = async () => {
+    if (!profile) return
+    setConfirmingEmail(true)
+    const res = await fetch('/api/admin/confirm-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: profile.id, adminEmail }),
+    })
+    const data = await res.json()
+    setConfirmingEmail(false)
+    if (res.ok) showToast('Email confirmed — customer can now log in')
+    else showToast(data.error ?? 'Failed to confirm email')
+  }
+
   // ─── KPIs ────────────────────────────────────────────────────────────────
 
   const totalSpent   = orders.reduce((s, o) => s + Number(o.total), 0)
@@ -284,11 +301,23 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
               <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-[#0097a7]" />Since {memberSince}</span>
             </div>
           </div>
-          {profile.email && (
-            <Button onClick={() => setComposing(true)} className="bg-gradient-to-r from-[#0097a7] to-[#1565c0] text-white gap-2 shrink-0">
-              <Mail className="w-4 h-4" /> Compose
+          <div className="flex gap-2 shrink-0">
+            <Button
+              onClick={handleConfirmEmail}
+              disabled={confirmingEmail}
+              variant="outline"
+              className="border-amber-300 text-amber-700 hover:bg-amber-50 gap-2"
+              title="Manually confirm this customer's email so they can log in"
+            >
+              <ShieldCheck className="w-4 h-4" />
+              {confirmingEmail ? 'Confirming...' : 'Confirm Email'}
             </Button>
-          )}
+            {profile.email && (
+              <Button onClick={() => setComposing(true)} className="bg-gradient-to-r from-[#0097a7] to-[#1565c0] text-white gap-2">
+                <Mail className="w-4 h-4" /> Compose
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* KPI chips */}

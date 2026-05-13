@@ -58,7 +58,6 @@ export default function AdminServicesPage() {
     setLoading(false)
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetch() }, [])
 
   const openAdd = () => {

@@ -3,6 +3,7 @@
 import { Star } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Script from 'next/script'
+import Link from 'next/link'
 
 interface Testimonial {
   name: string
@@ -136,7 +137,7 @@ export default function EnhancedTestimonials() {
 
                 {/* Review Text */}
                 <p className="text-[#4a7fa5] text-sm leading-relaxed mb-6 italic">
-                  "{testimonial.text}"
+                  &ldquo;{testimonial.text}&rdquo;
                 </p>
 
                 {/* Author Info */}
@@ -176,12 +177,12 @@ export default function EnhancedTestimonials() {
           {/* CTA */}
           <div className="text-center mt-12">
             <p className="text-[#4a7fa5] text-lg mb-6">Ready to join thousands of satisfied customers?</p>
-            <a
+            <Link
               href="/shop"
               className="inline-block px-8 py-4 bg-gradient-to-r from-[#0097a7] to-[#00838f] text-white font-bold rounded-2xl hover:shadow-lg transition-shadow"
             >
               Order Your First Delivery Today
-            </a>
+            </Link>
           </div>
         </div>
       </section>

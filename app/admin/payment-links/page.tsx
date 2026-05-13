@@ -250,7 +250,7 @@ function CreateLinkModal({ isOpen, onClose, onCreated }: { isOpen: boolean; onCl
   }
 
   const addLineItem = () => setLineItems(prev => [...prev, { description: '', quantity: 1, unit_price: 0 }])
-  const updateLineItem = (index: number, field: string, value: any) => {
+  const updateLineItem = (index: number, field: string, value: string | number) => {
     setLineItems(prev => {
       const updated = [...prev]
       updated[index] = { ...updated[index], [field]: value }

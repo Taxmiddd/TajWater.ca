@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
           payment_method: fullOrder.payment_method,
           delivery_address: fullOrder.delivery_address ?? null,
           customer_name: fullOrder.customer_name ?? null,
-          customer_phone: (fullOrder as any).customer_phone || null,
+          customer_phone: (fullOrder as { customer_phone?: string }).customer_phone || null,
           created_at: fullOrder.created_at || new Date().toISOString(),
           zones: Array.isArray(fullOrder.zones) ? (fullOrder.zones[0] ?? null) : (fullOrder.zones as { name: string } | null) ?? null,
           order_items: ((fullOrder.order_items ?? []) as unknown as RawItem[]).map(i => ({
@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    await (db as any).from('email_logs').insert({
+    await db.from('email_logs').insert({
       user_id: fullOrder.user_id ?? null,
       recipient_email: recipientEmail,
       email_type: newStatus === 'delivered' ? 'delivery_success' : 'out_for_delivery',
@@ -150,7 +150,7 @@ export async function POST(request: NextRequest) {
     })
 
     try {
-      const emailResult = await (resend as any).emails.send({
+      const emailResult = await resend.emails.send({
         from: 'TajWater Billing <billing@tajwater.ca>',
         to: recipientEmail,
         subject,

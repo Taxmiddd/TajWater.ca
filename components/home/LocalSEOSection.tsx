@@ -73,7 +73,7 @@ export default function LocalSEOSection() {
               Water Filter Installation — Vancouver &amp; Lower Mainland
             </h3>
             <p className="text-[#4a7fa5] text-sm leading-relaxed">
-              TajWater's certified technicians install under-sink reverse osmosis systems, whole-home filtration systems,
+              TajWater&apos;s certified technicians install under-sink reverse osmosis systems, whole-home filtration systems,
               and countertop water filters across Metro Vancouver. Every installation comes with a 2-year parts and labour warranty
               and a free water quality assessment. We service Vancouver, Burnaby, Surrey, Richmond, Coquitlam, and all
               Metro Vancouver cities. Annual filter replacement plans available from $79/year.

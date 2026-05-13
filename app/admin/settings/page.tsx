@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Building2, MapPin, DollarSign, Bell, CheckCircle2, RefreshCw, Mail, Download, Share2, FileText, Plus, Users } from 'lucide-react'
+import { Building2, MapPin, DollarSign, Bell, CheckCircle2, RefreshCw, Mail, Download, Share2, FileText, Users } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -163,7 +163,6 @@ export default function SettingsPage() {
     showToast('Social links saved!')
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchAll() }, [])
 
   // ── Save: Business ────────────────────────────────────────────────────────

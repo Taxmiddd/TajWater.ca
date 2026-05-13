@@ -128,7 +128,7 @@ export default function LocalSEOBoost() {
             <Phone className="w-8 h-8 text-[#0097a7] mx-auto mb-3" />
             <h4 className="font-bold text-[#0c2340] mb-2">24/7 Support</h4>
             <p className="text-sm text-[#4a7fa5]">
-              Questions? Call us or check our FAQ — we're here to help.
+              Questions? Call us or check our FAQ — we&apos;re here to help.
             </p>
           </div>
         </div>

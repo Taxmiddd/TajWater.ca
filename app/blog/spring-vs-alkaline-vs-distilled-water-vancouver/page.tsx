@@ -97,7 +97,7 @@ export default function ArticlePage() {
             <h2 className="text-2xl font-extrabold text-[#0c2340] mt-10 mb-4">Alkaline Water</h2>
             <p className="text-[#4a7fa5] leading-relaxed mb-4">
               Alkaline water is purified water that has been enhanced with minerals — typically calcium, magnesium, and
-              potassium — to raise its pH level to 8.0–9.5. The higher pH is what defines it as "alkaline." Unlike spring
+              potassium — to raise its pH level to 8.0–9.5. The higher pH is what defines it as &ldquo;alkaline.&rdquo; Unlike spring
               water, the mineral content in alkaline water is added during a controlled purification process rather than
               occurring naturally.
             </p>

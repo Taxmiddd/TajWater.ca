@@ -40,6 +40,7 @@ export interface Product {
   rating?: number
   review_count?: number
   subscription_interval?: 'daily' | 'weekly' | 'biweekly' | 'monthly' | null
+  taxable?: boolean
 }
 
 export interface Order {
@@ -83,6 +84,10 @@ export interface Subscription {
   square_card_id?: string | null
   payment_card_brand?: string | null
   payment_card_last4?: string | null
+  custom_plan?: boolean
+  plan_name?: string | null
+  custom_delivery_address?: string | null
+  admin_notes?: string | null
 }
 
 export interface SupportTicket {

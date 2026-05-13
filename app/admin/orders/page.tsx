@@ -139,7 +139,6 @@ export default function AdminOrdersPage() {
     }
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchOrders() }, [])
 
   const advanceStatus = async (order: OrderRow) => {

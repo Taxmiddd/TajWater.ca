@@ -68,12 +68,12 @@ export default function ArticlePage() {
           <div className="text-[#0c2340]">
             <p className="text-lg text-[#4a7fa5] leading-relaxed mb-8">
               <strong className="text-[#0c2340]">The short answer: technically yes.</strong> Metro Vancouver tap water meets all
-              Health Canada drinking water quality guidelines. But "safe" and "good to drink" are not always the
+              Health Canada drinking water quality guidelines. But &ldquo;safe&rdquo; and &ldquo;good to drink&rdquo; are not always the
               same thing — and for a significant portion of Metro Vancouver residents, the gap between those two
               definitions drives them to water delivery.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-[#0c2340] mt-10 mb-4">Where Metro Vancouver's Water Comes From</h2>
+            <h2 className="text-2xl font-extrabold text-[#0c2340] mt-10 mb-4">Where Metro Vancouver&apos;s Water Comes From</h2>
             <p className="text-[#4a7fa5] leading-relaxed mb-4">
               Metro Vancouver draws its drinking water from three mountain reservoirs in the Coast Mountains: Capilano,
               Seymour, and Coquitlam. These are protected watersheds — no logging, no agriculture, no public access — which
@@ -93,12 +93,12 @@ export default function ArticlePage() {
             </p>
             <p className="text-[#4a7fa5] leading-relaxed mb-4">
               However, chloramine produces a more noticeable taste and odour than straight chlorine for many people.
-              The "swimming pool" or "bleach" taste that Vancouver, Burnaby, and Surrey residents sometimes notice —
+              The &ldquo;swimming pool&rdquo; or &ldquo;bleach&rdquo; taste that Vancouver, Burnaby, and Surrey residents sometimes notice —
               especially in summer when temperatures rise — is chloramine at work.
             </p>
             <p className="text-[#4a7fa5] leading-relaxed mb-4">
               Chloramine levels in Metro Vancouver tap water are regulated at a maximum of 3 mg/L, well within
-              Health Canada's guidelines of 3 mg/L. Safe to drink — but noticeably present in taste for sensitive
+              Health Canada&apos;s guidelines of 3 mg/L. Safe to drink — but noticeably present in taste for sensitive
               individuals.
             </p>
 
@@ -106,7 +106,7 @@ export default function ArticlePage() {
             <p className="text-[#4a7fa5] leading-relaxed mb-4">
               Here is where it gets more complicated. The municipal water supply is safe when it leaves the treatment
               plant. But what happens between the water main on your street and your kitchen tap depends entirely
-              on your building's plumbing.
+              on your building&apos;s plumbing.
             </p>
             <p className="text-[#4a7fa5] leading-relaxed mb-4">
               Buildings constructed before 1990 in Vancouver, Burnaby, New Westminster, and Surrey may have galvanized
@@ -114,7 +114,7 @@ export default function ArticlePage() {
               it can leach small amounts of lead, copper, and rust into the water at the tap.
             </p>
             <p className="text-[#4a7fa5] leading-relaxed mb-4">
-              Health Canada's maximum acceptable concentration for lead in drinking water is 5 micrograms per litre (µg/L).
+              Health Canada&apos;s maximum acceptable concentration for lead in drinking water is 5 micrograms per litre (µg/L).
               Testing by Metro Vancouver shows that first-draw water from older buildings — the water that has been
               sitting in the pipes overnight — can occasionally exceed this threshold in buildings with lead solder.
             </p>
@@ -145,7 +145,7 @@ export default function ArticlePage() {
               <li><strong className="text-[#0c2340]">Newborns and young children</strong> — Health Canada recommends extra caution with lead exposure for infants. Delivered spring or distilled water eliminates pipe-related lead risk.</li>
               <li><strong className="text-[#0c2340]">Taste sensitivity</strong> — if chloramine taste bothers you, delivered water that contains zero chlorine or chloramines is a consistent, noticeable upgrade.</li>
               <li><strong className="text-[#0c2340]">CPAP machines</strong> — distilled water is required. Tap water, even good tap water, causes mineral buildup in CPAP humidifier chambers.</li>
-              <li><strong className="text-[#0c2340]">Cooking and coffee/tea</strong> — mineral content affects flavour. Spring water's natural mineral balance typically produces better-tasting food and beverages.</li>
+              <li><strong className="text-[#0c2340]">Cooking and coffee/tea</strong> — mineral content affects flavour. Spring water&apos;s natural mineral balance typically produces better-tasting food and beverages.</li>
             </ul>
 
             <h2 className="text-2xl font-extrabold text-[#0c2340] mt-10 mb-6">Frequently Asked Questions</h2>

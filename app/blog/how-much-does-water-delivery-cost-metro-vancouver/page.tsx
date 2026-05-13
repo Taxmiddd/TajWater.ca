@@ -152,7 +152,7 @@ export default function ArticlePage() {
             <h2 className="text-2xl font-extrabold text-[#0c2340] mt-10 mb-4">Is Water Delivery Worth It?</h2>
             <p className="text-[#4a7fa5] leading-relaxed mb-4">
               A typical Metro Vancouver household of 2–4 people uses approximately 2 five-gallon jugs per month for
-              drinking and cooking. At TajWater's standard rate, that is $17.98 per month — or about 60 cents a day.
+              drinking and cooking. At TajWater&apos;s standard rate, that is $17.98 per month — or about 60 cents a day.
             </p>
             <p className="text-[#4a7fa5] leading-relaxed mb-4">
               Compare that to:
@@ -178,7 +178,7 @@ export default function ArticlePage() {
             </div>
 
             <div className="bg-[#e0f7fa] rounded-2xl p-6 mt-10">
-              <h3 className="font-extrabold text-[#0c2340] text-lg mb-2">Get Started with TajWater — Metro Vancouver's Most Transparent Pricing</h3>
+              <h3 className="font-extrabold text-[#0c2340] text-lg mb-2">Get Started with TajWater — Metro Vancouver&apos;s Most Transparent Pricing</h3>
               <p className="text-[#4a7fa5] text-sm mb-4">
                 Spring water from $8.99/jug. Alkaline from $12.99. Distilled from $9.99. Free delivery on every order,
                 no contracts, same-day available before 12pm.

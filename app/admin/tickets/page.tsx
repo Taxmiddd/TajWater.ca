@@ -84,7 +84,6 @@ export default function AdminTicketsPage() {
   }
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     setAdminName(localStorage.getItem('admin_name') || 'Admin')
      
     fetchTickets()

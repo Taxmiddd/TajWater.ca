@@ -74,7 +74,7 @@ export default function CustomersPage() {
   const [customerNotes, setCustomerNotes] = useState('')
   const [savingNotes, setSavingNotes] = useState(false)
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 3000) }
 
   const fetchCustomers = async () => {
@@ -142,7 +142,7 @@ export default function CustomersPage() {
     setLoading(false)
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
   useEffect(() => { fetchCustomers() }, [])
 
   const openCustomer = async (customer: CustomerRow) => {

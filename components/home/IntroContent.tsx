@@ -10,11 +10,11 @@ export default function IntroContent() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="prose prose-lg max-w-none text-[#4a7fa5]">
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0c2340] mb-6">
-            Vancouver's Most Trusted Water Delivery Service — Serving 21 Cities
+            Vancouver&apos;s Most Trusted Water Delivery Service — Serving 21 Cities
           </h2>
           
           <p className="text-lg leading-relaxed mb-6 text-[#4a7fa5]">
-            TajWater is Metro Vancouver's #1 provider of premium 5-gallon water jug delivery. We've been serving thousands of households and businesses across 21 delivery zones since 2019, delivering fresh, independently tested spring water, alkaline water, and distilled water to your doorstep — fast, affordable, and guaranteed fresh.
+            TajWater is Metro Vancouver&apos;s #1 provider of premium 5-gallon water jug delivery. We&apos;ve been serving thousands of households and businesses across 21 delivery zones since 2019, delivering fresh, independently tested spring water, alkaline water, and distilled water to your doorstep — fast, affordable, and guaranteed fresh.
           </p>
 
           <h3 className="text-2xl font-bold text-[#0c2340] mt-8 mb-4">

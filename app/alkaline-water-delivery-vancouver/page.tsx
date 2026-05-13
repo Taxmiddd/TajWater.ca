@@ -213,7 +213,7 @@ export default function AlkalineWaterDeliveryVancouver() {
                 </p>
                 <p className="text-[#4a7fa5] leading-relaxed mb-4">
                   Many customers find alkaline water has a silkier, smoother taste compared to regular water.
-                  It is the top choice among Taj Water's active and health-conscious customers across Metro Vancouver.
+                  It is the top choice among Taj Water&apos;s active and health-conscious customers across Metro Vancouver.
                 </p>
                 <p className="text-[#4a7fa5] leading-relaxed">
                   Sourced, processed, and delivered locally from our Port Coquitlam facility — not shipped from
@@ -255,7 +255,7 @@ export default function AlkalineWaterDeliveryVancouver() {
               Why Metro Vancouver Residents Choose Alkaline Water
             </h2>
             <p className="text-[#4a7fa5] text-center max-w-2xl mx-auto mb-12 text-lg">
-              Alkaline water is the most popular choice among Taj Water's active, health-conscious customers.
+              Alkaline water is the most popular choice among Taj Water&apos;s active, health-conscious customers.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {[

@@ -55,7 +55,7 @@ export async function GET(
 
   // 2. Fetch profile separately if user_id exists
   let profileData = null
-  const anyOrder = order as any
+  const anyOrder = order as { user_id?: string | null }
   if (anyOrder.user_id) {
     const { data: p } = await db
       .from('profiles')
@@ -66,7 +66,7 @@ export async function GET(
   }
 
   const orderData: InvoiceOrderData = {
-    ...(order as any),
+    ...(order as unknown as InvoiceOrderData),
     profiles: profileData
   }
 

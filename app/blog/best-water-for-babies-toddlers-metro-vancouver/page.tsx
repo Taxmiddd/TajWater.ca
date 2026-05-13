@@ -113,7 +113,7 @@ export default function BestWaterBabiesVancouver() {
                 <AlertCircle className="w-5 h-5 text-[#ff9800] shrink-0 mt-0.5" />
                 <p className="text-sm text-[#6d4c41]">
                   <strong>Important:</strong> This article is for general information only. Always consult your pediatrician
-                  or family doctor for personalized guidance on your baby's water and formula needs.
+                  or family doctor for personalized guidance on your baby&apos;s water and formula needs.
                 </p>
               </div>
             </div>
@@ -126,7 +126,7 @@ export default function BestWaterBabiesVancouver() {
 
             <h2 className="text-2xl font-extrabold text-[#0c2340] mt-12 mb-6">What Health Canada Recommends</h2>
             <p className="text-[#4a7fa5] leading-relaxed mb-4">
-              Health Canada's guidance for infant water is:
+              Health Canada&apos;s guidance for infant water is:
             </p>
             <ul className="space-y-3 mb-8">
               {[
@@ -184,11 +184,11 @@ export default function BestWaterBabiesVancouver() {
             </p>
             <p className="text-[#4a7fa5] leading-relaxed mb-4">
               Distilled water contains <strong className="text-[#0c2340]">no fluoride</strong> — excess fluoride intake in infants
-              can cause dental fluorosis (white spots on developing teeth). Health Canada's position is that formula-fed infants
+              can cause dental fluorosis (white spots on developing teeth). Health Canada&apos;s position is that formula-fed infants
               who receive fluoridated water as their main liquid source may be at risk for dental fluorosis.
             </p>
             <p className="text-[#4a7fa5] leading-relaxed mb-4">
-              Distilled water also contains <strong className="text-[#0c2340]">no lead</strong>. Metro Vancouver's water treatment
+              Distilled water also contains <strong className="text-[#0c2340]">no lead</strong>. Metro Vancouver&apos;s water treatment
               removes lead before it leaves the facility, but lead can leach from older household plumbing and fixtures between the
               main and your tap — particularly in homes built before 1990.
             </p>
@@ -229,7 +229,7 @@ export default function BestWaterBabiesVancouver() {
             <p className="text-[#4a7fa5] leading-relaxed mb-4">
               Most pediatricians and Health Canada guidance indicates that spring water is generally fine for infants
               over 6 months, particularly once they have started solids and their digestive system has matured.
-              Spring water's natural mineral content — calcium, magnesium — is appropriate at this stage.
+              Spring water&apos;s natural mineral content — calcium, magnesium — is appropriate at this stage.
             </p>
             <p className="text-[#4a7fa5] leading-relaxed mb-8">
               TajWater spring water has a naturally balanced mineral profile and neutral pH, making it suitable for

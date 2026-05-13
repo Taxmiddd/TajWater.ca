@@ -2,20 +2,21 @@
 
 import { useState, useMemo } from 'react'
 import { Calculator, DollarSign, TrendingDown } from 'lucide-react'
+import Link from 'next/link'
+
+const PRICES = {
+  spring: { regular: 8.99, subscription: 6.49 },
+  alkaline: { regular: 12.99, subscription: 9.49 },
+  distilled: { regular: 9.99, subscription: 7.49 },
+}
 
 export default function SavingsCalculator() {
   const [jugsPerMonth, setJugsPerMonth] = useState(4)
   const [waterType, setWaterType] = useState<'spring' | 'alkaline' | 'distilled'>('spring')
   const [useSubscription, setUseSubscription] = useState(false)
 
-  const prices = {
-    spring: { regular: 8.99, subscription: 6.49 },
-    alkaline: { regular: 12.99, subscription: 9.49 },
-    distilled: { regular: 9.99, subscription: 7.49 },
-  }
-
   const calculations = useMemo(() => {
-    const pricePerJug = useSubscription ? prices[waterType].subscription : prices[waterType].regular
+    const pricePerJug = useSubscription ? PRICES[waterType].subscription : PRICES[waterType].regular
     const monthlyTotal = jugsPerMonth * pricePerJug
     const yearlyTotal = monthlyTotal * 12
 
@@ -50,7 +51,7 @@ export default function SavingsCalculator() {
             </h2>
           </div>
           <p className="text-[#4a7fa5] text-lg max-w-2xl mx-auto">
-            Calculate exactly how much you'll save by switching to TajWater compared to big box stores and competitors.
+            Calculate exactly how much you&apos;ll save by switching to TajWater compared to big box stores and competitors.
           </p>
         </div>
 
@@ -169,7 +170,7 @@ export default function SavingsCalculator() {
 
               {/* Benefits List */}
               <div className="mt-6 pt-6 border-t border-[#cce7f0]">
-                <p className="text-sm font-semibold text-[#0c2340] mb-3">What's Included:</p>
+                <p className="text-sm font-semibold text-[#0c2340] mb-3">What&apos;s Included:</p>
                 <ul className="space-y-2 text-sm">
                   {[
                     'Free delivery to your door',
@@ -187,12 +188,12 @@ export default function SavingsCalculator() {
             </div>
 
             {/* CTA */}
-            <a
+            <Link
               href="/shop"
               className="block w-full py-4 px-6 bg-gradient-to-r from-[#0097a7] to-[#00838f] text-white font-bold rounded-2xl text-center hover:shadow-lg transition-shadow"
             >
               Start Saving Today → Order Now
-            </a>
+            </Link>
           </div>
         </div>
 

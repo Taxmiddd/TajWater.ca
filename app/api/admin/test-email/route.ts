@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient as createSsrClient } from '@supabase/ssr'
 import { createServerClient } from '@/lib/supabase'
@@ -6,7 +6,7 @@ import { Resend } from 'resend'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // 1. Auth check (Admin only)
     const cookieStore = await cookies()

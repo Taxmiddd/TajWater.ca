@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSquareClient } from '@/lib/square'
+import { SquareClient, Country } from 'square'
 import { createServerClient } from '@/lib/supabase'
 import { rateLimit } from '@/lib/ratelimit'
 import { resend, buildOrderConfirmationEmail, buildAdminOrderNotificationEmail } from '@/lib/email'
@@ -21,12 +22,12 @@ function buildSquareAddress(address: { street?: string | null; zone?: string | n
     locality: address.zone,
     administrativeDistrictLevel1: 'BC',
     postalCode: address.postal ?? undefined,
-    country: 'CA',
+    country: Country.Ca,
   }
 }
 
 
-async function createSquareCustomer(square: any, profile: any, userId: string, address: any) {
+async function createSquareCustomer(square: SquareClient, profile: Record<string, string | null>, userId: string, address: Record<string, string | null> | null) {
   const { givenName, familyName } = parseSquareCustomerName(profile.name ?? address?.name)
   const response = await square.customers.create({
     givenName,
@@ -42,7 +43,7 @@ async function createSquareCustomer(square: any, profile: any, userId: string, a
   return customer.id
 }
 
-async function saveSquareCard(square: any, userId: string, sourceId: string, customerId: string, billingName: string | undefined, address: any) {
+async function saveSquareCard(square: SquareClient, userId: string, sourceId: string, customerId: string, billingName: string | undefined, address: Record<string, string | null> | null) {
   const response = await square.cards.create({
     idempotencyKey: crypto.randomUUID(),
     sourceId,
@@ -69,7 +70,6 @@ export async function POST(req: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { amount, items, address, userId, notes, discountCodeId, discountAmount: clientDiscountAmount, sourceId, paymentMethod = 'square_online' } = await req.json()
     type CartItem = { product_id: string; quantity: number; subscribeFrequency?: 'weekly' | 'biweekly' | 'monthly'; category?: string; name?: string }
-    type RawItem = { quantity: number; price: number; products: { name: string } | null }
 
     const isOffline = paymentMethod === 'cash_on_delivery' || paymentMethod === 'card_on_delivery'
 
@@ -105,33 +105,37 @@ export async function POST(req: NextRequest) {
     const productIds = items.map((i: { product_id: string }) => i.product_id)
     const { data: products, error: productError } = await db
       .from('products')
-      .select('id, price, active, category, subscription_interval')
+      .select('id, price, active, category, subscription_interval, taxable')
       .in('id', productIds)
 
     if (productError || !products) {
       return NextResponse.json({ error: 'Failed to fetch product prices' }, { status: 500 })
     }
 
-    const productMap: Record<string, { price: number; category: string; subscription_interval: string | null }> = {}
+    const productMap: Record<string, { price: number; category: string; subscription_interval: string | null; taxable: boolean }> = {}
     for (const p of products) {
       if (!p.active) {
         return NextResponse.json({ error: `Product is no longer available` }, { status: 400 })
       }
-      productMap[p.id] = { 
-        price: p.price, 
-        category: p.category, 
-        subscription_interval: p.subscription_interval ?? null 
+      productMap[p.id] = {
+        price: p.price,
+        category: p.category,
+        subscription_interval: p.subscription_interval ?? null,
+        taxable: p.taxable !== false,
       }
     }
 
     // 3. Recalculate subtotal server-side using DB prices
     let subtotal = 0
+    let taxableSubtotal = 0
     for (const item of items as CartItem[]) {
       const pInfo = productMap[item.product_id]
       if (!pInfo) {
         return NextResponse.json({ error: 'Invalid product in cart' }, { status: 400 })
       }
-      subtotal += pInfo.price * item.quantity
+      const lineTotal = pInfo.price * item.quantity
+      subtotal += lineTotal
+      if (pInfo.taxable) taxableSubtotal += lineTotal
     }
 
     // 4. Validate discount code server-side if provided
@@ -156,9 +160,11 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 5. BC tax: GST 5% + PST 7% = 12% (applied on discounted subtotal)
+    // 5. BC tax: GST 5% + PST 7% = 12% (applied only on taxable portion of discounted subtotal)
     const discountedSubtotal = Math.max(0, subtotal - discountAmt)
-    const taxAmount = Math.round(discountedSubtotal * 0.12 * 100) / 100
+    // Scale taxable subtotal proportionally if discount was applied
+    const taxablePortion = subtotal > 0 ? (taxableSubtotal / subtotal) * discountedSubtotal : 0
+    const taxAmount = Math.round(taxablePortion * 0.12 * 100) / 100
     const serverTotal = Math.round((discountedSubtotal + deliveryFee + taxAmount) * 100) / 100
 
     // 6. Reject if client amount differs by more than $0.01
@@ -240,7 +246,7 @@ export async function POST(req: NextRequest) {
       if (sourceId) {
         const billingName: string | undefined = (address?.name || profile.name) || undefined
         const card = await saveSquareCard(getSquareClient(), userId, sourceId as string, squareCustomerId as string, billingName, address)
-        squareCardId = card.id
+        squareCardId = card.id ?? null
         squareCardBrand = card.cardBrand ?? null
         squareCardLast4 = card.last4 ?? null
         squareCardExpMonth = card.expMonth ? Number(card.expMonth) : null
@@ -313,7 +319,7 @@ export async function POST(req: NextRequest) {
         const now = new Date()
         const subRows = subscribeItems.map(item => {
           const pInfo = productMap[item.product_id]
-          const freq = (pInfo.subscription_interval as any) || 'weekly'
+          const freq = (pInfo.subscription_interval as string) || 'weekly'
           const nextDelivery = new Date(now)
           nextDelivery.setDate(now.getDate() + (freq === 'weekly' ? 7 : freq === 'biweekly' ? 14 : freq === 'daily' ? 1 : 30))
           return {
@@ -418,7 +424,7 @@ export async function POST(req: NextRequest) {
               payment_method: fullOrder.payment_method,
               delivery_address: fullOrder.delivery_address ?? null,
               customer_name: fullOrder.customer_name ?? null,
-              customer_phone: (fullOrder as any).customer_phone || null,
+              customer_phone: (fullOrder as { customer_phone?: string }).customer_phone || null,
               created_at: fullOrder.created_at || new Date().toISOString(),
               zones: Array.isArray(fullOrder.zones) ? (fullOrder.zones[0] ?? null) : (fullOrder.zones as { name: string } | null) ?? null,
               order_items: ((fullOrder.order_items ?? []) as unknown as RawItem[]).map(i => ({
@@ -506,18 +512,18 @@ export async function POST(req: NextRequest) {
       deliveryFee,
       discountAmount: discountAmt,
     })
-  } catch (err: any) {
+  } catch (err: unknown) {
     let message = 'Failed to create payment'
-    
+    const sqError = err as { errors?: Array<{ code?: string; detail?: string }> }
     // Handle Square API errors gracefully
-    if (err.errors && Array.isArray(err.errors) && err.errors.length > 0) {
-      const sqErr = err.errors[0]
+    if (sqError.errors && Array.isArray(sqError.errors) && sqError.errors.length > 0) {
+      const sqErr = sqError.errors[0]
       if (sqErr.code === 'INVALID_CARD_DATA') {
         message = 'Invalid card data. Please check your card details and try again.'
       } else if (sqErr.detail) {
         message = sqErr.detail
       }
-    } else if (err.message && err.message.includes('INVALID_CARD_DATA')) {
+    } else if (err instanceof Error && err.message.includes('INVALID_CARD_DATA')) {
       message = 'Invalid card data. Please check your card details and try again.'
     } else if (err instanceof Error) {
       message = err.message

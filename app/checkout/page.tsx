@@ -111,7 +111,8 @@ export default function CheckoutPage() {
   
   const subtotal = total()
   const discountAmt = 0
-  const tax = Math.round(subtotal * 0.12 * 100) / 100
+  const taxableSubtotal = items.reduce((acc, item) => acc + (item.product.taxable !== false ? item.product.price * item.quantity : 0), 0)
+  const tax = Math.round(taxableSubtotal * 0.12 * 100) / 100
   const deliveryFeeValue = deliveryFee // For clarity in callbacks
   const orderTotal = Math.max(0, subtotal - discountAmt) + deliveryFeeValue + tax
   const displayTotal = serverTotal ?? orderTotal
@@ -731,10 +732,12 @@ export default function CheckoutPage() {
                     <span>Delivery</span>
                     <span>{deliveryFee === 0 ? 'FREE' : `$${deliveryFee.toFixed(2)}`}</span>
                   </div>
-                  <div className="flex justify-between text-xs text-[#4a7fa5]">
-                    <span>Tax (12%)</span>
-                    <span>${tax.toFixed(2)}</span>
-                  </div>
+                  {tax > 0 && (
+                    <div className="flex justify-between text-xs text-[#4a7fa5]">
+                      <span>Tax (12% BC)</span>
+                      <span>${tax.toFixed(2)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-base font-black text-[#0c2340] pt-2 border-t border-[#f0f9ff]">
                     <span>Total</span>
                     <span>${displayTotal.toFixed(2)}</span>

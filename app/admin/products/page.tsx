@@ -15,7 +15,7 @@ import type { Product } from '@/types'
 const categories = ['water', 'equipment', 'subscription', 'accessories']
 const categoryEmoji: Record<string, string> = { water: '💧', equipment: '🔧', subscription: '🔄', accessories: '🧹' }
 
-const empty: Omit<Product, 'id'> = { name: '', description: '', price: 0, image_url: '', stock: 0, category: 'water', active: true, featured: false, unit_label: 'unit', rating: 5.0, review_count: 0, subscription_interval: null }
+const empty: Omit<Product, 'id'> = { name: '', description: '', price: 0, image_url: '', stock: 0, category: 'water', active: true, featured: false, unit_label: 'unit', rating: 5.0, review_count: 0, subscription_interval: null, taxable: true }
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
@@ -49,7 +49,6 @@ export default function AdminProductsPage() {
     setLoading(false)
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchProducts() }, [])
 
   const adjustStock = async (product: Product, delta: number) => {
@@ -68,7 +67,6 @@ export default function AdminProductsPage() {
   }
 
   const openAdd = () => { setEditing(null); setForm(empty); setDialogOpen(true) }
-  const openEdit = (p: Product) => { setEditing(p); setForm({ name: p.name, description: p.description, price: p.price, image_url: p.image_url, stock: p.stock, category: p.category, active: p.active, featured: p.featured || false, unit_label: p.unit_label || '', rating: p.rating || 5.0, review_count: p.review_count || 0, subscription_interval: p.subscription_interval ?? null }); setDialogOpen(true) }
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -426,6 +424,13 @@ export default function AdminProductsPage() {
             <div className="flex items-center gap-3">
               <input type="checkbox" id="featured" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} className="w-4 h-4 accent-amber-500" />
               <label htmlFor="featured" className="text-sm font-medium text-[#0c2340] dark:text-[#f8fafc]">Featured (shown on home page)</label>
+            </div>
+            <div className="flex items-center gap-3 bg-[#f0f9ff] dark:bg-white/5 rounded-xl px-4 py-3 border border-[#cce7f0] dark:border-white/10">
+              <input type="checkbox" id="taxable" checked={form.taxable !== false} onChange={(e) => setForm({ ...form, taxable: e.target.checked })} className="w-4 h-4 accent-[#0097a7]" />
+              <div>
+                <label htmlFor="taxable" className="text-sm font-medium text-[#0c2340] dark:text-[#f8fafc] cursor-pointer">Taxable (apply 12% BC tax at checkout)</label>
+                <p className="text-[10px] text-[#4a7fa5] dark:text-[#94a3b8] mt-0.5">Uncheck for tax-exempt products. Affects checkout and order totals.</p>
+              </div>
             </div>
             <div className="flex gap-3 pt-2">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="flex-1 border-[#cce7f0] dark:border-white/10 dark:text-white hover:bg-white/5 transition-colors">Cancel</Button>

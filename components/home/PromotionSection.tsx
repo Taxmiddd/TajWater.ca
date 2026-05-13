@@ -95,7 +95,7 @@ export default function PromotionSection() {
 
           {/* Right Side - Details */}
           <div className="bg-[#f0f9ff] rounded-3xl border-2 border-[#cce7f0] p-8">
-            <h4 className="text-xl font-bold text-[#0c2340] mb-6">What's Included:</h4>
+            <h4 className="text-xl font-bold text-[#0c2340] mb-6">What&apos;s Included:</h4>
             <ul className="space-y-4 mb-8">
               {current.details.map((detail) => (
                 <li key={detail} className="flex items-start gap-3">

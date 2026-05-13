@@ -1,9 +1,8 @@
 import { createServerClient } from '@/lib/supabase'
 import PaymentClient from './PaymentClient'
 import type { PaymentLink } from '@/types'
-import { CheckCircle2, AlertTriangle, Droplets } from 'lucide-react'
+import { CheckCircle2, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
-import Image from 'next/image'
 
 // ── Static state screens ───────────────────────────────────────────────────────
 function PaidScreen({ link }: { link: PaymentLink }) {

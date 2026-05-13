@@ -1,8 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import dynamic from 'next/dynamic'
-import { generateInvoicePDF, type InvoiceOrderData, type CompanyInfo } from '@/lib/generateInvoice'
+import { type InvoiceOrderData, type CompanyInfo } from '@/lib/generateInvoice'
 import { Button } from '@/components/ui/button'
 import {
   Download,
@@ -46,15 +45,15 @@ const MOCK_ORDER: InvoiceOrderData = {
 
 export default function InvoicePreviewPage() {
   const [mounted, setMounted] = useState(false)
-  const [method, setMethod] = useState<'square_online' | 'cash_on_delivery' | 'card_on_delivery'>(MOCK_ORDER.payment_method as any)
-  const [status, setStatus] = useState<'paid' | 'pending'>(MOCK_ORDER.payment_status as any)
-  const [InvoiceComponent, setInvoiceComponent] = useState<any>(null)
+  type PayMethod = 'square_online' | 'cash_on_delivery' | 'card_on_delivery'
+  const [method, setMethod] = useState<PayMethod>(MOCK_ORDER.payment_method as PayMethod)
+  const [status, setStatus] = useState<'paid' | 'pending'>(MOCK_ORDER.payment_status as 'paid' | 'pending')
+  const [InvoiceComponent, setInvoiceComponent] = useState<React.ComponentType<{ order: InvoiceOrderData; companyInfo: CompanyInfo }> | null>(null)
 
   useEffect(() => {
     setMounted(true)
     // Dynamic import the component from the lib
     import('@/lib/generateInvoice').then(mod => {
-      // @ts-ignore - access internal component if exported
       if (mod.InvoicePDF) {
         setInvoiceComponent(() => mod.InvoicePDF)
       }
@@ -89,7 +88,7 @@ export default function InvoicePreviewPage() {
               <button
                 key={m.id}
                 onClick={() => {
-                  setMethod(m.id as any)
+                  setMethod(m.id as PayMethod)
                   setStatus(m.id === 'square_online' ? 'paid' : 'pending')
                 }}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${

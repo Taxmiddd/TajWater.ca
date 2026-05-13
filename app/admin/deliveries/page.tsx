@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
 import { exportCSV } from '@/lib/csv'
-import { div } from 'framer-motion/client'
+import Link from 'next/link'
 
 type DeliveryOrder = {
   id: string
@@ -85,7 +85,7 @@ export default function DeliveriesPage() {
     setLoading(false)
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
   useEffect(() => { fetchData() }, [])
 
   const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0)
@@ -279,7 +279,7 @@ export default function DeliveriesPage() {
           <Clock className="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-500" />
           <p className="text-sm font-bold text-amber-700 dark:text-amber-300">
             {unassigned.length} order{unassigned.length > 1 ? 's' : ''} with no driver assigned —
-            go to <a href="/admin/orders" className="underline hover:text-amber-900 dark:hover:text-amber-100">Orders</a> to assign drivers
+            go to <Link href="/admin/orders" className="underline hover:text-amber-900 dark:hover:text-amber-100">Orders</Link> to assign drivers
           </p>
         </div>
       )}

@@ -44,7 +44,6 @@ export default function AdminDiscountsPage() {
     setLoading(false)
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchCodes() }, [])
 
   const handleSave = async (e: React.FormEvent) => {

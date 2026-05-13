@@ -40,9 +40,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'No subscriptions are due for billing', processed: [] })
   }
 
-  const userIds = Array.from(new Set(subscriptions.map((sub: any) => sub.user_id).filter(Boolean)))
-  const productIds = Array.from(new Set(subscriptions.map((sub: any) => sub.product_id).filter(Boolean)))
-  const zoneIds = Array.from(new Set(subscriptions.map((sub: any) => sub.zone_id).filter(Boolean)))
+  const userIds = Array.from(new Set(subscriptions.map(sub => sub.user_id).filter(Boolean)))
+  const productIds = Array.from(new Set(subscriptions.map(sub => sub.product_id).filter(Boolean)))
+  const zoneIds = Array.from(new Set(subscriptions.map(sub => sub.zone_id).filter(Boolean)))
 
   const [{ data: profiles }, { data: products }, { data: zones }] = await Promise.all([
     db.from('profiles').select('id, name, email, phone, delivery_address, zone_id, square_customer_id, square_card_id').in('id', userIds),
@@ -50,15 +50,15 @@ export async function POST(req: NextRequest) {
     db.from('zones').select('id, delivery_fee').in('id', zoneIds),
   ])
 
-  const profileMap = new Map((profiles ?? []).map((profile: any) => [profile.id, profile]))
-  const productMap = new Map((products ?? []).map((product: any) => [product.id, product]))
-  const zoneMap = new Map((zones ?? []).map((zone: any) => [zone.id, zone.delivery_fee ?? 0]))
+  const profileMap = new Map((profiles ?? []).map(profile => [profile.id, profile]))
+  const productMap = new Map((products ?? []).map(product => [product.id, product]))
+  const zoneMap = new Map((zones ?? []).map(zone => [zone.id, zone.delivery_fee ?? 0]))
   const square = getSquareClient()
   const locationId = process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID!
 
   const processed: Array<{ subscription_id: string; success: boolean; reason?: string; order_id?: string }> = []
 
-  for (const subscription of subscriptions as any[]) {
+  for (const subscription of subscriptions) {
     const profile = profileMap.get(subscription.user_id)
     const product = productMap.get(subscription.product_id)
 

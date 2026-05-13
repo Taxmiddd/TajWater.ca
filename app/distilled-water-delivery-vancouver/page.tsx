@@ -221,7 +221,7 @@ export default function DistilledWaterDeliveryVancouver() {
                   mineral-free water is required.
                 </p>
                 <p className="text-[#4a7fa5] leading-relaxed">
-                  TajWater's distilled water is produced locally in Port Coquitlam and delivered in sealed BPA-free
+                  TajWater&apos;s distilled water is produced locally in Port Coquitlam and delivered in sealed BPA-free
                   5-gallon jugs to maintain purity from production to your door.
                 </p>
               </div>

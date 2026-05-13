@@ -87,7 +87,7 @@ export default function WaterDeliveryVsFilter() {
               <ArrowLeft className="w-4 h-4" /> Back to Blog
             </Link>
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-xs font-semibold px-3 py-1 rounded-full bg-white/20 text-white">Buyer's Guide</span>
+              <span className="text-xs font-semibold px-3 py-1 rounded-full bg-white/20 text-white">Buyer&apos;s Guide</span>
               <span className="text-[#b3e5fc] text-sm">May 13, 2026</span>
               <span className="text-[#b3e5fc] text-sm">· 7 min read</span>
             </div>

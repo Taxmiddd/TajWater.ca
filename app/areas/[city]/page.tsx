@@ -2,7 +2,6 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Script from 'next/script'
-import { createServerClient } from '@/lib/supabase'
 import { Droplets, MapPin, Clock, Phone, ArrowRight, CheckCircle2, ShieldCheck, Truck } from 'lucide-react'
 
 type Props = {

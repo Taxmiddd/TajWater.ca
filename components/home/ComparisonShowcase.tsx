@@ -48,8 +48,8 @@ export default function ComparisonShowcase() {
             Why TajWater Wins Against <span className="gradient-text">Every Alternative</span>
           </h2>
           <p className="text-[#4a7fa5] text-lg max-w-2xl mx-auto">
-            We've compared ourselves against big box stores, tap water, and national competitors. 
-            Here's why Metro Vancouver families choose TajWater.
+            We&apos;ve compared ourselves against big box stores, tap water, and national competitors.
+            Here&apos;s why Metro Vancouver families choose TajWater.
           </p>
         </div>
 
@@ -98,8 +98,8 @@ export default function ComparisonShowcase() {
         <div className="mt-16 bg-gradient-to-r from-[#0097a7] to-[#006064] rounded-3xl p-8 sm:p-12 text-center text-white">
           <h3 className="text-2xl sm:text-3xl font-bold mb-4">Made for Metro Vancouver</h3>
           <p className="text-lg mb-8 max-w-2xl mx-auto">
-            TajWater is locally owned and operated right here in Port Coquitlam. We understand Metro Vancouver's unique water needs — 
-            from the mountains of North Vancouver to the delta communities. We're not a national franchise. We're your neighbors.
+            TajWater is locally owned and operated right here in Port Coquitlam. We understand Metro Vancouver&apos;s unique water needs —
+            from the mountains of North Vancouver to the delta communities. We&apos;re not a national franchise. We&apos;re your neighbors.
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[

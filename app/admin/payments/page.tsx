@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  DollarSign, TrendingUp, Clock, XCircle, Download,
-  RefreshCw, Search, CheckCircle2, Package, CreditCard,
-  RotateCcw, AlertTriangle, ExternalLink, Trash2, Link2, Plus, QrCode, Copy, Mail, Calendar, Check, User
+  Download,
+  RefreshCw, Search, CheckCircle2,
+  RotateCcw, ExternalLink, Trash2,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
