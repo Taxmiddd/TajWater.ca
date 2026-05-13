@@ -164,7 +164,7 @@ export default function AdminSubscriptionsPage() {
   }
 
   const planLink = createdToken
-    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/plan/${createdToken}`
+    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/pay/plan/${createdToken}`
     : ''
 
   const copyLink = () => {
