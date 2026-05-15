@@ -18,7 +18,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ toke
     .eq('plan_link_token', token)
     .single()
 
-  if (error || !data) return NextResponse.json({ error: 'Plan not found' }, { status: 404 })
+  if (error) {
+    console.error('Plan fetch error:', error)
+    return NextResponse.json({ error: error.message || 'Database error' }, { status: 500 })
+  }
+  if (!data) return NextResponse.json({ error: 'Plan not found' }, { status: 404 })
 
   return NextResponse.json(data)
 }

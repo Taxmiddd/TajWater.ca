@@ -33,8 +33,8 @@ export default function PlanSetupClient({ token }: { token: string }) {
   useEffect(() => {
     fetch(`/api/plan/${token}`)
       .then(async (res) => {
-        if (!res.ok) throw new Error('Plan not found')
         const data = await res.json()
+        if (!res.ok) throw new Error(data.error || 'Plan not found')
         const product = Array.isArray(data.product) ? data.product[0] : data.product
         const profile = Array.isArray(data.profile) ? data.profile[0] : data.profile
         setPlan({
