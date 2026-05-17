@@ -70,6 +70,16 @@ const faqSchema = {
   ],
 }
 
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://tajwater.ca' },
+    { '@type': 'ListItem', position: 2, name: 'Shop', item: 'https://tajwater.ca/shop' },
+    { '@type': 'ListItem', position: 3, name: 'Spring Water Delivery Vancouver', item: 'https://tajwater.ca/spring-water-delivery-vancouver' },
+  ],
+}
+
 const cities = ['Vancouver', 'Burnaby', 'Richmond', 'Surrey', 'Coquitlam', 'Port Coquitlam', 'North Vancouver', 'West Vancouver', 'Langley', 'Delta', 'Port Moody', 'White Rock', 'Maple Ridge', 'Squamish']
 
 export default function SpringWaterPage() {
@@ -77,6 +87,7 @@ export default function SpringWaterPage() {
     <>
       <Script id="product-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }} />
       <Script id="faq-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <Script id="breadcrumb-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
 
       <main className="min-h-screen">
         {/* Hero */}

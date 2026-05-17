@@ -28,8 +28,13 @@ const articleSchema = {
   headline: 'Spring vs Alkaline vs Distilled Water: Which Should You Drink in Vancouver?',
   description: 'A plain-English breakdown of the three water types delivered across Metro Vancouver.',
   datePublished: '2026-04-15',
-  dateModified: '2026-04-15',
-  author: { '@type': 'Organization', name: 'TajWater', url: 'https://tajwater.ca' },
+  dateModified: '2026-05-17',
+  author: {
+    '@type': 'Person',
+    name: 'Taj Water Team',
+    url: 'https://tajwater.ca/about',
+    worksFor: { '@type': 'Organization', name: 'Taj Water', url: 'https://tajwater.ca' },
+  },
   publisher: { '@type': 'Organization', name: 'TajWater', url: 'https://tajwater.ca', logo: { '@type': 'ImageObject', url: 'https://tajwater.ca/logo/tajcyan.svg' } },
   mainEntityOfPage: { '@type': 'WebPage', '@id': 'https://tajwater.ca/blog/spring-vs-alkaline-vs-distilled-water-vancouver' },
 }
@@ -109,7 +114,7 @@ export default function ArticlePage() {
             <p className="text-[#4a7fa5] leading-relaxed mb-6">
               <strong className="text-[#0c2340]">Best for:</strong> Health-conscious households, people with acid reflux, athletes, anyone who wants to increase their daily water intake.
               <br />
-              <strong className="text-[#0c2340]">Price:</strong> $12.99 per 5-gallon jug, free delivery across Metro Vancouver.
+              <strong className="text-[#0c2340]">Price:</strong> $10.99 per 5-gallon jug, free delivery across Metro Vancouver.
             </p>
 
             <h2 className="text-2xl font-extrabold text-[#0c2340] mt-10 mb-4">Distilled Water</h2>
@@ -152,7 +157,7 @@ export default function ArticlePage() {
                     ['Taste', 'Clean, neutral', 'Smooth, slightly sweet', 'Flat, neutral'],
                     ['Best for drinking', '✓ Yes', '✓ Yes', '△ Not ideal long-term'],
                     ['CPAP machines', '✗ No', '✗ No', '✓ Yes — required'],
-                    ['Price per 5-gal jug', '$8.99', '$12.99', '$9.99'],
+                    ['Price per 5-gal jug', '$8.99', '$10.99', '$9.99'],
                     ['Delivery', 'Free', 'Free', 'Free'],
                   ].map(([prop, spring, alk, dist], i) => (
                     <tr key={prop} className={i < 6 ? 'border-b border-[#cce7f0]' : ''}>

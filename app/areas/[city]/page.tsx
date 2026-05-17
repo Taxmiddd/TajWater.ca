@@ -16,7 +16,7 @@ const CITY_DATA: Record<string, { name: string; districts: string[]; schedule: s
     description: 'Vancouver\'s most trusted water delivery service. We deliver 5-gallon spring, alkaline, and distilled water jugs to homes and offices throughout Vancouver — from Downtown to Marpole, Kitsilano to East Van.',
     why: 'Vancouver has excellent municipal water, but many residents notice a chlorine taste — especially in older buildings with aging pipes in Kitsilano and East Van. TajWater delivers independently tested, purified water straight to your door, so every glass is fresh and clean. We offer same-day delivery in Vancouver for orders placed before 12pm, free delivery on every order, and a flexible jug swap system with no commitment required.',
     faq: [
-      { q: 'How much does water delivery cost in Vancouver?', a: 'TajWater\'s 5-gallon water jugs start at $8.99 each for spring water, $12.99 for alkaline, and $9.99 for distilled. Delivery is always free across Vancouver. Orders of 10+ jugs or subscriptions start from $6.49/jug.' },
+      { q: 'How much does water delivery cost in Vancouver?', a: 'TajWater\'s 5-gallon water jugs start at $8.99 each for spring water, $10.99 for alkaline, and $9.99 for distilled. Delivery is always free across Vancouver. Orders of 10+ jugs or subscriptions start from $6.49/jug.' },
       { q: 'Do you offer same-day water delivery in Vancouver?', a: 'Yes. Orders placed before 12pm on a weekday qualify for same-day delivery across most Vancouver neighbourhoods including Downtown, Kitsilano, East Vancouver, Marpole, and Mount Pleasant.' },
       { q: 'Do I need to be home when the water is delivered in Vancouver?', a: 'No. Most Vancouver customers leave a note with their delivery instructions — we place your new jugs and pick up your empties without you needing to be present.' },
     ],
@@ -40,7 +40,7 @@ const CITY_DATA: Record<string, { name: string; districts: string[]; schedule: s
     description: 'Reliable 5-gallon water delivery across Richmond. From Steveston to City Centre, we bring pure spring and alkaline water right to your door.',
     why: 'Richmond\'s water supply passes through an extensive distribution network across the delta, and many residents — particularly in Steveston and Terra Nova — prefer bottled water for drinking and cooking. TajWater delivers BPA-free, purified 5-gallon jugs to Richmond homes and businesses Monday to Saturday with same-day service available.',
     faq: [
-      { q: 'How much does water jug delivery cost in Richmond?', a: 'TajWater delivers 5-gallon water jugs to Richmond starting at $8.99 each with free delivery. Alkaline water is $12.99/jug and distilled is $9.99/jug.' },
+      { q: 'How much does water jug delivery cost in Richmond?', a: 'TajWater delivers 5-gallon water jugs to Richmond starting at $8.99 each with free delivery. Alkaline water is $10.99/jug and distilled is $9.99/jug.' },
       { q: 'Do you deliver water to Steveston?', a: 'Yes. TajWater delivers to all Richmond neighbourhoods including Steveston, City Centre, Brighouse, Terra Nova, and Hamilton.' },
       { q: 'How does the jug return system work in Richmond?', a: 'On your first order, a $12 bottle deposit applies per jug. On every subsequent delivery, our driver swaps your empties for fresh full jugs. The deposit stays on account as long as you order.' },
     ],
@@ -314,7 +314,7 @@ export default async function CityPage({ params }: Props) {
   // Hardcoded featured products to ensure 100% static stability without DB hits at runtime
   const products = [
     { id: 'spring-5g', slug: 'spring-water', name: '5 Gallon Spring Water', price: 8.99, category: 'water' },
-    { id: 'alkaline-5g', slug: 'alkaline-water', name: '5 Gallon Alkaline Water', price: 12.99, category: 'water' },
+    { id: 'alkaline-5g', slug: 'alkaline-water', name: '5 Gallon Alkaline Water', price: 10.99, category: 'water' },
     { id: 'distilled-5g', slug: 'distilled-water', name: '5 Gallon Distilled Water', price: 9.99, category: 'water' },
   ]
 
@@ -337,8 +337,8 @@ export default async function CityPage({ params }: Props) {
     offers: products.length > 0
       ? {
           '@type': 'AggregateOffer',
-          lowPrice: products[0].price.toFixed(2),
-          highPrice: products[products.length - 1].price.toFixed(2),
+          lowPrice: Math.min(...products.map((p) => p.price)).toFixed(2),
+          highPrice: Math.max(...products.map((p) => p.price)).toFixed(2),
           priceCurrency: 'CAD',
           offerCount: products.length,
         }
@@ -493,7 +493,7 @@ export default async function CityPage({ params }: Props) {
                 <tbody>
                   {[
                     { type: 'Spring Water', size: '5 gallon (20L)', price: '$8.99/jug', delivery: 'Free' },
-                    { type: 'Alkaline Water', size: '5 gallon (20L)', price: '$12.99/jug', delivery: 'Free' },
+                    { type: 'Alkaline Water', size: '5 gallon (20L)', price: '$10.99/jug', delivery: 'Free' },
                     { type: 'Distilled Water', size: '5 gallon (20L)', price: '$9.99/jug', delivery: 'Free' },
                     { type: 'Subscription (any type)', size: '5 gallon (20L)', price: 'From $6.49/jug', delivery: 'Free + priority' },
                   ].map((row, i) => (

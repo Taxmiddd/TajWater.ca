@@ -155,10 +155,72 @@ const jsonLd = {
   ),
 }
 
+const howToJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  name: 'How to Order Water Delivery in Metro Vancouver',
+  description: 'Order 5-gallon spring, alkaline, or distilled water jug delivery from Taj Water across Metro Vancouver in 5 simple steps.',
+  totalTime: 'PT5M',
+  estimatedCost: {
+    '@type': 'MonetaryAmount',
+    currency: 'CAD',
+    value: '8.99',
+  },
+  step: [
+    {
+      '@type': 'HowToStep',
+      position: '1',
+      name: 'Choose your water type',
+      text: 'Select from spring water ($8.99/jug), alkaline water ($10.99/jug), or distilled water ($9.99/jug) at tajwater.ca/shop.',
+    },
+    {
+      '@type': 'HowToStep',
+      position: '2',
+      name: 'Select quantity and delivery schedule',
+      text: 'Choose one-time delivery or a recurring subscription (weekly from $29.99 or monthly from $59.99). Orders placed before 12pm qualify for same-day delivery.',
+    },
+    {
+      '@type': 'HowToStep',
+      position: '3',
+      name: 'Enter your Metro Vancouver delivery address',
+      text: 'Provide your home or office address and preferred drop-off location (front door, lobby, garage). Taj Water delivers to 21 cities across Metro Vancouver.',
+    },
+    {
+      '@type': 'HowToStep',
+      position: '4',
+      name: 'Complete your payment',
+      text: 'Pay securely by credit card, e-transfer, or choose cash on delivery. No deposit, no setup fee, no contract required.',
+    },
+    {
+      '@type': 'HowToStep',
+      position: '5',
+      name: 'Receive delivery and leave empty jugs for pickup',
+      text: 'Your driver delivers fresh jugs to your specified location and collects your empty ones. You do not need to be home. Delivery is always free on every order.',
+    },
+  ],
+}
+
+const webPageJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': 'https://tajwater.ca/faq',
+  name: 'Water Delivery FAQ — Metro Vancouver | TajWater',
+  url: 'https://tajwater.ca/faq',
+  description: 'Answers to the most common questions about water delivery in Metro Vancouver. Pricing, same-day delivery, CPAP water, areas served, jug swaps, and more.',
+  speakable: {
+    '@type': 'SpeakableSpecification',
+    cssSelector: ['h1', 'h2', '.faq-answer'],
+  },
+  isPartOf: { '@id': 'https://tajwater.ca/#website' },
+  about: { '@id': 'https://tajwater.ca/#business' },
+}
+
 export default function FAQPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }} />
 
       <main className="min-h-screen bg-[#f0f9ff]">
 
@@ -191,7 +253,7 @@ export default function FAQPage() {
                   {section.faqs.map((faq) => (
                     <div key={faq.q} className="bg-white rounded-2xl border border-[#cce7f0] p-6 shadow-sm">
                       <h3 className="text-[#0c2340] font-bold text-lg mb-3">{faq.q}</h3>
-                      <p className="text-[#4a7fa5] leading-relaxed">{faq.a}</p>
+                      <p className="faq-answer text-[#4a7fa5] leading-relaxed">{faq.a}</p>
                     </div>
                   ))}
                 </div>
