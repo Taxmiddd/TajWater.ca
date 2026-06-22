@@ -41,6 +41,8 @@ interface OrderDetail {
   profile: { name: string; email: string; phone: string } | null
   payment_method?: string | null
   customer_email: string | null
+  tax_amount?: number | null
+  discount_amount?: number | null
 }
 
 const STATUS_STYLE: Record<string, { color: string; icon: React.ElementType; next: string | null; nextLabel: string }> = {
@@ -98,7 +100,7 @@ export default function AdminOrderDetailPage() {
           driver_name, customer_name, customer_phone, notes, created_at, updated_at,
           zones ( name ),
           order_items ( id, quantity, price, products ( name, image_url, category ) ),
-          customer_email
+          customer_email, tax_amount, discount_amount
         `)
         .eq('id', id)
         .maybeSingle()
@@ -223,7 +225,9 @@ export default function AdminOrderDetailPage() {
   const StatusIcon = s.icon
   const currentStep = STEPS.findIndex(st => st.key === order.status)
   const subtotal = order.order_items.reduce((sum, item) => sum + item.price * item.quantity, 0)
-  const deliveryFee = subtotal > 0 ? Number(order.total) - subtotal : 0
+  const tax = Number(order.tax_amount ?? 0)
+  const discount = Number(order.discount_amount ?? 0)
+  const deliveryFee = Math.max(0, parseFloat((Number(order.total) - subtotal + discount - tax).toFixed(2)))
   const zoneName = order.zones ? (Array.isArray(order.zones) ? order.zones[0]?.name : (order.zones as { name: string }).name) : null
   const displayName = order.profile?.name ?? order.customer_name ?? '—'
   const displayPhone = order.profile?.phone ?? order.customer_phone ?? '—'
@@ -427,16 +431,27 @@ export default function AdminOrderDetailPage() {
                 <span>Subtotal</span>
                 <span>${subtotal.toFixed(2)}</span>
               </div>
-              {deliveryFee > 0 && (
+              {discount > 0 && (
+                <div className="flex justify-between text-xs text-green-600 font-medium">
+                  <span>Discount</span>
+                  <span>-${discount.toFixed(2)}</span>
+                </div>
+              )}
+              {deliveryFee > 0 ? (
                 <div className="flex justify-between text-[#4a7fa5]">
                   <span>Delivery fee{zoneName ? ` (${zoneName})` : ''}</span>
                   <span>${deliveryFee.toFixed(2)}</span>
                 </div>
-              )}
-              {deliveryFee === 0 && (
+              ) : (
                 <div className="flex justify-between text-[#4a7fa5]">
                   <span>Delivery</span>
                   <span className="text-green-600 font-medium">Included</span>
+                </div>
+              )}
+              {tax > 0 && (
+                <div className="flex justify-between text-[#4a7fa5]">
+                  <span>Tax (12% BC)</span>
+                  <span>${tax.toFixed(2)}</span>
                 </div>
               )}
               <div className="border-t border-[#e0f7fa] pt-2 flex justify-between font-extrabold text-base text-[#0c2340]">

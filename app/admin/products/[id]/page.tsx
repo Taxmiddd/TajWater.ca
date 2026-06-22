@@ -69,6 +69,7 @@ export default function AdminProductDetailPage() {
         unit_label: data.unit_label || '',
         rating: data.rating || 5.0,
         review_count: data.review_count || 0,
+        taxable: data.taxable !== false,
       })
       setLoading(false)
     }
@@ -312,6 +313,24 @@ export default function AdminProductDetailPage() {
                   className="border-[#cce7f0] focus:border-[#0097a7]"
                   required
                 />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 bg-[#f0f9ff] rounded-xl px-4 py-3 border border-[#cce7f0]">
+              <input
+                type="checkbox"
+                id="taxable"
+                checked={form.taxable !== false}
+                onChange={(e) => setForm({ ...form, taxable: e.target.checked })}
+                className="w-4 h-4 accent-[#0097a7]"
+              />
+              <div>
+                <label htmlFor="taxable" className="text-sm font-medium text-[#0c2340] cursor-pointer">
+                  Taxable (apply 12% BC tax at checkout)
+                </label>
+                <p className="text-[10px] text-[#4a7fa5] mt-0.5">
+                  Uncheck for tax-exempt products. Affects checkout and order totals.
+                </p>
               </div>
             </div>
           </div>

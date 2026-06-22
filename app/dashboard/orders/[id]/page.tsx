@@ -41,6 +41,7 @@ interface OrderDetail {
   updated_at: string | null
   zones: { name: string; delivery_fee: number } | null
   order_items: OrderItem[]
+  discount_amount?: number | null
 }
 
 // ── Config ────────────────────────────────────────────────────────────────────
@@ -129,7 +130,7 @@ export default function OrderDetailPage() {
       const { data, error } = await supabase
         .from('orders')
         .select(`
-          id, user_id, status, payment_status, payment_method, total, tax_amount,
+          id, user_id, status, payment_status, payment_method, total, tax_amount, discount_amount,
           delivery_address, notes, driver_name, customer_name, customer_phone,
           created_at, updated_at,
           zones ( name, delivery_fee ),
@@ -195,7 +196,8 @@ export default function OrderDetailPage() {
   const payKey   = order.payment_status ?? 'pending'
   const subtotal = order.order_items.reduce((s, i) => s + i.price * i.quantity, 0)
   const tax      = Number(order.tax_amount ?? 0)
-  const delivery = Number(order.zones?.delivery_fee ?? 0)
+  const discount = Number(order.discount_amount ?? 0)
+  const delivery = Math.max(0, parseFloat((Number(order.total) - subtotal + discount - tax).toFixed(2)))
   const balance  = payKey === 'paid' ? 0 : Number(order.total)
   const totalQty = order.order_items.reduce((s, i) => s + i.quantity, 0)
 
@@ -317,6 +319,12 @@ export default function OrderDetailPage() {
                   <span>Subtotal · {totalQty} item{totalQty !== 1 ? 's' : ''}</span>
                   <span>${subtotal.toFixed(2)}</span>
                 </div>
+                {discount > 0 && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Discount</span>
+                    <span>-${discount.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-gray-500">
                   <span>Shipping {order.zones?.name ? `(${order.zones.name})` : ''}</span>
                   <span>{delivery > 0 ? `$${delivery.toFixed(2)}` : 'Free'}</span>

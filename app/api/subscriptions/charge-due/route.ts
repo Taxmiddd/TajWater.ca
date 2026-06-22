@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
 
   const [{ data: profiles }, { data: products }, { data: zones }] = await Promise.all([
     db.from('profiles').select('id, name, email, phone, delivery_address, zone_id, square_customer_id, square_card_id').in('id', userIds),
-    db.from('products').select('id, name, price, active').in('id', productIds),
+    db.from('products').select('id, name, price, active, taxable').in('id', productIds),
     db.from('zones').select('id, delivery_fee').in('id', zoneIds),
   ])
 
@@ -79,7 +79,8 @@ export async function POST(req: NextRequest) {
 
     const zoneFee = zoneMap.get(subscription.zone_id) ?? 0
     const subtotal = Number(subscription.price) * Number(subscription.quantity)
-    const taxAmount = Math.round(subtotal * 0.12 * 100) / 100
+    const isTaxable = product?.taxable !== false
+    const taxAmount = isTaxable ? Math.round(subtotal * 0.12 * 100) / 100 : 0
     const serverTotal = Math.round((subtotal + zoneFee + taxAmount) * 100) / 100
 
     const trackingToken = crypto.randomUUID()

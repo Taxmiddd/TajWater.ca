@@ -356,7 +356,7 @@ export default function SettingsPage() {
               <>
                 <div className="p-5 border-b border-[#cce7f0] dark:border-white/10 bg-[#f0f9ff]/50 dark:bg-white/5">
                   <h4 className="text-sm font-bold text-[#0c2340] dark:text-[#f8fafc] mb-3">Add New Zone</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+                  <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 items-end">
                     <div className="sm:col-span-2">
                       <label className="text-xs font-bold text-[#4a7fa5] dark:text-[#94a3b8] mb-1.5 block">City Name</label>
                       <Input
@@ -376,25 +376,32 @@ export default function SettingsPage() {
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-[#4a7fa5] dark:text-[#94a3b8] mb-1.5 flex justify-between">
-                        Fee
-                        {!newZone.name.trim() && <span className="text-red-400">Required</span>}
-                      </label>
-                      <div className="flex gap-2">
-                        <Input
-                          type="number" min="0" step="0.50"
-                          value={newZone.delivery_fee}
-                          onChange={e => setNewZone(p => ({ ...p, delivery_fee: parseFloat(e.target.value) || 0 }))}
-                          className="border-[#cce7f0] dark:border-white/10 bg-white dark:bg-white/5 dark:text-white h-9"
+                      <label className="text-xs font-bold text-[#4a7fa5] dark:text-[#94a3b8] mb-1.5 block">Fee ($)</label>
+                      <Input
+                        type="number" min="0" step="0.50"
+                        value={newZone.delivery_fee}
+                        disabled={newZone.delivery_fee === 0}
+                        onChange={e => setNewZone(p => ({ ...p, delivery_fee: parseFloat(e.target.value) || 0 }))}
+                        className="border-[#cce7f0] dark:border-white/10 bg-white dark:bg-white/5 dark:text-white h-9 disabled:opacity-50"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-bold text-[#4a7fa5] dark:text-[#94a3b8] flex items-center gap-1 cursor-pointer select-none h-5">
+                        <input
+                          type="checkbox"
+                          checked={newZone.delivery_fee === 0}
+                          onChange={e => setNewZone(p => ({ ...p, delivery_fee: e.target.checked ? 0 : 5.00 }))}
+                          className="w-3.5 h-3.5 accent-green-600"
                         />
-                        <Button
-                          onClick={handleAddZone}
-                          disabled={saving || !newZone.name.trim()}
-                          className="h-9 px-4 bg-[#0097a7] hover:bg-[#00838f] text-white shrink-0"
-                        >
-                          Add
-                        </Button>
-                      </div>
+                        Free Delivery
+                      </label>
+                      <Button
+                        onClick={handleAddZone}
+                        disabled={saving || !newZone.name.trim()}
+                        className="h-9 w-full bg-[#0097a7] hover:bg-[#00838f] text-white shrink-0"
+                      >
+                        Add
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -405,6 +412,7 @@ export default function SettingsPage() {
                     <span className="flex-1 text-xs font-bold text-[#4a7fa5] dark:text-[#94a3b8] uppercase">Zone</span>
                     <span className="w-32 text-xs font-bold text-[#4a7fa5] dark:text-[#94a3b8] uppercase">Schedule</span>
                     <span className="w-28 text-xs font-bold text-[#4a7fa5] dark:text-[#94a3b8] uppercase">Fee ($)</span>
+                    <span className="w-16 text-xs font-bold text-[#4a7fa5] dark:text-[#94a3b8] uppercase text-center font-bold">Free</span>
                     <span className="w-16 text-xs font-bold text-[#4a7fa5] dark:text-[#94a3b8] uppercase text-center">Active</span>
                   </div>
 
@@ -427,8 +435,17 @@ export default function SettingsPage() {
                           min="0"
                           step="0.50"
                           value={z.delivery_fee}
+                          disabled={z.delivery_fee === 0}
                           onChange={e => updateZone(z.id, 'delivery_fee', parseFloat(e.target.value) || 0)}
-                          className="border-[#cce7f0] dark:border-white/10 dark:bg-white/5 dark:text-white h-7 w-20 text-xs text-right transition-colors"
+                          className="border-[#cce7f0] dark:border-white/10 dark:bg-white/5 dark:text-white h-7 w-20 text-xs text-right transition-colors disabled:opacity-50"
+                        />
+                      </div>
+                      <div className="w-16 flex justify-center">
+                        <input
+                          type="checkbox"
+                          checked={z.delivery_fee === 0}
+                          onChange={e => updateZone(z.id, 'delivery_fee', e.target.checked ? 0 : 5.00)}
+                          className="w-4 h-4 accent-green-600 cursor-pointer"
                         />
                       </div>
                       <div className="w-16 flex justify-center">
