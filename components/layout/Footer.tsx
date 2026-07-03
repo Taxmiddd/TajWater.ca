@@ -5,6 +5,14 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Phone, Mail, MapPin, Facebook, Instagram, Twitter, MessageCircle } from 'lucide-react'
+
+function TikTokIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.79 1.53V6.77a4.85 4.85 0 01-1.02-.08z" />
+    </svg>
+  )
+}
 import { supabase } from '@/lib/supabase'
 
 export default function Footer() {
@@ -14,17 +22,17 @@ export default function Footer() {
   const [address, setAddress] = useState('Vancouver, BC, Canada')
   const [hours, setHours] = useState('Mon – Sat: 7am – 7pm\nSunday: 9am – 5pm')
   const [zones, setZones] = useState<string[]>([])
-  const [socials, setSocials] = useState({ facebook: '', instagram: '', twitter: '' })
+  const [socials, setSocials] = useState({ facebook: '', instagram: '', twitter: '', tiktok: '' })
 
   useEffect(() => {
     if (!supabase.from) return
     supabase
       .from('site_content')
       .select('key, value')
-      .in('key', ['settings_phone', 'settings_email', 'settings_address', 'settings_hours', 'social_facebook', 'social_instagram', 'social_twitter'])
+      .in('key', ['settings_phone', 'settings_email', 'settings_address', 'settings_hours', 'social_facebook', 'social_instagram', 'social_twitter', 'social_tiktok'])
       .then(({ data }) => {
         if (!data) return
-        const fb: typeof socials = { facebook: '', instagram: '', twitter: '' }
+        const fb: typeof socials = { facebook: '', instagram: '', twitter: '', tiktok: '' }
         for (const row of data) {
           if (row.key === 'settings_phone') setPhone(row.value)
           if (row.key === 'settings_email') setEmail(row.value)
@@ -33,6 +41,7 @@ export default function Footer() {
           if (row.key === 'social_facebook') fb.facebook = row.value
           if (row.key === 'social_instagram') fb.instagram = row.value
           if (row.key === 'social_twitter') fb.twitter = row.value
+          if (row.key === 'social_tiktok') fb.tiktok = row.value
         }
         setSocials(fb)
       })
@@ -71,17 +80,19 @@ export default function Footer() {
             <p className="text-[#b3e5fc] text-sm leading-relaxed mb-6 text-center sm:text-left">
               Delivering pure, fresh water across Metro Vancouver. Trusted by thousands of households and businesses since 2023.
             </p>
-            <div className="flex gap-4 justify-center sm:justify-start">
+            <div className="flex gap-3 flex-wrap justify-center sm:justify-start">
               {[
-                { icon: Facebook, href: socials.facebook || null },
-                { icon: Instagram, href: socials.instagram || null },
-                { icon: Twitter, href: socials.twitter || null },
-              ].filter(s => s.href).map(({ icon: Icon, href }, i) => (
-                <a key={i} href={href!} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-xl bg-white/10 hover:bg-[#00bcd4] flex items-center justify-center text-white transition-all duration-200 hover:scale-110">
+                { icon: Facebook, href: socials.facebook || null, label: 'Facebook', color: 'hover:bg-[#1877f2]' },
+                { icon: Instagram, href: socials.instagram || null, label: 'Instagram', color: 'hover:bg-[#e1306c]' },
+                { icon: Twitter, href: socials.twitter || null, label: 'X / Twitter', color: 'hover:bg-[#000000]' },
+                { icon: TikTokIcon, href: socials.tiktok || null, label: 'TikTok', color: 'hover:bg-[#010101]' },
+              ].filter(s => s.href).map(({ icon: Icon, href, label, color }, i) => (
+                <a key={i} href={href!} target="_blank" rel="noopener noreferrer" aria-label={label}
+                  className={`w-10 h-10 rounded-xl bg-white/10 ${color} flex items-center justify-center text-white transition-all duration-200 hover:scale-110`}>
                   <Icon className="w-5 h-5" />
                 </a>
               ))}
-              <a href={`https://wa.me/${whatsapp}`} className="w-10 h-10 rounded-xl bg-[#25d366]/20 hover:bg-[#25d366] flex items-center justify-center text-white transition-all duration-200 hover:scale-110">
+              <a href={`https://wa.me/${whatsapp}`} aria-label="WhatsApp" className="w-10 h-10 rounded-xl bg-[#25d366]/20 hover:bg-[#25d366] flex items-center justify-center text-white transition-all duration-200 hover:scale-110">
                 <MessageCircle className="w-5 h-5" />
               </a>
             </div>
@@ -103,6 +114,7 @@ export default function Footer() {
                 { label: 'Distilled Water Delivery', href: '/distilled-water-delivery-vancouver' },
                 { label: 'About Us', href: '/about' },
                 { label: 'Contact', href: '/contact' },
+                { label: 'Follow Us', href: '/socials' },
               ].map((l) => (
                 <li key={l.href}>
                   <Link href={l.href} className="text-[#b3e5fc] hover:text-white text-sm transition-colors hover:translate-x-1 inline-block duration-200">

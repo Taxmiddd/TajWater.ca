@@ -83,7 +83,7 @@ export default function SettingsPage() {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([])
   const [newZone, setNewZone] = useState({ name: '', schedule: 'Wednesdays and Fridays', delivery_fee: 5 })
   const [revenueGoal, setRevenueGoal] = useState('')
-  const [socials, setSocialsState] = useState({ facebook: '', instagram: '', twitter: '' })
+  const [socials, setSocialsState] = useState({ facebook: '', instagram: '', twitter: '', tiktok: '' })
   const [emailTmpl, setEmailTmpl] = useState<Record<EmailTemplateKey, string>>(EMAIL_TEMPLATE_DEFAULTS)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -98,7 +98,7 @@ export default function SettingsPage() {
     const allContentKeys = [
       'settings_company', 'settings_phone', 'settings_email', 'settings_address', 'settings_hours',
       'monthly_revenue_goal',
-      'social_facebook', 'social_instagram', 'social_twitter',
+      'social_facebook', 'social_instagram', 'social_twitter', 'social_tiktok',
       ...NOTIF_KEYS.map(n => n.key),
       ...EMAIL_TEMPLATE_KEYS,
     ]
@@ -131,6 +131,7 @@ export default function SettingsPage() {
         facebook: map['social_facebook'] ?? '',
         instagram: map['social_instagram'] ?? '',
         twitter: map['social_twitter'] ?? '',
+        tiktok: map['social_tiktok'] ?? '',
       })
       const tmpl = { ...EMAIL_TEMPLATE_DEFAULTS }
       EMAIL_TEMPLATE_KEYS.forEach(k => { if (map[k]) tmpl[k] = map[k] })
@@ -156,6 +157,7 @@ export default function SettingsPage() {
       { key: 'social_facebook', value: socials.facebook },
       { key: 'social_instagram', value: socials.instagram },
       { key: 'social_twitter', value: socials.twitter },
+      { key: 'social_tiktok', value: socials.tiktok },
     ]
     const { error } = await supabase.from('site_content').upsert(rows, { onConflict: 'key' })
     setSaving(false)
@@ -272,6 +274,9 @@ export default function SettingsPage() {
           </TabsTrigger>
           <TabsTrigger value="subscribers" className="rounded-xl px-5 py-2 text-sm font-bold data-[state=active]:bg-[#e0f7fa] dark:data-[state=active]:bg-[#0097a7]/20 data-[state=active]:text-[#0097a7] dark:data-[state=active]:text-[#b3e5fc] transition-all">
             <Users className="w-4 h-4 mr-2" /> Subscribers
+          </TabsTrigger>
+          <TabsTrigger value="socials" className="rounded-xl px-5 py-2 text-sm font-bold data-[state=active]:bg-[#e0f7fa] dark:data-[state=active]:bg-[#0097a7]/20 data-[state=active]:text-[#0097a7] dark:data-[state=active]:text-[#b3e5fc] transition-all">
+            <Share2 className="w-4 h-4 mr-2" /> Socials
           </TabsTrigger>
         </TabsList>
 
@@ -600,6 +605,7 @@ export default function SettingsPage() {
               { label: 'Facebook URL', field: 'facebook' as const, placeholder: 'https://facebook.com/yourpage' },
               { label: 'Instagram URL', field: 'instagram' as const, placeholder: 'https://instagram.com/yourhandle' },
               { label: 'Twitter / X URL', field: 'twitter' as const, placeholder: 'https://x.com/yourhandle' },
+              { label: 'TikTok URL', field: 'tiktok' as const, placeholder: 'https://tiktok.com/@yourhandle' },
             ].map(({ label, field, placeholder }) => (
               <div key={field}>
                 <label className="text-sm font-bold text-[#0c2340] dark:text-[#f8fafc] mb-1.5 block">{label}</label>

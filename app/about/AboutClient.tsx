@@ -1,7 +1,9 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Shield, Award, Leaf, Heart, Users, Droplets } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Shield, Award, Leaf, Heart, Users, Droplets,
@@ -34,6 +36,72 @@ interface Props {
 }
 
 export default function AboutClient({ team, mission, vision, heroSubtitle }: Props) {
+  const [socials, setSocials] = useState({ facebook: '', instagram: '', twitter: '', tiktok: '' })
+
+  useEffect(() => {
+    supabase
+      .from('site_content')
+      .select('key, value')
+      .in('key', ['social_facebook', 'social_instagram', 'social_twitter', 'social_tiktok'])
+      .then(({ data }) => {
+        if (!data) return
+        const s = { facebook: '', instagram: '', twitter: '', tiktok: '' }
+        for (const row of data) {
+          if (row.key === 'social_facebook') s.facebook = row.value
+          if (row.key === 'social_instagram') s.instagram = row.value
+          if (row.key === 'social_twitter') s.twitter = row.value
+          if (row.key === 'social_tiktok') s.tiktok = row.value
+        }
+        setSocials(s)
+      })
+  }, [])
+
+  const socialPlatforms = [
+    {
+      key: 'facebook',
+      label: 'Facebook',
+      handle: socials.facebook,
+      href: socials.facebook,
+      gradient: 'from-[#1877f2] to-[#0d5dbf]',
+      icon: (
+        <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+      ),
+      desc: 'Like our page for updates & promos',
+    },
+    {
+      key: 'instagram',
+      label: 'Instagram',
+      handle: socials.instagram,
+      href: socials.instagram,
+      gradient: 'from-[#f58529] via-[#dd2a7b] to-[#8134af]',
+      icon: (
+        <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+      ),
+      desc: 'See behind-the-scenes & delivery highlights',
+    },
+    {
+      key: 'twitter',
+      label: 'X (Twitter)',
+      handle: socials.twitter,
+      href: socials.twitter,
+      gradient: 'from-[#111] to-[#333]',
+      icon: (
+        <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.26 5.632zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      ),
+      desc: 'Follow for quick tips & service news',
+    },
+    {
+      key: 'tiktok',
+      label: 'TikTok',
+      handle: socials.tiktok,
+      href: socials.tiktok,
+      gradient: 'from-[#010101] to-[#69c9d0]',
+      icon: (
+        <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.79 1.53V6.77a4.85 4.85 0 01-1.02-.08z"/></svg>
+      ),
+      desc: 'Watch our water delivery in action',
+    },
+  ].filter(p => p.href)
   return (
     <div className="min-h-screen">
       {/* Hero */}
@@ -180,6 +248,45 @@ export default function AboutClient({ team, mission, vision, heroSubtitle }: Pro
           </div>
         </div>
       </section>
+
+      {/* Social Media */}
+      {socialPlatforms.length > 0 && (
+        <section className="py-20 bg-[#f0f9ff]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-extrabold text-[#0c2340] mb-3">Follow Us on <span className="gradient-text">Social Media</span></h2>
+              <p className="text-[#4a7fa5]">Stay connected with TajWater for updates, tips, and behind-the-scenes content.</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto">
+              {socialPlatforms.map((platform, i) => (
+                <motion.a
+                  key={platform.key}
+                  href={platform.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-50px' }}
+                  transition={{ delay: i * 0.1 }}
+                  whileHover={{ y: -4 }}
+                  className="group bg-white rounded-3xl p-6 text-center border border-[#cce7f0] shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center gap-3"
+                >
+                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${platform.gradient} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                    {platform.icon}
+                  </div>
+                  <div>
+                    <p className="font-bold text-[#0c2340] text-base">{platform.label}</p>
+                    <p className="text-xs text-[#4a7fa5] mt-1">{platform.desc}</p>
+                  </div>
+                  <span className={`mt-auto text-xs font-semibold px-4 py-1.5 rounded-full bg-gradient-to-r ${platform.gradient} text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200`}>
+                    Follow →
+                  </span>
+                </motion.a>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* NAP block — critical for local SEO */}
       <section className="py-16 bg-white border-t border-[#cce7f0]">
