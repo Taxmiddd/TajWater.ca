@@ -129,7 +129,13 @@ export default function WalletPage() {
             </div>
             <h3 className="text-xl font-bold text-[#0c2340]">Recharge Wallet</h3>
           </div>
-          <p className="text-xs text-[#4a7fa5] mb-6">Choose a package — the more you load, the more bonus credits you get!</p>
+          <p className="text-xs text-[#4a7fa5] mb-2">Choose a package — the more you load, the more bonus credits you get!</p>
+          <div className="bg-[#f0f9ff] border border-[#cce7f0] rounded-xl p-3 mb-6 flex items-start gap-2">
+            <Info className="w-4 h-4 text-[#0097a7] shrink-0 mt-0.5" />
+            <p className="text-[11px] text-[#4a7fa5] leading-relaxed">
+              Note: To purchase wallet credits, you must have an active TajWater account and be logged in. Credits are tied directly to your account.
+            </p>
+          </div>
 
           <div className="space-y-3">
             {RECHARGE_PACKAGES.map((pkg) => {

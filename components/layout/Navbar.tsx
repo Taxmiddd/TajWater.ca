@@ -14,6 +14,7 @@ const navLinks = [
   { label: 'Services', href: '/services' },
   { label: 'Delivery Areas', href: '/areas' },
   { label: 'Shop', href: '/shop' },
+  { label: 'Wallet', href: '/dashboard/wallet' },
   { label: 'Blog', href: '/blog' },
   { label: 'FAQ', href: '/faq' },
   { label: 'Contact', href: '/contact' },

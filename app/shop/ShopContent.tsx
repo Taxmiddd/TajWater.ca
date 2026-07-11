@@ -180,21 +180,35 @@ export default function ShopContent({ initialProducts }: ShopContentProps) {
 
                       <div className="flex items-center justify-between mt-6">
                         <div>
-                          <p className="text-2xl font-extrabold" style={{ color }}>${product.price.toFixed(2)}</p>
-                          <p className="text-xs text-[#4a7fa5]">
-                            {product.category === 'subscription' && !product.unit_label 
-                              ? '/month' 
-                              : product.unit_label 
-                                ? (product.unit_label.toLowerCase().includes('per') || 
-                                   product.unit_label.startsWith('/') || 
-                                   product.unit_label.toLowerCase().startsWith('each') 
-                                     ? product.unit_label 
-                                     : `per ${product.unit_label}`) 
-                                : 'per unit'}
-                          </p>
+                          {product.call_for_price ? (
+                            <p className="text-xl font-extrabold" style={{ color }}>Call for Price</p>
+                          ) : (
+                            <>
+                              <p className="text-2xl font-extrabold" style={{ color }}>${product.price.toFixed(2)}</p>
+                              <p className="text-xs text-[#4a7fa5]">
+                                {product.category === 'subscription' && !product.unit_label 
+                                  ? '/month' 
+                                  : product.unit_label 
+                                    ? (product.unit_label.toLowerCase().includes('per') || 
+                                       product.unit_label.startsWith('/') || 
+                                       product.unit_label.toLowerCase().startsWith('each') 
+                                         ? product.unit_label 
+                                         : `per ${product.unit_label}`) 
+                                    : 'per unit'}
+                              </p>
+                            </>
+                          )}
                         </div>
 
-                        {qty > 0 ? (
+                        {product.call_for_price ? (
+                          <Link href="/contact">
+                            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
+                              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold transition-all"
+                              style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}>
+                              Contact Us
+                            </motion.button>
+                          </Link>
+                        ) : qty > 0 ? (
                           <div className="flex items-center gap-2">
                             <button onClick={() => updateQuantity(product.id, qty - 1)} className="w-8 h-8 rounded-lg border border-[#cce7f0] flex items-center justify-center hover:border-[#0097a7] hover:text-[#0097a7] transition-colors">
                               <Minus className="w-3.5 h-3.5" />

@@ -117,7 +117,7 @@ export default function WaterGuide() {
                   <h3 className="text-xl font-extrabold text-[#0c2340] mb-1">{type.name}</h3>
                   <div className="flex items-baseline gap-1.5">
                     <span className="text-2xl font-extrabold" style={{ color: type.accent }}>{type.price}</span>
-                    <span className="text-xs text-[#4a7fa5]">/ jug · free delivery</span>
+                    <span className="text-xs text-[#4a7fa5]">/ jug</span>
                   </div>
                 </div>
 

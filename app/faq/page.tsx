@@ -58,12 +58,8 @@ const faqSections = [
     title: 'Pricing & Payment',
     faqs: [
       {
-        q: 'How much does water delivery cost?',
-        a: 'Taj Water pricing is: Spring Water — $8.99/jug one-time. Alkaline Water — $10.99/jug one-time. Distilled Water — $9.99/jug one-time. Delivery fees vary by zone and are displayed at checkout. Prices are in CAD.'
-      },
-      {
         q: 'Is there a minimum order quantity?',
-        a: 'No. You can order as few as one jug. There is no minimum quantity for one-time orders. Most households order 2–4 jugs per delivery.'
+        a: 'First orders require a minimum of 2 water jugs. After your first order, you can order as few as one jug. Most households order 2–4 jugs per delivery.'
       },
       {
         q: 'What payment methods do you accept?',

@@ -177,7 +177,9 @@ export default function ProductShowcase() {
 
                   <div className="flex items-center justify-between">
                     <div>
-                      {product.price > 0 ? (
+                      {product.call_for_price ? (
+                        <p className="text-xl font-extrabold" style={{ color: theme.iconColor }}>Call for Price</p>
+                      ) : product.price > 0 ? (
                         <>
                           <p className="text-2xl font-extrabold" style={{ color: theme.iconColor }}>${product.price.toFixed(2)}</p>
                           <p className="text-xs text-[#4a7fa5]">
@@ -197,7 +199,7 @@ export default function ProductShowcase() {
                         </>
                       )}
                     </div>
-                    <Link href={product.price > 0 ? '/shop' : '/contact'}>
+                    <Link href={product.call_for_price ? '/contact' : product.price > 0 ? '/shop' : '/contact'}>
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.97 }}
@@ -205,7 +207,7 @@ export default function ProductShowcase() {
                         style={{ background: `linear-gradient(135deg, ${theme.iconColor}, ${theme.badgeColor})` }}
                       >
                         <ShoppingCart className="w-4 h-4" />
-                        {product.price > 0 ? 'Add to Cart' : 'Get Quote'}
+                        {product.call_for_price ? 'Contact Us' : product.price > 0 ? 'Add to Cart' : 'Get Quote'}
                       </motion.button>
                     </Link>
                   </div>

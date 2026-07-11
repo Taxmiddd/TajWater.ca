@@ -15,7 +15,7 @@ import type { Product } from '@/types'
 const categories = ['water', 'equipment', 'subscription', 'accessories']
 const categoryEmoji: Record<string, string> = { water: '💧', equipment: '🔧', subscription: '🔄', accessories: '🧹' }
 
-const empty: Omit<Product, 'id'> = { name: '', description: '', price: 0, image_url: '', stock: 0, category: 'water', active: true, featured: false, unit_label: 'unit', rating: 5.0, review_count: 0, subscription_interval: null, taxable: true }
+const empty: Omit<Product, 'id'> = { name: '', description: '', price: 0, image_url: '', stock: 0, category: 'water', active: true, featured: false, unit_label: 'unit', rating: 5.0, review_count: 0, subscription_interval: null, taxable: true, wallet_eligible: true, call_for_price: false }
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
@@ -428,10 +428,25 @@ export default function AdminProductsPage() {
             <div className="flex items-center gap-3 bg-[#f0f9ff] dark:bg-white/5 rounded-xl px-4 py-3 border border-[#cce7f0] dark:border-white/10">
               <input type="checkbox" id="taxable" checked={form.taxable !== false} onChange={(e) => setForm({ ...form, taxable: e.target.checked })} className="w-4 h-4 accent-[#0097a7]" />
               <div>
-                <label htmlFor="taxable" className="text-sm font-medium text-[#0c2340] dark:text-[#f8fafc] cursor-pointer">Taxable (apply 12% BC tax at checkout)</label>
-                <p className="text-[10px] text-[#4a7fa5] dark:text-[#94a3b8] mt-0.5">Uncheck for tax-exempt products. Affects checkout and order totals.</p>
+                <label htmlFor="taxable" className="text-sm font-bold text-[#0c2340] dark:text-[#f8fafc] block">Taxable</label>
+                <p className="text-[10px] text-[#4a7fa5] dark:text-[#b3e5fc]/80">BC standard 12% tax will be applied at checkout</p>
               </div>
             </div>
+            <div className="flex items-center gap-3 bg-[#e8f5e9] dark:bg-green-900/10 rounded-xl px-4 py-3 border border-[#c8e6c9] dark:border-green-900/30">
+              <input type="checkbox" id="wallet_eligible" checked={form.wallet_eligible !== false} onChange={(e) => setForm({ ...form, wallet_eligible: e.target.checked })} className="w-4 h-4 accent-green-600" />
+              <div>
+                <label htmlFor="wallet_eligible" className="text-sm font-bold text-[#0c2340] dark:text-[#f8fafc] block">Wallet Eligible</label>
+                <p className="text-[10px] text-green-700 dark:text-green-400">Can customers use wallet credits to pay for this item?</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 bg-[#fff3e0] dark:bg-orange-900/10 rounded-xl px-4 py-3 border border-[#ffe0b2] dark:border-orange-900/30">
+              <input type="checkbox" id="call_for_price" checked={form.call_for_price === true} onChange={(e) => setForm({ ...form, call_for_price: e.target.checked })} className="w-4 h-4 accent-orange-500" />
+              <div>
+                <label htmlFor="call_for_price" className="text-sm font-bold text-[#0c2340] dark:text-[#f8fafc] block">Call for Price</label>
+                <p className="text-[10px] text-orange-700 dark:text-orange-400">Hides price and replaces Add to Cart with Contact Us</p>
+              </div>
+            </div>
+
             <div className="flex gap-3 pt-2">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="flex-1 border-[#cce7f0] dark:border-white/10 dark:text-white hover:bg-white/5 transition-colors">Cancel</Button>
               <Button type="submit" disabled={saving} className="flex-1 bg-gradient-to-r from-[#0097a7] to-[#1565c0] text-white shadow-lg shadow-blue-500/20">

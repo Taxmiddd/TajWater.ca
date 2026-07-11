@@ -163,19 +163,25 @@ export default function ProductDetailContent({
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-extrabold" style={{ color }}>${displayPrice.toFixed(2)}</span>
+                    {product.call_for_price ? (
+                      <span className="text-4xl font-extrabold" style={{ color }}>Call for Price</span>
+                    ) : (
+                      <span className="text-4xl font-extrabold" style={{ color }}>${displayPrice.toFixed(2)}</span>
+                    )}
                   </div>
-                  <p className="text-sm text-[#4a7fa5]">
-                    {product.category === 'subscription' && !product.unit_label
-                      ? 'per month'
-                      : product.unit_label
-                        ? (product.unit_label.toLowerCase().includes('per') ||
-                           product.unit_label.startsWith('/') ||
-                           product.unit_label.toLowerCase().startsWith('each')
-                             ? product.unit_label
-                             : `per ${product.unit_label}`)
-                        : 'per unit'}
-                  </p>
+                  {!product.call_for_price && (
+                    <p className="text-sm text-[#4a7fa5]">
+                      {product.category === 'subscription' && !product.unit_label
+                        ? 'per month'
+                        : product.unit_label
+                          ? (product.unit_label.toLowerCase().includes('per') ||
+                             product.unit_label.startsWith('/') ||
+                             product.unit_label.toLowerCase().startsWith('each')
+                               ? product.unit_label
+                               : `per ${product.unit_label}`)
+                          : 'per unit'}
+                    </p>
+                  )}
                 </div>
                 <div className="text-right">
                   <p className={`font-bold ${product.stock > 0 ? 'text-green-600' : 'text-red-500'}`}>
@@ -185,7 +191,20 @@ export default function ProductDetailContent({
               </div>
 
               {/* Quantity + Add */}
-              {qty > 0 ? (
+              {product.call_for_price ? (
+                <div className="flex gap-3">
+                  <Link href="/contact" className="flex-1">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="w-full h-12 rounded-xl text-white font-semibold flex items-center justify-center gap-2 transition-all"
+                      style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}
+                    >
+                      Contact Us
+                    </motion.button>
+                  </Link>
+                </div>
+              ) : qty > 0 ? (
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-3 bg-[#f0f9ff] rounded-xl p-1">
                     <button

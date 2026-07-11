@@ -41,6 +41,8 @@ export interface Product {
   review_count?: number
   subscription_interval?: 'daily' | 'weekly' | 'biweekly' | 'monthly' | null
   taxable?: boolean
+  wallet_eligible?: boolean
+  call_for_price?: boolean
 }
 
 export interface Order {

@@ -79,9 +79,6 @@ export async function POST(req: NextRequest) {
     const isOffline = paymentMethod === 'card_on_delivery'
     const isWallet = paymentMethod === 'wallet'
 
-    // Wallet-eligible product categories
-    const WALLET_ELIGIBLE_CATEGORIES = ['water', 'refill', 'water_product']
-
     const isSubscriptionOrder = Array.isArray(items) && (items as CartItem[]).some(i => !!i.subscribeFrequency || i.category === 'subscription')
     if (!sourceId && !isOffline && !isWallet && !isSubscriptionOrder) {
       return NextResponse.json({ error: 'Payment source token is required' }, { status: 400 })
@@ -117,14 +114,14 @@ export async function POST(req: NextRequest) {
     const productIds = items.map((i: { product_id: string }) => i.product_id)
     const { data: products, error: productError } = await db
       .from('products')
-      .select('id, price, active, category, subscription_interval, taxable')
+      .select('id, price, active, category, subscription_interval, taxable, wallet_eligible')
       .in('id', productIds)
 
     if (productError || !products) {
       return NextResponse.json({ error: 'Failed to fetch product prices' }, { status: 500 })
     }
 
-    const productMap: Record<string, { price: number; category: string; subscription_interval: string | null; taxable: boolean }> = {}
+    const productMap: Record<string, { price: number; category: string; subscription_interval: string | null; taxable: boolean; wallet_eligible: boolean }> = {}
     for (const p of products) {
       if (!p.active) {
         return NextResponse.json({ error: `Product is no longer available` }, { status: 400 })
@@ -134,6 +131,7 @@ export async function POST(req: NextRequest) {
         category: p.category,
         subscription_interval: p.subscription_interval ?? null,
         taxable: p.taxable !== false,
+        wallet_eligible: p.wallet_eligible !== false,
       }
     }
 
@@ -188,11 +186,11 @@ export async function POST(req: NextRequest) {
     // 5a. For wallet payments, enforce that all items are wallet-eligible
     if (isWallet) {
       const ineligibleItems = (items as CartItem[]).filter(i =>
-        !WALLET_ELIGIBLE_CATEGORIES.includes(productMap[i.product_id]?.category ?? '')
+        !productMap[i.product_id]?.wallet_eligible
       )
       if (ineligibleItems.length > 0) {
         return NextResponse.json(
-          { error: 'Wallet credits can only be used for water refills and water products. Please use card payment for other items.' },
+          { error: 'One or more items in your cart cannot be paid for using wallet credits. Please use a card or remove those items.' },
           { status: 400 }
         )
       }
