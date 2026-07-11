@@ -71,7 +71,30 @@ export default function ProductShowcase() {
       })
   }, [])
 
-  if (loading) return null // Hide section while loading for better UX on initial landing
+  if (loading) return (
+    <section className="py-24 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <div className="h-6 w-32 rounded-full bg-[#e0f7fa] mx-auto mb-3 animate-pulse" />
+          <div className="h-10 w-80 rounded-xl bg-[#e0f7fa] mx-auto mb-4 animate-pulse" />
+          <div className="h-5 w-96 rounded-lg bg-[#e0f7fa] mx-auto animate-pulse" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="rounded-3xl border border-[#cce7f0] overflow-hidden animate-pulse">
+              <div className="aspect-[4/5] bg-[#e0f7fa]" />
+              <div className="p-6 space-y-3">
+                <div className="h-6 w-3/4 bg-[#e0f7fa] rounded-lg" />
+                <div className="h-4 w-full bg-[#e0f7fa] rounded-lg" />
+                <div className="h-4 w-5/6 bg-[#e0f7fa] rounded-lg" />
+                <div className="h-10 w-28 bg-[#e0f7fa] rounded-xl mt-4" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
   return (
     <section className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

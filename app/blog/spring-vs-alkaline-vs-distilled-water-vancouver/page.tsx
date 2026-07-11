@@ -45,7 +45,7 @@ const faqSchema = {
   mainEntity: [
     { '@type': 'Question', name: 'What is the difference between spring water and alkaline water?', acceptedAnswer: { '@type': 'Answer', text: 'Spring water comes from a natural underground source and contains naturally occurring minerals like calcium, magnesium, and potassium, with a neutral pH of 7.2–7.8. Alkaline water is purified water that has been enhanced with added minerals to raise its pH to 8.0–9.5. Both are safe to drink; the difference is mineral content and pH level.' } },
     { '@type': 'Question', name: 'Is distilled water safe to drink every day?', acceptedAnswer: { '@type': 'Answer', text: 'Distilled water is safe to drink but is not ideal as your only water source because the purification process removes all minerals, including beneficial ones like calcium and magnesium. It is best used for CPAP machines, steam irons, aquariums, and laboratory purposes. For daily drinking, spring or alkaline water is a better choice.' } },
-    { '@type': 'Question', name: 'Which water type is best for CPAP machines in Vancouver?', acceptedAnswer: { '@type': 'Answer', text: 'Distilled water is the recommended water type for CPAP machines. It prevents mineral buildup in the humidifier chamber. TajWater delivers 5-gallon distilled water jugs across Metro Vancouver starting at $9.99 per jug with free delivery.' } },
+    { '@type': 'Question', name: 'Which water type is best for CPAP machines in Vancouver?', acceptedAnswer: { '@type': 'Answer', text: 'Distilled water is the recommended water type for CPAP machines. It prevents mineral buildup in the humidifier chamber. TajWater delivers 5-gallon distilled water jugs across Metro Vancouver starting at $9.99 per jug with Delivery available.' } },
     { '@type': 'Question', name: 'Does alkaline water have real health benefits?', acceptedAnswer: { '@type': 'Answer', text: 'Some studies suggest alkaline water may help with acid reflux and hydration, but the scientific evidence is not conclusive. Many people simply prefer its smoother taste. It is a safe choice with no known downsides for healthy adults.' } },
   ],
 }
@@ -96,7 +96,7 @@ export default function ArticlePage() {
               Vancouver and Burnaby tap water its occasional taste and odour.
             </p>
             <p className="text-[#4a7fa5] leading-relaxed mb-6">
-              <strong className="text-[#0c2340]">Price:</strong> $8.99 per 5-gallon jug, free delivery across Metro Vancouver.
+              <strong className="text-[#0c2340]">Price:</strong> $8.99 per 5-gallon jug, Delivery available across Metro Vancouver.
             </p>
 
             <h2 className="text-2xl font-extrabold text-[#0c2340] mt-10 mb-4">Alkaline Water</h2>
@@ -114,7 +114,7 @@ export default function ArticlePage() {
             <p className="text-[#4a7fa5] leading-relaxed mb-6">
               <strong className="text-[#0c2340]">Best for:</strong> Health-conscious households, people with acid reflux, athletes, anyone who wants to increase their daily water intake.
               <br />
-              <strong className="text-[#0c2340]">Price:</strong> $10.99 per 5-gallon jug, free delivery across Metro Vancouver.
+              <strong className="text-[#0c2340]">Price:</strong> $10.99 per 5-gallon jug, Delivery available across Metro Vancouver.
             </p>
 
             <h2 className="text-2xl font-extrabold text-[#0c2340] mt-10 mb-4">Distilled Water</h2>
@@ -136,7 +136,7 @@ export default function ArticlePage() {
               <li>Dental equipment and medical devices</li>
             </ul>
             <p className="text-[#4a7fa5] leading-relaxed mb-6">
-              <strong className="text-[#0c2340]">Price:</strong> $9.99 per 5-gallon jug, free delivery across Metro Vancouver.
+              <strong className="text-[#0c2340]">Price:</strong> $9.99 per 5-gallon jug, Delivery available across Metro Vancouver.
             </p>
 
             <h2 className="text-2xl font-extrabold text-[#0c2340] mt-10 mb-4">Side-by-Side Comparison</h2>
@@ -206,7 +206,7 @@ export default function ArticlePage() {
               <h3 className="font-extrabold text-[#0c2340] text-lg mb-2">Order Water Delivery Across Metro Vancouver</h3>
               <p className="text-[#4a7fa5] text-sm mb-4">
                 TajWater delivers spring, alkaline, and distilled water to 21 cities across Metro Vancouver.
-                Free delivery on every order. Same-day available before 12pm.
+                Delivery available. Same-day available before 12pm.
               </p>
               <Link href="/shop" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#0097a7] text-white font-bold text-sm hover:bg-[#00838f] transition-colors">
                 Shop Water Delivery →

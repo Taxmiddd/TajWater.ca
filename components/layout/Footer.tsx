@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { Phone, Mail, MapPin, Facebook, Instagram, Twitter, MessageCircle } from 'lucide-react'
+import { Phone, Mail, MapPin, Facebook, Instagram, Twitter, MessageCircle, Clock, Droplets } from 'lucide-react'
 
 function TikTokIcon({ className }: { className?: string }) {
   return (
@@ -60,153 +60,206 @@ export default function Footer() {
 
   const whatsapp = phone.replace(/\D/g, '')
 
+  const quickLinks = [
+    { label: 'Home', href: '/' },
+    { label: 'Our Services', href: '/services' },
+    { label: 'Delivery Areas', href: '/areas' },
+    { label: 'Shop', href: '/shop' },
+    { label: 'Blog', href: '/blog' },
+    { label: 'FAQ', href: '/faq' },
+    { label: 'About Us', href: '/about' },
+    { label: 'Contact', href: '/contact' },
+  ]
+
+  const waterTypes = [
+    { label: 'Spring Water Delivery', href: '/spring-water-delivery-vancouver' },
+    { label: 'Alkaline Water Delivery', href: '/alkaline-water-delivery-vancouver' },
+    { label: 'Distilled Water Delivery', href: '/distilled-water-delivery-vancouver' },
+    { label: 'Follow Us', href: '/socials' },
+  ]
+
   return (
-    <footer className="relative overflow-hidden bg-gradient-to-b from-[#006064] to-[#003d40]">
-      {/* Wave top */}
-      <div className="absolute top-0 left-0 right-0 overflow-hidden leading-none">
-        <svg viewBox="0 0 1440 80" className="w-full" preserveAspectRatio="none">
-          <path d="M0,40 C240,80 480,0 720,40 C960,80 1200,0 1440,40 L1440,0 L0,0 Z" fill="#f0f9ff" />
-        </svg>
-      </div>
+    <footer className="relative overflow-hidden bg-[#011f22]">
+      {/* Decorative top accent */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00bcd4]/60 to-transparent" />
 
-      <div className="relative pt-20 pb-10 px-4 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 mb-16">
+      {/* Subtle background glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-[#006064]/20 rounded-full blur-[100px] pointer-events-none" />
 
-          {/* Brand */}
-          <div className="lg:col-span-1">
-            <div className="mb-6 flex justify-center sm:justify-start">
-              <Image src="/logo/tajwhite.svg" alt="TajWater" width={150} height={48} className="h-11 w-auto" />
+      <div className="relative pt-16 pb-0 px-4 max-w-7xl mx-auto">
+
+        {/* ── Top row: Brand + columns ── */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-10 lg:gap-12 pb-12">
+
+          {/* Brand column */}
+          <div className="md:col-span-4 lg:col-span-4">
+            <div className="mb-5">
+              <Image src="/logo/tajwhite.svg" alt="TajWater" width={140} height={44} className="h-10 w-auto" />
             </div>
-            <p className="text-[#b3e5fc] text-sm leading-relaxed mb-6 text-center sm:text-left">
-              Delivering pure, fresh water across Metro Vancouver. Trusted by thousands of households and businesses since 2023.
+            <p className="text-[#7ecfdc] text-sm leading-relaxed mb-6 max-w-xs">
+              Metro Vancouver&apos;s trusted source for pure, fresh water delivery. Independently tested spring, alkaline, and distilled water — right to your door.
             </p>
-            <div className="flex gap-3 flex-wrap justify-center sm:justify-start">
+
+            {/* Social icons */}
+            <div className="flex gap-2.5 flex-wrap">
               {[
-                { icon: Facebook, href: socials.facebook || null, label: 'Facebook', color: 'hover:bg-[#1877f2]' },
-                { icon: Instagram, href: socials.instagram || null, label: 'Instagram', color: 'hover:bg-[#e1306c]' },
-                { icon: Twitter, href: socials.twitter || null, label: 'X / Twitter', color: 'hover:bg-[#000000]' },
-                { icon: TikTokIcon, href: socials.tiktok || null, label: 'TikTok', color: 'hover:bg-[#010101]' },
-              ].filter(s => s.href).map(({ icon: Icon, href, label, color }, i) => (
-                <a key={i} href={href!} target="_blank" rel="noopener noreferrer" aria-label={label}
-                  className={`w-10 h-10 rounded-xl bg-white/10 ${color} flex items-center justify-center text-white transition-all duration-200 hover:scale-110`}>
-                  <Icon className="w-5 h-5" />
+                { icon: Facebook, href: socials.facebook || null, label: 'Facebook', hover: 'hover:bg-[#1877f2] hover:border-[#1877f2]' },
+                { icon: Instagram, href: socials.instagram || null, label: 'Instagram', hover: 'hover:bg-[#e1306c] hover:border-[#e1306c]' },
+                { icon: Twitter, href: socials.twitter || null, label: 'X / Twitter', hover: 'hover:bg-white/10 hover:border-white/30' },
+                { icon: TikTokIcon, href: socials.tiktok || null, label: 'TikTok', hover: 'hover:bg-white/10 hover:border-white/30' },
+              ].filter(s => s.href).map(({ icon: Icon, href, label, hover }, i) => (
+                <a
+                  key={i}
+                  href={href!}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className={`w-9 h-9 rounded-xl border border-white/10 bg-white/5 ${hover} flex items-center justify-center text-[#7ecfdc] hover:text-white transition-all duration-200 hover:scale-110`}
+                >
+                  <Icon className="w-4 h-4" />
                 </a>
               ))}
-              <a href={`https://wa.me/${whatsapp}`} aria-label="WhatsApp" className="w-10 h-10 rounded-xl bg-[#25d366]/20 hover:bg-[#25d366] flex items-center justify-center text-white transition-all duration-200 hover:scale-110">
-                <MessageCircle className="w-5 h-5" />
-              </a>
+              {whatsapp && (
+                <a
+                  href={`https://wa.me/${whatsapp}`}
+                  aria-label="WhatsApp"
+                  className="w-9 h-9 rounded-xl border border-[#25d366]/30 bg-[#25d366]/10 hover:bg-[#25d366] hover:border-[#25d366] flex items-center justify-center text-[#25d366] hover:text-white transition-all duration-200 hover:scale-110"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                </a>
+              )}
             </div>
           </div>
 
           {/* Quick Links */}
-          <div>
-            <h4 className="font-semibold text-white mb-4">Quick Links</h4>
-            <ul className="space-y-2">
-              {[
-                { label: 'Home', href: '/' },
-                { label: 'Our Services', href: '/services' },
-                { label: 'Delivery Areas', href: '/areas' },
-                { label: 'Shop', href: '/shop' },
-                { label: 'Blog', href: '/blog' },
-                { label: 'FAQ', href: '/faq' },
-                { label: 'Spring Water Delivery', href: '/spring-water-delivery-vancouver' },
-                { label: 'Alkaline Water Delivery', href: '/alkaline-water-delivery-vancouver' },
-                { label: 'Distilled Water Delivery', href: '/distilled-water-delivery-vancouver' },
-                { label: 'About Us', href: '/about' },
-                { label: 'Contact', href: '/contact' },
-                { label: 'Follow Us', href: '/socials' },
-              ].map((l) => (
+          <div className="md:col-span-2 lg:col-span-2">
+            <h4 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-4">Pages</h4>
+            <ul className="space-y-2.5">
+              {quickLinks.map((l) => (
                 <li key={l.href}>
-                  <Link href={l.href} className="text-[#b3e5fc] hover:text-white text-sm transition-colors hover:translate-x-1 inline-block duration-200">
-                    → {l.label}
+                  <Link
+                    href={l.href}
+                    className="text-[#7ecfdc] hover:text-white text-sm transition-colors duration-150"
+                  >
+                    {l.label}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Delivery Zones */}
-          <div>
-            <h4 className="font-semibold text-white mb-4">Delivery Zones</h4>
-            <div className="flex flex-wrap gap-2">
-              {zones.map((zone) => (
-                <Link
-                  key={zone}
-                  href="/areas"
-                  className="text-[10px] font-medium px-2.5 py-1 rounded-full bg-white/10 text-[#b3e5fc] hover:bg-[#00bcd4] hover:text-white transition-all duration-200"
-                >
-                  {zone}
-                </Link>
+          {/* Water Types */}
+          <div className="md:col-span-3 lg:col-span-2">
+            <h4 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-4">Products</h4>
+            <ul className="space-y-2.5">
+              {waterTypes.map((l) => (
+                <li key={l.href}>
+                  <Link
+                    href={l.href}
+                    className="text-[#7ecfdc] hover:text-white text-sm transition-colors duration-150"
+                  >
+                    {l.label}
+                  </Link>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
 
-          {/* Contact */}
-          <div>
-            <h4 className="font-semibold text-white mb-4">Contact Us</h4>
+          {/* Contact & Hours */}
+          <div className="md:col-span-3 lg:col-span-4">
+            <h4 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-4">Contact</h4>
             <ul className="space-y-3">
               {phone && (
                 <li>
-                  <a href={`tel:${phone}`} className="flex items-start gap-3 group">
-                    <div className="w-8 h-8 rounded-lg bg-white/10 group-hover:bg-[#00bcd4] flex items-center justify-center shrink-0 transition-colors">
-                      <Phone className="w-4 h-4 text-[#00bcd4] group-hover:text-white" />
+                  <a href={`tel:${phone}`} className="flex items-center gap-3 group">
+                    <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 group-hover:bg-[#00bcd4]/20 group-hover:border-[#00bcd4]/40 flex items-center justify-center shrink-0 transition-all">
+                      <Phone className="w-3.5 h-3.5 text-[#00bcd4]" />
                     </div>
-                    <div>
-                      <p className="text-[10px] text-[#b3e5fc]/60 uppercase tracking-wider">Phone</p>
-                      <p className="text-sm text-[#b3e5fc] group-hover:text-white transition-colors">{phone}</p>
-                    </div>
+                    <span className="text-sm text-[#7ecfdc] group-hover:text-white transition-colors">{phone}</span>
                   </a>
                 </li>
               )}
               {email && (
                 <li>
-                  <a href={`mailto:${email}`} className="flex items-start gap-3 group">
-                    <div className="w-8 h-8 rounded-lg bg-white/10 group-hover:bg-[#00bcd4] flex items-center justify-center shrink-0 transition-colors">
-                      <Mail className="w-4 h-4 text-[#00bcd4] group-hover:text-white" />
+                  <a href={`mailto:${email}`} className="flex items-center gap-3 group">
+                    <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 group-hover:bg-[#00bcd4]/20 group-hover:border-[#00bcd4]/40 flex items-center justify-center shrink-0 transition-all">
+                      <Mail className="w-3.5 h-3.5 text-[#00bcd4]" />
                     </div>
-                    <div>
-                      <p className="text-[10px] text-[#b3e5fc]/60 uppercase tracking-wider">Email</p>
-                      <p className="text-sm text-[#b3e5fc] group-hover:text-white transition-colors">{email}</p>
-                    </div>
+                    <span className="text-sm text-[#7ecfdc] group-hover:text-white transition-colors">{email}</span>
                   </a>
                 </li>
               )}
               <li>
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
-                    <MapPin className="w-4 h-4 text-[#00bcd4]" />
+                  <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <MapPin className="w-3.5 h-3.5 text-[#00bcd4]" />
                   </div>
-                  <div>
-                    <p className="text-[10px] text-[#b3e5fc]/60 uppercase tracking-wider">Office</p>
-                    <p className="text-sm text-[#b3e5fc] whitespace-pre-line">{address}</p>
-                  </div>
+                  <span className="text-sm text-[#7ecfdc] whitespace-pre-line">{address}</span>
                 </div>
               </li>
-              <li>
-                <div className="mt-2 p-3 rounded-xl bg-white/10 border border-white/10">
-                  <p className="text-[11px] text-[#b3e5fc]/70 uppercase tracking-wider mb-1">Business Hours</p>
-                  {hours.split('\n').map((line, i) => (
-                    <p key={i} className={`text-sm ${i === 0 ? 'text-white font-medium mb-0.5' : 'text-[#b3e5fc]'}`}>
-                      {line}
-                    </p>
-                  ))}
+
+              {/* Hours card */}
+              <li className="mt-1">
+                <div className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/8">
+                  <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <Clock className="w-3.5 h-3.5 text-[#00bcd4]" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-white/30 uppercase tracking-wider mb-1">Business Hours</p>
+                    {hours.split('\n').map((line, i) => (
+                      <p key={i} className={`text-sm ${i === 0 ? 'text-white font-medium' : 'text-[#7ecfdc]'}`}>
+                        {line}
+                      </p>
+                    ))}
+                  </div>
                 </div>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3">
-          <p className="text-[#b3e5fc]/60 text-xs">© 2023-26 TajWater LTD. All rights reserved.</p>
-          <div className="flex gap-4 items-center">
-            <Link href="/legal/privacy" className="text-[#b3e5fc]/60 hover:text-[#b3e5fc] text-xs transition-colors">Privacy Policy</Link>
-            <Link href="/legal/terms" className="text-[#b3e5fc]/60 hover:text-[#b3e5fc] text-xs transition-colors">Terms of Service</Link>
-            <span className="text-[#b3e5fc]/30">|</span>
-            <a href="https://noeticstudio.net" target="_blank" rel="noopener noreferrer" className="text-[#b3e5fc]/60 hover:text-white text-xs transition-colors">Developed By <span className="font-semibold text-white">NOÉTIC Studio</span></a>
+        {/* ── Delivery zones strip ── */}
+        {zones.length > 0 && (
+          <div className="border-t border-white/5 py-6">
+            <div className="flex items-start gap-4 flex-wrap">
+              <div className="flex items-center gap-1.5 shrink-0">
+                <Droplets className="w-3.5 h-3.5 text-[#00bcd4]" />
+                <span className="text-[10px] font-semibold text-white/30 uppercase tracking-widest">Delivery Zones</span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {zones.map((zone) => (
+                  <Link
+                    key={zone}
+                    href="/areas"
+                    className="text-[10px] font-medium px-2.5 py-1 rounded-full bg-white/5 border border-white/8 text-[#7ecfdc] hover:bg-[#00bcd4]/20 hover:border-[#00bcd4]/40 hover:text-white transition-all duration-150"
+                  >
+                    {zone}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Bottom bar ── */}
+        <div className="border-t border-white/5 py-5 flex flex-col sm:flex-row justify-between items-center gap-3">
+          <p className="text-white/25 text-xs">© {new Date().getFullYear()} TajWater LTD. All rights reserved.</p>
+          <div className="flex gap-5 items-center">
+            <Link href="/legal/privacy" className="text-white/30 hover:text-[#7ecfdc] text-xs transition-colors">Privacy Policy</Link>
+            <Link href="/legal/terms" className="text-white/30 hover:text-[#7ecfdc] text-xs transition-colors">Terms of Service</Link>
+            <span className="text-white/10">·</span>
+            <a
+              href="https://noeticstudio.net"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/25 hover:text-white text-xs transition-colors"
+            >
+              Built by <span className="font-semibold text-white/60 hover:text-white">NOÉTIC Studio</span>
+            </a>
           </div>
         </div>
+
       </div>
     </footer>
   )
 }
-

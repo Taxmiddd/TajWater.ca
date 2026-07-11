@@ -2,7 +2,7 @@
 
 import { motion, useScroll, useTransform } from 'framer-motion'
 import Link from 'next/link'
-import { ArrowRight, Play, Droplets, ChevronDown } from 'lucide-react'
+import { ArrowRight, Droplets } from 'lucide-react'
 import WaterBackground from '@/components/shared/WaterBackground'
 export default function Hero({ description }: { description: string }) {
   const { scrollY } = useScroll()
@@ -56,7 +56,7 @@ export default function Hero({ description }: { description: string }) {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 border border-white/25 text-white text-sm mb-6 backdrop-blur-sm"
           >
             <span className="w-2 h-2 rounded-full bg-[#00bcd4] animate-pulse" />
-            Trusted by 5,000+ Metro Vancouver Families
+            Trusted by 500+ Metro Vancouver Families
           </motion.div>
 
           {/* Headline */}
@@ -100,8 +100,8 @@ export default function Hero({ description }: { description: string }) {
                 whileTap={{ scale: 0.97 }}
                 className="flex items-center gap-2 px-8 py-4 rounded-2xl border-2 border-white/40 bg-white/10 backdrop-blur-sm text-white font-semibold text-base hover:bg-white/20 hover:border-white/60 transition-all duration-300"
               >
-                <Play className="w-4 h-4" />
-                Learn More
+                Our Services
+                <ArrowRight className="w-4 h-4" />
               </motion.button>
             </Link>
           </motion.div>
@@ -111,10 +111,9 @@ export default function Hero({ description }: { description: string }) {
             {[
               { value: '2,000+', label: 'Happy Customers' },
               { value: '21', label: 'Delivery Zones' },
-              { value: '5+', label: 'Years Serving BC' },
+              { value: '4.9★', label: 'Avg. Rating' },
               { value: '24h', label: 'Delivery Window' },
             ].map((stat) => (
-
               <div key={stat.label} className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-0 sm:bg-transparent sm:backdrop-blur-none sm:text-center">
                 <p className="text-xl sm:text-2xl font-extrabold text-white">{stat.value}</p>
                 <p className="text-[10px] sm:text-xs text-[#b3e5fc] uppercase tracking-wider">{stat.label}</p>
@@ -124,18 +123,7 @@ export default function Hero({ description }: { description: string }) {
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2 }}
-        className="absolute bottom-24 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1 text-white/60"
-      >
-        <span className="text-xs uppercase tracking-widest">Scroll</span>
-        <motion.div animate={{ y: [0, 6, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}>
-          <ChevronDown className="w-5 h-5" />
-        </motion.div>
-      </motion.div>
+
     </section>
   )
 }

@@ -162,7 +162,7 @@ export default function ArticlePage() {
               <h3 className="font-extrabold text-[#0c2340] text-lg mb-2">Pure Water Delivered Across Metro Vancouver</h3>
               <p className="text-[#4a7fa5] text-sm mb-4">
                 TajWater delivers independently tested spring, alkaline, and distilled water to 21 cities across
-                Metro Vancouver. Zero chlorine. Zero chloramines. Free delivery on every order.
+                Metro Vancouver. Zero chlorine. Zero chloramines. Delivery available.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link href="/shop" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#0097a7] text-white font-bold text-sm hover:bg-[#00838f] transition-colors">

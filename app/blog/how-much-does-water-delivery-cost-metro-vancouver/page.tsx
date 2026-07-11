@@ -40,7 +40,7 @@ const faqSchema = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
   mainEntity: [
-    { '@type': 'Question', name: 'How much does 5-gallon water delivery cost in Vancouver?', acceptedAnswer: { '@type': 'Answer', text: 'In Metro Vancouver, 5-gallon (20L) water jug delivery typically costs between $7.50 and $13.00 per jug depending on the provider and water type. TajWater charges $8.99 per jug for spring water with free delivery, $12.99 for alkaline, and $9.99 for distilled. Subscription customers pay from $6.49 per jug.' } },
+    { '@type': 'Question', name: 'How much does 5-gallon water delivery cost in Vancouver?', acceptedAnswer: { '@type': 'Answer', text: 'In Metro Vancouver, 5-gallon (20L) water jug delivery typically costs between $7.50 and $13.00 per jug depending on the provider and water type. TajWater charges $8.99 per jug for spring water with Delivery available, $12.99 for alkaline, and $9.99 for distilled. Subscription customers pay from $6.49 per jug.' } },
     { '@type': 'Question', name: 'Is there a bottle deposit for water jugs in Vancouver?', acceptedAnswer: { '@type': 'Answer', text: 'Yes. Most Metro Vancouver water delivery companies charge a one-time bottle deposit when you place your first order. TajWater charges $12 per jug as a refundable deposit. This is returned to your account when you stop service and return your jugs.' } },
     { '@type': 'Question', name: 'Is water delivery cheaper than buying bottled water at the grocery store?', acceptedAnswer: { '@type': 'Answer', text: 'Yes, significantly. A 5-gallon (20L) jug delivered by TajWater costs $8.99 — that is $0.45 per litre. A case of 24 x 500mL bottles at a Vancouver grocery store costs approximately $5–$8, which works out to $0.42–$0.67 per litre. Beyond cost, delivery eliminates plastic waste, shopping trips, and heavy lifting.' } },
     { '@type': 'Question', name: 'Does TajWater charge extra for delivery in Surrey or Langley?', acceptedAnswer: { '@type': 'Answer', text: 'No. TajWater charges the same per-jug price and zero delivery fee across all 21 service zones in Metro Vancouver — including Surrey, Langley, Delta, Maple Ridge, Squamish, and Whistler. There is no distance surcharge.' } },
@@ -180,7 +180,7 @@ export default function ArticlePage() {
             <div className="bg-[#e0f7fa] rounded-2xl p-6 mt-10">
               <h3 className="font-extrabold text-[#0c2340] text-lg mb-2">Get Started with TajWater — Metro Vancouver&apos;s Most Transparent Pricing</h3>
               <p className="text-[#4a7fa5] text-sm mb-4">
-                Spring water from $8.99/jug. Alkaline from $12.99. Distilled from $9.99. Free delivery on every order,
+                Spring water from $8.99/jug. Alkaline from $12.99. Distilled from $9.99. Delivery available,
                 no contracts, same-day available before 12pm.
               </p>
               <div className="flex flex-wrap gap-3">

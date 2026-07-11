@@ -4,7 +4,7 @@ import { CheckCircle, Droplets, Shield, Star, MapPin, Heart } from 'lucide-react
 
 export const metadata: Metadata = {
   title: 'Distilled Water Delivery Vancouver — CPAP & Medical Use | TajWater $9.99/Jug',
-  description: 'Distilled water delivery in Metro Vancouver. 100% pure distilled water for CPAP machines, medical use, babies, and appliances. 5-gallon jugs, free delivery, same-day available. From $7.99/jug on subscription.',
+  description: 'Distilled water delivery in Metro Vancouver. 100% pure distilled water for CPAP machines, medical use, babies, and appliances. 5-gallon jugs, Delivery available, same-day available. From $7.99/jug on subscription.',
   keywords: [
     'distilled water delivery Vancouver',
     'distilled water delivery Metro Vancouver',
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://tajwater.ca/distilled-water-delivery-vancouver' },
   openGraph: {
     title: 'Distilled Water Delivery Vancouver — CPAP & Medical | TajWater',
-    description: '100% pure distilled water delivered to your door in Metro Vancouver. Perfect for CPAP machines, babies, and appliances. Free delivery, no contract.',
+    description: '100% pure distilled water delivered to your door in Metro Vancouver. Perfect for CPAP machines, babies, and appliances. Delivery available, no contract.',
     url: 'https://tajwater.ca/distilled-water-delivery-vancouver',
     type: 'website',
     images: [{ url: 'https://tajwater.ca/opengraph-image', width: 1200, height: 630 }],
@@ -172,7 +172,7 @@ export default function DistilledWaterDeliveryVancouver() {
             </h1>
             <p className="text-[#b3e5fc] text-lg sm:text-xl max-w-3xl mx-auto mb-10">
               100% pure distilled water in 5-gallon BPA-free jugs. Ideal for CPAP machines, baby formula,
-              humidifiers, and sensitive applications. Free delivery, same-day available.
+              humidifiers, and sensitive applications. Delivery available, same-day available.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
               <Link href="/shop" className="btn-primary text-lg px-8 py-4">
@@ -183,7 +183,7 @@ export default function DistilledWaterDeliveryVancouver() {
               </Link>
             </div>
             <div className="flex flex-wrap justify-center gap-4 text-white/90 text-sm">
-              {['Free Delivery', 'Same-Day Available', 'No Contract', 'CPAP-Safe', '100% Pure H₂O'].map((f) => (
+              {['Delivery available', 'Same-Day Available', 'No Contract', 'CPAP-Safe', '100% Pure H₂O'].map((f) => (
                 <span key={f} className="flex items-center gap-1.5">
                   <CheckCircle className="w-4 h-4 text-[#80deea]" /> {f}
                 </span>
@@ -196,7 +196,7 @@ export default function DistilledWaterDeliveryVancouver() {
         <div className="bg-[#0097a7] py-4">
           <div className="max-w-5xl mx-auto px-4 flex flex-wrap justify-center gap-6 sm:gap-12 text-white text-sm font-semibold">
             <span className="flex items-center gap-2"><Star className="w-4 h-4 text-yellow-300 fill-yellow-300" /> 4.8/5 — 76 Reviews</span>
-            <span>Free Delivery on Every Order</span>
+            <span>Delivery available</span>
             <span>21 Metro Vancouver Cities</span>
             <span>No Minimum Order</span>
           </div>
@@ -366,7 +366,7 @@ export default function DistilledWaterDeliveryVancouver() {
               Distilled Water Delivery Pricing — Metro Vancouver
             </h2>
             <p className="text-[#4a7fa5] text-lg mb-12 max-w-2xl mx-auto">
-              Transparent pricing. No hidden fees. Free delivery on every order.
+              Transparent pricing. No hidden fees. Delivery available.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
               {[
@@ -374,7 +374,7 @@ export default function DistilledWaterDeliveryVancouver() {
                   plan: 'One-Time Order',
                   price: '$9.99',
                   unit: 'per jug',
-                  features: ['No commitment', 'Order anytime', 'Free delivery', 'Jug swap included'],
+                  features: ['No commitment', 'Order anytime', 'Delivery available', 'Jug swap included'],
                   cta: 'Order Now',
                   highlight: false,
                 },
@@ -382,7 +382,7 @@ export default function DistilledWaterDeliveryVancouver() {
                   plan: 'Weekly Subscription',
                   price: '$29.99',
                   unit: 'per week',
-                  features: ['Weekly delivery', 'Cancel anytime', 'Free delivery', 'Auto-replenishment'],
+                  features: ['Weekly delivery', 'Cancel anytime', 'Delivery available', 'Auto-replenishment'],
                   cta: 'Best for CPAP',
                   highlight: true,
                 },
@@ -390,7 +390,7 @@ export default function DistilledWaterDeliveryVancouver() {
                   plan: 'Monthly Subscription',
                   price: '$59.99',
                   unit: 'per month',
-                  features: ['Monthly delivery', 'Cancel anytime', 'Free delivery', 'Priority scheduling'],
+                  features: ['Monthly delivery', 'Cancel anytime', 'Delivery available', 'Priority scheduling'],
                   cta: 'Subscribe Monthly',
                   highlight: false,
                 },
@@ -488,7 +488,7 @@ export default function DistilledWaterDeliveryVancouver() {
             <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0c2340] mb-4">
               Distilled Water Delivery — All Metro Vancouver Cities
             </h2>
-            <p className="text-[#4a7fa5] mb-10">Free delivery to 21 cities. Same-day available before 12pm.</p>
+            <p className="text-[#4a7fa5] mb-10">Delivery available to 21 cities. Same-day available before 12pm.</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
               {cities.map((city) => (
                 <Link

@@ -4,7 +4,7 @@ import Script from 'next/script'
 
 export const metadata: Metadata = {
   title: 'Spring Water Delivery Vancouver — 5-Gallon Jugs from $8.99 | TajWater',
-  description: 'Natural spring water delivered in 5-gallon BPA-free jugs across Metro Vancouver. $8.99/jug, free delivery, same-day available. No contracts. From TajWater, Port Coquitlam.',
+  description: 'Natural spring water delivered in 5-gallon BPA-free jugs across Metro Vancouver. $8.99/jug, delivery available, same-day available. No contracts. From TajWater, Port Coquitlam.',
   keywords: [
     'spring water delivery Vancouver',
     'natural spring water delivery Metro Vancouver',
@@ -17,8 +17,8 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: 'https://tajwater.ca/spring-water-delivery-vancouver' },
   openGraph: {
-    title: 'Spring Water Delivery Vancouver — $8.99/Jug Free Delivery | TajWater',
-    description: 'Natural spring water in 5-gallon BPA-free jugs. Free delivery across all 21 Metro Vancouver zones. Same-day available before 12pm.',
+    title: 'Spring Water Delivery Vancouver — $8.99/Jug | TajWater',
+    description: 'Natural spring water in 5-gallon BPA-free jugs. Fast delivery across all 21 Metro Vancouver zones. Same-day available before 12pm.',
     url: 'https://tajwater.ca/spring-water-delivery-vancouver',
     type: 'website',
     images: [{ url: '/opengraph-image', width: 1200, height: 630 }],
@@ -65,7 +65,7 @@ const faqSchema = {
   mainEntity: [
     { '@type': 'Question', name: 'Where does Taj Water spring water come from?', acceptedAnswer: { '@type': 'Answer', text: 'Taj Water spring water is sourced from protected natural underground aquifers in British Columbia. The water is independently tested for over 200 contaminants and meets or exceeds Health Canada drinking water standards. It contains naturally occurring calcium, magnesium, and potassium at levels beneficial for daily hydration.' } },
     { '@type': 'Question', name: 'Is Taj Water spring water pH balanced?', acceptedAnswer: { '@type': 'Answer', text: 'Yes. Taj Water spring water is naturally pH balanced, which is ideal for daily drinking. It retains its natural mineral profile, making it the most popular choice for families and offices across Metro Vancouver.' } },
-    { '@type': 'Question', name: 'How much does spring water delivery cost in Vancouver?', acceptedAnswer: { '@type': 'Answer', text: 'Taj Water spring water is $8.99 per 5-gallon (20L) jug with free delivery across all Metro Vancouver zones. Subscription plans start at $29.99/week or $59.99/month. There are no zone surcharges, no minimum orders, and no contracts.' } },
+    { '@type': 'Question', name: 'How much does spring water delivery cost in Vancouver?', acceptedAnswer: { '@type': 'Answer', text: 'Taj Water spring water is $8.99 per 5-gallon (20L) jug with delivery available across all Metro Vancouver zones. Subscription plans start at $29.99/week or $59.99/month. There are no zone surcharges, no minimum orders, and no contracts.' } },
     { '@type': 'Question', name: 'Are Taj Water spring water jugs BPA-free?', acceptedAnswer: { '@type': 'Answer', text: 'Yes. All Taj Water 5-gallon jugs are made from BPA-free, food-grade polycarbonate. They are sanitized and inspected before every refill to ensure safety and freshness.' } },
   ],
 }
@@ -98,7 +98,7 @@ export default function SpringWaterPage() {
               Natural Spring Water Delivery<br />Across Metro Vancouver
             </h1>
             <p className="text-[#b3e5fc] text-xl max-w-2xl mx-auto mb-8">
-              Fresh BC mountain spring water in 5-gallon BPA-free jugs. $8.99 per jug — free delivery — same-day available before 12pm.
+              Fresh BC mountain spring water in 5-gallon BPA-free jugs. $8.99 per jug — delivery available — same-day available before 12pm.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Link href="/shop" className="px-8 py-4 bg-white text-[#0097a7] font-bold rounded-2xl hover:shadow-xl transition-all">
@@ -137,7 +137,7 @@ export default function SpringWaterPage() {
                 <h3 className="text-xl font-extrabold text-[#0c2340] mb-6">Spring Water Pricing</h3>
                 <div className="space-y-3">
                   {[
-                    { tier: 'One-Time Order', price: '$8.99/jug', note: 'Free delivery' },
+                    { tier: 'One-Time Order', price: '$8.99/jug', note: 'delivery available' },
                     { tier: 'Weekly Subscription', price: '$29.99/week', note: 'Cancel anytime' },
                     { tier: 'Monthly Subscription', price: '$59.99/month', note: 'Cancel anytime' },
                   ].map((row) => (
@@ -224,7 +224,7 @@ export default function SpringWaterPage() {
         <section className="py-20 bg-[#f0f9ff]">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-3xl font-extrabold text-[#0c2340] text-center mb-4">Spring Water Delivery Across Metro Vancouver</h2>
-            <p className="text-[#4a7fa5] text-center mb-10">Free delivery to all zones — same price everywhere, no surcharges.</p>
+            <p className="text-[#4a7fa5] text-center mb-10">delivery available to all zones — same price everywhere, no surcharges.</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {cities.map((city) => (
                 <Link key={city} href={`/areas/${city.toLowerCase().replace(' ', '-')}`} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-[#cce7f0] hover:border-[#0097a7]/40 hover:bg-[#e0f7fa] text-sm font-medium text-[#0c2340] hover:text-[#0097a7] transition-all">
@@ -254,7 +254,7 @@ export default function SpringWaterPage() {
         <section className="py-16 bg-gradient-to-r from-[#0097a7] to-[#006064]">
           <div className="max-w-3xl mx-auto px-4 text-center text-white">
             <h2 className="text-3xl font-extrabold mb-3">Order Spring Water Delivery Today</h2>
-            <p className="text-[#b3e5fc] mb-6">$8.99/jug · Free delivery · Same-day before 12pm · No contracts</p>
+            <p className="text-[#b3e5fc] mb-6">$8.99/jug · delivery available · Same-day before 12pm · No contracts</p>
             <div className="flex flex-wrap gap-3 justify-center">
               <Link href="/shop" className="px-8 py-3 bg-white text-[#0097a7] font-bold rounded-xl hover:shadow-lg transition-shadow">Order Now</Link>
               <Link href="/alkaline-water-delivery-vancouver" className="px-8 py-3 bg-white/20 text-white font-semibold rounded-xl border-2 border-white/40 hover:bg-white/30 transition-colors">Compare Alkaline Water</Link>

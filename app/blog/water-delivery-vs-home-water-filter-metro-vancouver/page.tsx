@@ -293,7 +293,7 @@ export default function WaterDeliveryVsFilter() {
             <div className="bg-gradient-to-r from-[#0097a7] to-[#006064] rounded-3xl p-8 text-center text-white mt-12">
               <h3 className="text-2xl font-extrabold mb-3">Try TajWater Delivery — No Commitment</h3>
               <p className="text-[#b3e5fc] mb-6">
-                Order one jug, no subscription required. Spring water from $8.99. Free delivery across Metro Vancouver.
+                Order one jug, no subscription required. Spring water from $8.99. Delivery available across Metro Vancouver.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/shop" className="bg-white text-[#0097a7] font-bold px-6 py-3 rounded-xl hover:bg-[#f0f9ff] transition-colors">

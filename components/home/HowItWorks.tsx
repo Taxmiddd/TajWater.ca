@@ -49,8 +49,11 @@ export default function HowItWorks() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-10 relative">
-          {/* Connecting line */}
-          <div className="hidden lg:block absolute top-16 left-[calc(16.66%+2rem)] right-[calc(16.66%+2rem)] h-0.5 bg-gradient-to-r from-[#0097a7] via-[#1565c0] to-[#006064] opacity-30" />
+          {/* Connecting dashes between steps */}
+          <div className="hidden lg:flex absolute top-[4.5rem] left-0 right-0 items-center pointer-events-none px-[calc(16.66%+2rem)]">
+            <div className="flex-1 h-px border-t-2 border-dashed border-[#0097a7]/25" />
+            <div className="w-[calc(33.33%-1rem)] h-px border-t-2 border-dashed border-[#1565c0]/25" />
+          </div>
 
           {steps.map((step, i) => {
             const Icon = step.icon

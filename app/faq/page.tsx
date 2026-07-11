@@ -36,9 +36,10 @@ const faqSections = [
         a: 'Yes. Orders placed before 12pm (noon) are eligible for same-day delivery across most Metro Vancouver cities including Vancouver, Burnaby, Richmond, Surrey, Coquitlam, Port Coquitlam, North Vancouver, and West Vancouver. Contact us if you have an urgent same-day need.'
       },
       {
-        q: 'Is delivery free?',
-        a: 'Yes, delivery is always free on every order — no minimum order required. There is no delivery fee, no fuel surcharge, and no service fee. What you see on the price list is what you pay.'
+        q: 'Can I pick up my water order?',
+        a: 'Yes! We offer free in-store pickup at our Port Coquitlam location (1770 McLean Ave, Port Coquitlam, BC V3C 4K8). Just select "Store Pickup" at checkout and the delivery fee will be waived. We will contact you when your order is ready for pickup during our business hours (Mon-Fri 9am-5pm).'
       },
+
       {
         q: 'What areas do you deliver to?',
         a: 'TajWater delivers to 21 cities across Metro Vancouver and the Sea-to-Sky corridor: Vancouver, Burnaby, Richmond, Surrey, Coquitlam, Port Coquitlam, Port Moody, North Vancouver, West Vancouver, Langley, Langley Township, Delta, White Rock, Cloverdale, Tsawwassen, Walnut Grove, Maple Ridge, Pitt Meadows, Mary Hill, Squamish, and Whistler.'
@@ -58,7 +59,7 @@ const faqSections = [
     faqs: [
       {
         q: 'How much does water delivery cost?',
-        a: 'Taj Water pricing is: Spring Water — $8.99/jug one-time. Alkaline Water — $10.99/jug one-time. Distilled Water — $9.99/jug one-time. All prices include free delivery and are in CAD.'
+        a: 'Taj Water pricing is: Spring Water — $8.99/jug one-time. Alkaline Water — $10.99/jug one-time. Distilled Water — $9.99/jug one-time. Delivery fees vary by zone and are displayed at checkout. Prices are in CAD.'
       },
       {
         q: 'Is there a minimum order quantity?',
@@ -66,7 +67,7 @@ const faqSections = [
       },
       {
         q: 'What payment methods do you accept?',
-        a: 'We accept all major credit cards (Visa, Mastercard, Amex), e-transfer, and cash on delivery. Commercial accounts with net-30 invoicing are available for businesses — contact us for details.'
+        a: 'We accept all major credit and debit cards (Visa, Mastercard, Amex) online or by card on delivery using our driver\'s Square POS terminal. Cash is not accepted. Commercial accounts with net-30 invoicing are available for businesses — contact us for details.'
       },
     ]
   },
@@ -129,7 +130,7 @@ const faqSections = [
       },
       {
         q: 'How long has TajWater been operating?',
-        a: 'TajWater has been serving Metro Vancouver families and businesses for over 5 years. We started as a small local delivery service and have grown to serve thousands of households across 21 cities while remaining family-owned and locally operated.'
+        a: 'TajWater has been serving Metro Vancouver families and businesses since our founding. We started as a small local delivery service and have grown to serve thousands of households across 21 cities while remaining family-owned and locally operated.'
       },
       {
         q: 'Is Taj Water water tested and certified?',
@@ -189,13 +190,13 @@ const howToJsonLd = {
       '@type': 'HowToStep',
       position: '4',
       name: 'Complete your payment',
-      text: 'Pay securely by credit card, e-transfer, or choose cash on delivery. No deposit, no setup fee, no contract required.',
+      text: 'Pay securely by credit or debit card online, or our driver will bring a Square POS terminal for card payment on delivery. No deposit, no setup fee, no contract required.',
     },
     {
       '@type': 'HowToStep',
       position: '5',
       name: 'Receive delivery and leave empty jugs for pickup',
-      text: 'Your driver delivers fresh jugs to your specified location and collects your empty ones. You do not need to be home. Delivery is always free on every order.',
+      text: 'Your driver delivers fresh jugs to your specified location and collects your empty ones. You do not need to be home.',
     },
   ],
 }

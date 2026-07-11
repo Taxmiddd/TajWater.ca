@@ -64,7 +64,7 @@ const faqSchema = {
       name: 'Is TajWater cheaper than most water delivery services in Metro Vancouver?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'TajWater spring water starts at $8.99 per 5-gallon jug with free delivery — no contracts, no cancellation fees, and no zone surcharges across all 21 Metro Vancouver cities. Subscription customers pay from $6.49 per jug.',
+        text: 'TajWater spring water starts at $8.99 per 5-gallon jug with Delivery available — no contracts, no cancellation fees, and no zone surcharges across all 21 Metro Vancouver cities. Subscription customers pay from $6.49 per jug.',
       },
     },
   ],
@@ -200,7 +200,7 @@ export default function SwitchingProvidersPost() {
               'Spring water from $8.99 per 5-gallon jug — published, fixed, no surprises',
               'Alkaline water at $12.99/jug and distilled at $9.99/jug',
               'Subscription customers pay from $6.49/jug — pause or cancel anytime',
-              'Free delivery on every order across all 21 Metro Vancouver zones',
+              'Delivery available across all 21 Metro Vancouver zones',
               'Same-day delivery for orders placed before 12pm',
               'No contracts, no annual price adjustments, no early termination fees',
               'Local Port Coquitlam team — real people who answer the phone',

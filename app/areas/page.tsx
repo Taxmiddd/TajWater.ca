@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://tajwater.ca/areas' },
   openGraph: {
     title: 'Water Delivery Areas — All 21 Metro Vancouver Zones | TajWater',
-    description: 'TajWater delivers spring, alkaline, and distilled 5-gallon water jugs to 21 cities across Metro Vancouver. Free delivery, same-day available.',
+    description: 'TajWater delivers spring, alkaline, and distilled 5-gallon water jugs to 21 cities across Metro Vancouver. Delivery available, same-day available.',
     url: 'https://tajwater.ca/areas',
     type: 'website',
     images: [{ url: '/opengraph-image', width: 1200, height: 630 }],

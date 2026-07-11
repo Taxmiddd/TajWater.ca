@@ -4,7 +4,7 @@ import { CheckCircle, Droplets, Zap, Shield, Star, MapPin } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Alkaline Water Delivery Vancouver — 5-Gallon Jugs $10.99 | Taj Water',
-  description: 'Alkaline water delivery in Metro Vancouver. pH balanced alkaline water delivered to your door in 5-gallon jugs. Same-day available, free delivery, no contract. $10.99/jug.',
+  description: 'Alkaline water delivery in Metro Vancouver. pH balanced alkaline water delivered to your door in 5-gallon jugs. Same-day available, Delivery available, no contract. $10.99/jug.',
   keywords: [
     'alkaline water delivery Vancouver',
     'alkaline water delivery Metro Vancouver',
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://tajwater.ca/alkaline-water-delivery-vancouver' },
   openGraph: {
     title: 'Alkaline Water Delivery Vancouver — $10.99/Jug | Taj Water',
-    description: 'pH balanced alkaline water delivered to your door in Metro Vancouver. Same-day available, free delivery, no contract.',
+    description: 'pH balanced alkaline water delivered to your door in Metro Vancouver. Same-day available, Delivery available, no contract.',
     url: 'https://tajwater.ca/alkaline-water-delivery-vancouver',
     type: 'website',
     images: [{ url: 'https://tajwater.ca/opengraph-image', width: 1200, height: 630 }],
@@ -92,7 +92,7 @@ const jsonLd = {
           name: 'How much does alkaline water delivery cost in Vancouver?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Taj Water alkaline water is $10.99 per 5-gallon jug with free delivery across Metro Vancouver. Subscription plans start at $29.99/week. No minimum order, no setup fees, no contracts.',
+            text: 'Taj Water alkaline water is $10.99 per 5-gallon jug with Delivery available across Metro Vancouver. Subscription plans start at $29.99/week. No minimum order, no setup fees, no contracts.',
           },
         },
         {
@@ -168,7 +168,7 @@ export default function AlkalineWaterDeliveryVancouver() {
             </h1>
             <p className="text-[#b3e5fc] text-lg sm:text-xl max-w-3xl mx-auto mb-10">
               pH balanced alkaline water delivered to your home or office in 5-gallon BPA-free jugs.
-              Free delivery across all 21 Metro Vancouver cities. Same-day available before 12pm.
+              Delivery available across all 21 Metro Vancouver cities. Same-day available before 12pm.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
               <Link href="/shop" className="btn-primary text-lg px-8 py-4">
@@ -179,7 +179,7 @@ export default function AlkalineWaterDeliveryVancouver() {
               </Link>
             </div>
             <div className="flex flex-wrap justify-center gap-4 text-white/90 text-sm">
-              {['Free Delivery', 'Same-Day Available', 'No Contract', 'Cancel Anytime', 'pH Balanced'].map((f) => (
+              {['Delivery available', 'Same-Day Available', 'No Contract', 'Cancel Anytime', 'pH Balanced'].map((f) => (
                 <span key={f} className="flex items-center gap-1.5">
                   <CheckCircle className="w-4 h-4 text-[#80deea]" /> {f}
                 </span>
@@ -192,7 +192,7 @@ export default function AlkalineWaterDeliveryVancouver() {
         <div className="bg-[#0097a7] py-4">
           <div className="max-w-5xl mx-auto px-4 flex flex-wrap justify-center gap-6 sm:gap-12 text-white text-sm font-semibold">
             <span className="flex items-center gap-2"><Star className="w-4 h-4 text-yellow-300 fill-yellow-300" /> 4.9/5 — 98 Reviews</span>
-            <span>Free Delivery on Every Order</span>
+            <span>Delivery available</span>
             <span>21 Metro Vancouver Cities</span>
             <span>No Minimum Order</span>
           </div>
@@ -307,7 +307,7 @@ export default function AlkalineWaterDeliveryVancouver() {
               Alkaline Water Delivery Pricing — Metro Vancouver
             </h2>
             <p className="text-[#4a7fa5] text-lg mb-12 max-w-2xl mx-auto">
-              Transparent pricing. No hidden fees. Free delivery on every order.
+              Transparent pricing. No hidden fees. Delivery available.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
               {[
@@ -315,7 +315,7 @@ export default function AlkalineWaterDeliveryVancouver() {
                   plan: 'One-Time Order',
                   price: '$10.99',
                   unit: 'per jug',
-                  features: ['No commitment', 'Order anytime', 'Free delivery', 'Jug swap included'],
+                  features: ['No commitment', 'Order anytime', 'Delivery available', 'Jug swap included'],
                   cta: 'Order Now',
                   highlight: false,
                 },
@@ -323,7 +323,7 @@ export default function AlkalineWaterDeliveryVancouver() {
                   plan: 'Weekly Subscription',
                   price: '$29.99',
                   unit: 'per week',
-                  features: ['Weekly delivery', 'Cancel anytime', 'Free delivery', 'Priority scheduling'],
+                  features: ['Weekly delivery', 'Cancel anytime', 'Delivery available', 'Priority scheduling'],
                   cta: 'Subscribe Weekly',
                   highlight: true,
                 },
@@ -331,7 +331,7 @@ export default function AlkalineWaterDeliveryVancouver() {
                   plan: 'Monthly Subscription',
                   price: '$59.99',
                   unit: 'per month',
-                  features: ['Monthly delivery', 'Cancel anytime', 'Free delivery', 'Dedicated route'],
+                  features: ['Monthly delivery', 'Cancel anytime', 'Delivery available', 'Dedicated route'],
                   cta: 'Subscribe Monthly',
                   highlight: false,
                 },
@@ -429,7 +429,7 @@ export default function AlkalineWaterDeliveryVancouver() {
             <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0c2340] mb-4">
               Alkaline Water Delivery — All Metro Vancouver Cities
             </h2>
-            <p className="text-[#4a7fa5] mb-10">Free delivery to 21 cities. Same-day available before 12pm.</p>
+            <p className="text-[#4a7fa5] mb-10">Delivery available to 21 cities. Same-day available before 12pm.</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
               {cities.map((city) => (
                 <Link
@@ -459,7 +459,7 @@ export default function AlkalineWaterDeliveryVancouver() {
                 },
                 {
                   q: 'How much does alkaline water delivery cost in Vancouver?',
-                  a: 'Taj Water alkaline water is $10.99 per 5-gallon jug with free delivery across Metro Vancouver. Subscription plans start at $29.99/week. No minimum order, no setup fees, no contracts.',
+                  a: 'Taj Water alkaline water is $10.99 per 5-gallon jug with Delivery available across Metro Vancouver. Subscription plans start at $29.99/week. No minimum order, no setup fees, no contracts.',
                 },
                 {
                   q: 'What is the difference between alkaline water and spring water?',
@@ -491,7 +491,7 @@ export default function AlkalineWaterDeliveryVancouver() {
             </h2>
             <p className="text-[#b3e5fc] text-lg mb-8">
               pH balanced alkaline water delivered to your door anywhere in Metro Vancouver.
-              Free delivery. Same-day available. No contract required.
+              Delivery available. Same-day available. No contract required.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/shop" className="bg-white text-[#0097a7] font-bold px-8 py-4 rounded-xl hover:bg-[#f0f9ff] transition-colors text-lg">

@@ -167,7 +167,7 @@ export default async function Image() {
           {/* Key features row */}
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             {[
-              { icon: '🚚', text: 'Free Delivery' },
+              { icon: '🚚', text: 'Delivery Available' },
               { icon: '⚡', text: 'Same-Day Available' },
               { icon: '📍', text: '21 Cities Covered' },
               { icon: '❌', text: 'No Contracts Ever' },

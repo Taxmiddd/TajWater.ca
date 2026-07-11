@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { LayoutDashboard, ShoppingBag, RefreshCw, User, HeadphonesIcon, LogOut, Menu, X, Bell, Droplets } from 'lucide-react'
+import { LayoutDashboard, ShoppingBag, RefreshCw, User, HeadphonesIcon, LogOut, Menu, X, Bell, Droplets, Wallet } from 'lucide-react'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 
@@ -12,6 +12,7 @@ const navItems = [
   { icon: LayoutDashboard, label: 'Overview', href: '/dashboard' },
   { icon: ShoppingBag, label: 'My Orders', href: '/dashboard/orders' },
   { icon: RefreshCw, label: 'Subscription', href: '/dashboard/subscription' },
+  { icon: Wallet, label: 'My Wallet', href: '/dashboard/wallet' },
   { icon: User, label: 'My Profile', href: '/dashboard/profile' },
   { icon: HeadphonesIcon, label: 'Support', href: '/dashboard/support' },
 ]

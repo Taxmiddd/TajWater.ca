@@ -14,7 +14,7 @@ const CITY_DATA: Record<string, { name: string; districts: string[]; schedule: s
     districts: ['Downtown', 'Kitsilano', 'East Vancouver', 'Marpole', 'Kerrisdale', 'Dunbar', 'Point Grey', 'Mount Pleasant'],
     schedule: 'Daily',
     description: 'Vancouver\'s most trusted water delivery service. We deliver 5-gallon spring, alkaline, and distilled water jugs to homes and offices throughout Vancouver — from Downtown to Marpole, Kitsilano to East Van.',
-    why: 'Vancouver has excellent municipal water, but many residents notice a chlorine taste — especially in older buildings with aging pipes in Kitsilano and East Van. TajWater delivers independently tested, purified water straight to your door, so every glass is fresh and clean. We offer same-day delivery in Vancouver for orders placed before 12pm, free delivery on every order, and a flexible jug swap system with no commitment required.',
+    why: 'Vancouver has excellent municipal water, but many residents notice a chlorine taste — especially in older buildings with aging pipes in Kitsilano and East Van. TajWater delivers independently tested, purified water straight to your door, so every glass is fresh and clean. We offer same-day delivery in Vancouver for orders placed before 12pm, Delivery available, and a flexible jug swap system with no commitment required.',
     faq: [
       { q: 'How much does water delivery cost in Vancouver?', a: 'TajWater\'s 5-gallon water jugs start at $8.99 each for spring water, $10.99 for alkaline, and $9.99 for distilled. Delivery is always free across Vancouver. Orders of 10+ jugs or subscriptions start from $6.49/jug.' },
       { q: 'Do you offer same-day water delivery in Vancouver?', a: 'Yes. Orders placed before 12pm on a weekday qualify for same-day delivery across most Vancouver neighbourhoods including Downtown, Kitsilano, East Vancouver, Marpole, and Mount Pleasant.' },
@@ -26,9 +26,9 @@ const CITY_DATA: Record<string, { name: string; districts: string[]; schedule: s
     districts: ['Metrotown', 'Brentwood', 'Burnaby Heights', 'South Slope', 'Edmonds', 'Deer Lake'],
     schedule: 'Mon–Sat',
     description: 'Fast and affordable water jug delivery in Burnaby. Same-day delivery available to Metrotown, Brentwood, Burnaby Heights, and all Burnaby neighbourhoods.',
-    why: 'Burnaby residents in high-rise buildings at Metrotown and Brentwood often experience water pressure and taste variations depending on floor level. TajWater\'s 5-gallon jug delivery eliminates any uncertainty — pure, tested water delivered directly to your suite or lobby. We deliver Monday through Saturday across all Burnaby zones with free delivery every time.',
+    why: 'Burnaby residents in high-rise buildings at Metrotown and Brentwood often experience water pressure and taste variations depending on floor level. TajWater\'s 5-gallon jug delivery eliminates any uncertainty — pure, tested water delivered directly to your suite or lobby. We deliver Monday through Saturday across all Burnaby zones with Delivery available every time.',
     faq: [
-      { q: 'How much does water delivery cost in Burnaby?', a: 'Water jug delivery in Burnaby starts at $8.99 per 5-gallon jug. Free delivery is included on all orders. Subscriptions and bulk orders of 10+ jugs bring the price down to $6.49/jug.' },
+      { q: 'How much does water delivery cost in Burnaby?', a: 'Water jug delivery in Burnaby starts at $8.99 per 5-gallon jug. Delivery available is included on all orders. Subscriptions and bulk orders of 10+ jugs bring the price down to $6.49/jug.' },
       { q: 'Can you deliver water to my condo or apartment in Burnaby?', a: 'Yes. We deliver to condos, apartments, houses, and offices across Burnaby including Metrotown, Brentwood, and Burnaby Heights. Leave delivery instructions in your order notes.' },
       { q: 'What days do you deliver water in Burnaby?', a: 'We deliver in Burnaby Monday through Saturday. Same-day delivery is available for orders placed before 12pm.' },
     ],
@@ -40,7 +40,7 @@ const CITY_DATA: Record<string, { name: string; districts: string[]; schedule: s
     description: 'Reliable 5-gallon water delivery across Richmond. From Steveston to City Centre, we bring pure spring and alkaline water right to your door.',
     why: 'Richmond\'s water supply passes through an extensive distribution network across the delta, and many residents — particularly in Steveston and Terra Nova — prefer bottled water for drinking and cooking. TajWater delivers BPA-free, purified 5-gallon jugs to Richmond homes and businesses Monday to Saturday with same-day service available.',
     faq: [
-      { q: 'How much does water jug delivery cost in Richmond?', a: 'TajWater delivers 5-gallon water jugs to Richmond starting at $8.99 each with free delivery. Alkaline water is $10.99/jug and distilled is $9.99/jug.' },
+      { q: 'How much does water jug delivery cost in Richmond?', a: 'TajWater delivers 5-gallon water jugs to Richmond starting at $8.99 each with Delivery available. Alkaline water is $10.99/jug and distilled is $9.99/jug.' },
       { q: 'Do you deliver water to Steveston?', a: 'Yes. TajWater delivers to all Richmond neighbourhoods including Steveston, City Centre, Brighouse, Terra Nova, and Hamilton.' },
       { q: 'How does the jug return system work in Richmond?', a: 'On your first order, a $12 bottle deposit applies per jug. On every subsequent delivery, our driver swaps your empties for fresh full jugs. The deposit stays on account as long as you order.' },
     ],
@@ -52,7 +52,7 @@ const CITY_DATA: Record<string, { name: string; districts: string[]; schedule: s
     description: 'Affordable water jug delivery across Surrey and its neighbourhoods. Serving Newton, Fleetwood, Cloverdale, Guildford, and more.',
     why: 'Surrey is Metro Vancouver\'s fastest-growing city, and water demand across Newton, Fleetwood, and South Surrey continues to rise. TajWater offers competitive pricing on 5-gallon jug delivery to all Surrey zones with no contracts. Whether you\'re in a Panorama Ridge single family home or a Guildford apartment, we deliver fresh, clean water on schedule.',
     faq: [
-      { q: 'How much does water delivery cost in Surrey?', a: 'Water jug delivery in Surrey starts at $8.99 per 5-gallon jug with free delivery included. Bulk orders and subscriptions bring pricing down to $6.49/jug.' },
+      { q: 'How much does water delivery cost in Surrey?', a: 'Water jug delivery in Surrey starts at $8.99 per 5-gallon jug with Delivery available included. Bulk orders and subscriptions bring pricing down to $6.49/jug.' },
       { q: 'Which Surrey neighbourhoods do you deliver water to?', a: 'We deliver across all of Surrey including City Centre, Newton, Fleetwood, Cloverdale, Guildford, South Surrey, Panorama Ridge, Whalley, and Bear Creek.' },
       { q: 'Can I set up recurring water delivery in Surrey?', a: 'Yes. Our subscription service lets you schedule weekly, bi-weekly, or monthly deliveries at a lower per-jug price. Cancel or pause anytime from your online account.' },
     ],
@@ -65,7 +65,7 @@ const CITY_DATA: Record<string, { name: string; districts: string[]; schedule: s
     why: 'Langley City and Langley Township residents have fewer local water delivery options than Vancouver\'s urban core. TajWater fills that gap with three delivery days per week covering Willoughby, Walnut Grove, Brookswood, and Murrayville. Pure 5-gallon spring, alkaline, and distilled water at Metro Vancouver\'s most competitive prices.',
     faq: [
       { q: 'Do you deliver water to Langley Township?', a: 'Yes. TajWater delivers to both Langley City and Langley Township, including Willoughby, Walnut Grove, Brookswood, Fort Langley, Aldergrove, and Murrayville.' },
-      { q: 'How much does water delivery cost in Langley?', a: 'Water delivery in Langley starts at $8.99 per 5-gallon jug with free delivery. Subscription customers pay from $6.49/jug.' },
+      { q: 'How much does water delivery cost in Langley?', a: 'Water delivery in Langley starts at $8.99 per 5-gallon jug with Delivery available. Subscription customers pay from $6.49/jug.' },
       { q: 'What days does TajWater deliver in Langley?', a: 'We deliver to Langley on Tuesdays, Thursdays, and Saturdays. Order before 12pm for same-day delivery on available days.' },
     ],
   },
@@ -76,7 +76,7 @@ const CITY_DATA: Record<string, { name: string; districts: string[]; schedule: s
     description: 'Water jug delivery service in Coquitlam. Fast delivery to Burke Mountain, Maillardville, Westwood Plateau, and all Coquitlam areas.',
     why: 'TajWater is based in Port Coquitlam, which means Coquitlam is our home territory. Burke Mountain, Westwood Plateau, and Austin Heights customers receive some of our fastest delivery windows — often within hours of ordering. We know the neighbourhoods, the roads, and the delivery windows better than any competitor.',
     faq: [
-      { q: 'How much does water delivery cost in Coquitlam?', a: 'TajWater delivers 5-gallon water jugs to Coquitlam starting at $8.99 each. Free delivery on all orders. Subscriptions from $6.49/jug.' },
+      { q: 'How much does water delivery cost in Coquitlam?', a: 'TajWater delivers 5-gallon water jugs to Coquitlam starting at $8.99 each. Delivery available on all orders. Subscriptions from $6.49/jug.' },
       { q: 'Do you deliver water to Burke Mountain in Coquitlam?', a: 'Yes. Burke Mountain is one of our most popular delivery zones in Coquitlam. We deliver Tuesday, Thursday, and Saturday.' },
       { q: 'Can I get same-day water delivery in Coquitlam?', a: 'Yes. As a Port Coquitlam-based company, we frequently fulfill same-day orders in Coquitlam for orders placed before 12pm.' },
     ],
@@ -88,7 +88,7 @@ const CITY_DATA: Record<string, { name: string; districts: string[]; schedule: s
     description: 'TajWater delivers fresh 5-gallon water jugs to Port Coquitlam. Serving Citadel, Mary Hill, Oxford Heights, and surrounding neighbourhoods.',
     why: 'Port Coquitlam is TajWater\'s home base. Our warehouse is located on McLean Ave in Port Coquitlam, which means PoCo customers get the fastest service, most flexible delivery windows, and our most competitive pricing. If you\'re in Citadel, Mary Hill, Oxford Heights, or Riverwood, you\'re minutes from our facility.',
     faq: [
-      { q: 'How much does water delivery cost in Port Coquitlam?', a: 'Port Coquitlam is TajWater\'s home base. 5-gallon water jugs start at $8.99 with free delivery. As a local PoCo business, we also offer flexible scheduling and fast turnaround.' },
+      { q: 'How much does water delivery cost in Port Coquitlam?', a: 'Port Coquitlam is TajWater\'s home base. 5-gallon water jugs start at $8.99 with Delivery available. As a local PoCo business, we also offer flexible scheduling and fast turnaround.' },
       { q: 'What areas of Port Coquitlam do you deliver to?', a: 'We deliver across all of Port Coquitlam: Citadel, Mary Hill, Oxford Heights, Riverwood, Prairie, and the McLean Ave area.' },
       { q: 'Can I pick up water from your facility in Port Coquitlam?', a: 'Yes. Our warehouse is at 1770 McLean Ave unit 7, Port Coquitlam. Contact us to arrange a pickup instead of delivery.' },
     ],
@@ -98,9 +98,9 @@ const CITY_DATA: Record<string, { name: string; districts: string[]; schedule: s
     districts: ['Inlet Centre', 'Heritage Woods', 'Glenayre', 'College Park', 'Suter Brook'],
     schedule: 'Tue, Thu',
     description: 'Water delivery service in Port Moody. Fresh spring and alkaline water delivered to Inlet Centre, Heritage Woods, Glenayre, and more.',
-    why: 'Port Moody residents value quality — and TajWater delivers exactly that. From the Heritage Woods hillside to Suter Brook\'s waterfront, we bring certified 5-gallon water jugs twice a week with free delivery and a simple jug swap system.',
+    why: 'Port Moody residents value quality — and TajWater delivers exactly that. From the Heritage Woods hillside to Suter Brook\'s waterfront, we bring certified 5-gallon water jugs twice a week with Delivery available and a simple jug swap system.',
     faq: [
-      { q: 'How much does water delivery cost in Port Moody?', a: 'TajWater delivers 5-gallon water jugs to Port Moody starting at $8.99 each with free delivery included.' },
+      { q: 'How much does water delivery cost in Port Moody?', a: 'TajWater delivers 5-gallon water jugs to Port Moody starting at $8.99 each with Delivery available included.' },
       { q: 'Do you deliver water to Heritage Woods?', a: 'Yes. Heritage Woods, Inlet Centre, Glenayre, College Park, and Suter Brook are all in our Port Moody delivery zone.' },
       { q: 'What days do you deliver water in Port Moody?', a: 'We deliver to Port Moody on Tuesdays and Thursdays.' },
     ],
@@ -112,7 +112,7 @@ const CITY_DATA: Record<string, { name: string; districts: string[]; schedule: s
     description: 'Premium water delivery in North Vancouver. 5-gallon jugs delivered to Lynn Valley, Deep Cove, Lonsdale, and across the North Shore.',
     why: 'North Vancouver\'s mountain water supply is among the cleanest in BC, but many North Shore residents still prefer the convenience and consistency of filtered jug delivery. TajWater serves North Vancouver three days a week with next-day delivery guaranteed and same-day available for Lynn Valley and Lower Lonsdale.',
     faq: [
-      { q: 'How much does water delivery cost in North Vancouver?', a: 'TajWater delivers 5-gallon water jugs to North Vancouver starting at $8.99 each with free delivery.' },
+      { q: 'How much does water delivery cost in North Vancouver?', a: 'TajWater delivers 5-gallon water jugs to North Vancouver starting at $8.99 each with Delivery available.' },
       { q: 'Do you deliver water to Deep Cove and Lynn Valley?', a: 'Yes. Deep Cove, Lynn Valley, Capilano, Seymour, Lonsdale, and Lower Lonsdale are all covered in our North Vancouver delivery zone.' },
       { q: 'What days do you deliver water in North Vancouver?', a: 'We deliver in North Vancouver on Mondays, Wednesdays, and Fridays.' },
     ],
@@ -124,7 +124,7 @@ const CITY_DATA: Record<string, { name: string; districts: string[]; schedule: s
     description: 'Water jug delivery to West Vancouver. Serving Dundarave, Ambleside, Horseshoe Bay, and the British Properties.',
     why: 'West Vancouver homes in the British Properties and Caulfeild area often have long pipe runs from the municipal supply, making filtered delivery the preferred choice. TajWater delivers 5-gallon spring and alkaline water to West Vancouver three times a week.',
     faq: [
-      { q: 'How much does water delivery cost in West Vancouver?', a: 'Water jug delivery to West Vancouver starts at $8.99 per 5-gallon jug with free delivery included.' },
+      { q: 'How much does water delivery cost in West Vancouver?', a: 'Water jug delivery to West Vancouver starts at $8.99 per 5-gallon jug with Delivery available included.' },
       { q: 'Do you deliver water to the British Properties in West Vancouver?', a: 'Yes. The British Properties, Dundarave, Ambleside, Horseshoe Bay, and Caulfeild are all on our West Vancouver delivery route.' },
       { q: 'What days do you deliver water in West Vancouver?', a: 'We deliver to West Vancouver on Tuesdays, Thursdays, and Saturdays.' },
     ],
@@ -136,7 +136,7 @@ const CITY_DATA: Record<string, { name: string; districts: string[]; schedule: s
     description: 'Water delivery across Delta — Ladner, Tsawwassen, and North Delta. Fresh 5-gallon jugs at competitive prices.',
     why: 'Delta spans three distinct communities — Ladner, Tsawwassen, and North Delta — and TajWater serves all three. Our Monday, Wednesday, Friday schedule means you\'re never more than two days away from a fresh water delivery across all of Delta.',
     faq: [
-      { q: 'How much does water delivery cost in Delta?', a: 'Water delivery in Delta starts at $8.99 per 5-gallon jug. Free delivery on all orders.' },
+      { q: 'How much does water delivery cost in Delta?', a: 'Water delivery in Delta starts at $8.99 per 5-gallon jug. Delivery available on all orders.' },
       { q: 'Do you deliver water to Ladner and Tsawwassen?', a: 'Yes. Ladner, Tsawwassen, North Delta, Sunshine Hills, and Scottsdale are all in our Delta delivery zone.' },
       { q: 'What days do you deliver water in Delta?', a: 'We deliver to Delta on Mondays, Wednesdays, and Fridays.' },
     ],
@@ -148,7 +148,7 @@ const CITY_DATA: Record<string, { name: string; districts: string[]; schedule: s
     description: 'Water jug delivery to Maple Ridge. Serving Albion, Silver Valley, Haney, and surrounding areas.',
     why: 'Maple Ridge and Pitt Meadows are underserved by most Metro Vancouver water delivery companies. TajWater is committed to the Fraser Valley corridor — we deliver to Albion, Silver Valley, and Haney twice weekly at the same prices as central Vancouver.',
     faq: [
-      { q: 'How much does water delivery cost in Maple Ridge?', a: 'Water delivery in Maple Ridge starts at $8.99 per 5-gallon jug with free delivery — same price as Vancouver.' },
+      { q: 'How much does water delivery cost in Maple Ridge?', a: 'Water delivery in Maple Ridge starts at $8.99 per 5-gallon jug with Delivery available — same price as Vancouver.' },
       { q: 'Do you deliver water to Silver Valley and Albion?', a: 'Yes. Silver Valley, Albion, Haney, Kanaka Creek, and Thornhill are all covered in our Maple Ridge delivery zone.' },
       { q: 'What days do you deliver water in Maple Ridge?', a: 'We deliver to Maple Ridge on Wednesdays and Fridays.' },
     ],
@@ -160,7 +160,7 @@ const CITY_DATA: Record<string, { name: string; districts: string[]; schedule: s
     description: 'Affordable water delivery service in Pitt Meadows. Fresh 5-gallon water jugs delivered to your door.',
     why: 'Pitt Meadows is a growing community with limited local water delivery options. TajWater delivers twice weekly to all Pitt Meadows areas at Metro Vancouver prices — no rural premium, no extra fees.',
     faq: [
-      { q: 'How much does water delivery cost in Pitt Meadows?', a: 'Water delivery in Pitt Meadows starts at $8.99 per 5-gallon jug with free delivery.' },
+      { q: 'How much does water delivery cost in Pitt Meadows?', a: 'Water delivery in Pitt Meadows starts at $8.99 per 5-gallon jug with Delivery available.' },
       { q: 'What areas of Pitt Meadows do you deliver to?', a: 'We deliver to Central Pitt Meadows, South Bonson, and North Pitt Meadows.' },
       { q: 'What days do you deliver water in Pitt Meadows?', a: 'We deliver to Pitt Meadows on Wednesdays and Fridays.' },
     ],
@@ -170,9 +170,9 @@ const CITY_DATA: Record<string, { name: string; districts: string[]; schedule: s
     districts: ['White Rock Beach', 'East White Rock', 'West White Rock', 'Hillcrest'],
     schedule: 'Mon, Wed, Fri',
     description: 'Water delivery in White Rock. 5-gallon spring and alkaline water jugs delivered to homes and businesses.',
-    why: 'White Rock\'s ocean proximity and municipal supply system make many residents prefer purified water for drinking. TajWater delivers to White Rock Beach, East White Rock, and Hillcrest three times a week with the same free delivery and competitive pricing as all Metro Vancouver zones.',
+    why: 'White Rock\'s ocean proximity and municipal supply system make many residents prefer purified water for drinking. TajWater delivers to White Rock Beach, East White Rock, and Hillcrest three times a week with the same Delivery available and competitive pricing as all Metro Vancouver zones.',
     faq: [
-      { q: 'How much does water delivery cost in White Rock?', a: 'TajWater delivers 5-gallon water jugs to White Rock starting at $8.99 each with free delivery.' },
+      { q: 'How much does water delivery cost in White Rock?', a: 'TajWater delivers 5-gallon water jugs to White Rock starting at $8.99 each with Delivery available.' },
       { q: 'Do you deliver water to White Rock Beach?', a: 'Yes. White Rock Beach, East White Rock, West White Rock, and Hillcrest are all in our delivery zone.' },
       { q: 'What days do you deliver in White Rock?', a: 'We deliver to White Rock on Mondays, Wednesdays, and Fridays.' },
     ],
@@ -184,7 +184,7 @@ const CITY_DATA: Record<string, { name: string; districts: string[]; schedule: s
     description: 'Water jug delivery to Squamish. Fresh 5-gallon spring water delivered weekly to Garibaldi Highlands, Valleycliffe, and Brackendale.',
     why: 'Squamish is the gateway to the Sea-to-Sky corridor, and TajWater is one of the only Metro Vancouver water delivery services that extends service this far north. We deliver to Squamish every Thursday — spring, alkaline, and distilled water at the same flat rate as Vancouver.',
     faq: [
-      { q: 'How much does water delivery cost in Squamish?', a: 'Water delivery to Squamish starts at $8.99 per 5-gallon jug with free delivery — same price as Vancouver.' },
+      { q: 'How much does water delivery cost in Squamish?', a: 'Water delivery to Squamish starts at $8.99 per 5-gallon jug with Delivery available — same price as Vancouver.' },
       { q: 'Do you deliver water to Garibaldi Highlands?', a: 'Yes. We deliver to Garibaldi Highlands, Downtown Squamish, Valleycliffe, and Brackendale every Thursday.' },
       { q: 'What day do you deliver water in Squamish?', a: 'We deliver to Squamish every Thursday. Order by Wednesday evening to be on the next run.' },
     ],
@@ -208,7 +208,7 @@ const CITY_DATA: Record<string, { name: string; districts: string[]; schedule: s
     description: 'Water jug delivery in Cloverdale, Surrey. 5-gallon spring, alkaline, and distilled water delivered to Clayton, Clayton Heights, and Cloverdale Town Centre.',
     why: 'Cloverdale and Clayton Heights are among Surrey\'s fastest-growing residential areas. TajWater delivers three times a week to all Cloverdale neighbourhoods at the same competitive rates as central Vancouver.',
     faq: [
-      { q: 'How much does water delivery cost in Cloverdale?', a: 'Water delivery in Cloverdale starts at $8.99 per 5-gallon jug with free delivery.' },
+      { q: 'How much does water delivery cost in Cloverdale?', a: 'Water delivery in Cloverdale starts at $8.99 per 5-gallon jug with Delivery available.' },
       { q: 'Do you deliver water to Clayton Heights?', a: 'Yes. Clayton, Clayton Heights, Cloverdale Town Centre, and Hillcrest are all covered.' },
       { q: 'What days do you deliver in Cloverdale?', a: 'We deliver to Cloverdale on Mondays, Wednesdays, and Fridays.' },
     ],
@@ -220,7 +220,7 @@ const CITY_DATA: Record<string, { name: string; districts: string[]; schedule: s
     description: 'Water delivery across Langley Township. Serving Willoughby, Walnut Grove, Brookswood, Fort Langley, Aldergrove, and Murrayville with fresh 5-gallon jugs.',
     why: 'Langley Township is one of BC\'s largest municipalities by area, and water delivery coverage is inconsistent. TajWater covers the full township — from Willoughby\'s new neighbourhoods to historic Fort Langley and rural Aldergrove — three times a week.',
     faq: [
-      { q: 'How much does water delivery cost in Langley Township?', a: 'Water delivery in Langley Township starts at $8.99 per 5-gallon jug with free delivery.' },
+      { q: 'How much does water delivery cost in Langley Township?', a: 'Water delivery in Langley Township starts at $8.99 per 5-gallon jug with Delivery available.' },
       { q: 'Do you deliver water to Aldergrove and Fort Langley?', a: 'Yes. Aldergrove, Fort Langley, Willoughby, Walnut Grove, Brookswood, and Murrayville are all covered.' },
       { q: 'What days do you deliver in Langley Township?', a: 'We deliver to Langley Township on Tuesdays, Thursdays, and Saturdays.' },
     ],
@@ -232,7 +232,7 @@ const CITY_DATA: Record<string, { name: string; districts: string[]; schedule: s
     description: 'Water delivery to Mary Hill in Port Coquitlam. Fresh 5-gallon water jugs delivered to Mary Hill, Citadel Heights, and surrounding neighbourhoods.',
     why: 'Mary Hill is minutes from TajWater\'s Port Coquitlam warehouse. Residents here receive our fastest delivery and most flexible scheduling — same-day service is frequently available.',
     faq: [
-      { q: 'How much does water delivery cost in Mary Hill?', a: 'Water delivery in Mary Hill (Port Coquitlam) starts at $8.99 per 5-gallon jug with free delivery.' },
+      { q: 'How much does water delivery cost in Mary Hill?', a: 'Water delivery in Mary Hill (Port Coquitlam) starts at $8.99 per 5-gallon jug with Delivery available.' },
       { q: 'What areas do you cover in Mary Hill?', a: 'We cover Mary Hill, Citadel Heights, Riverwood, and Prairie in the Port Coquitlam area.' },
       { q: 'What days do you deliver in Mary Hill?', a: 'We deliver to Mary Hill on Tuesdays, Thursdays, and Saturdays.' },
     ],
@@ -244,7 +244,7 @@ const CITY_DATA: Record<string, { name: string; districts: string[]; schedule: s
     description: 'Water delivery in Tsawwassen, Delta. 5-gallon spring and alkaline water jugs delivered to Tsawwassen Heights, Beach Grove, Boundary Bay, and all Tsawwassen areas.',
     why: 'Tsawwassen\'s peninsula geography means fewer delivery services reach this area. TajWater covers the full Tsawwassen area three times a week — Heights, English Bluff, Beach Grove, and Boundary Bay included.',
     faq: [
-      { q: 'How much does water delivery cost in Tsawwassen?', a: 'Water delivery in Tsawwassen starts at $8.99 per 5-gallon jug with free delivery — same as all Metro Vancouver zones.' },
+      { q: 'How much does water delivery cost in Tsawwassen?', a: 'Water delivery in Tsawwassen starts at $8.99 per 5-gallon jug with Delivery available — same as all Metro Vancouver zones.' },
       { q: 'Do you deliver water to Beach Grove and Boundary Bay?', a: 'Yes. Beach Grove, Boundary Bay, Tsawwassen Heights, English Bluff, and Pebble Hill are all covered.' },
       { q: 'What days do you deliver in Tsawwassen?', a: 'We deliver to Tsawwassen on Mondays, Wednesdays, and Fridays.' },
     ],
@@ -256,7 +256,7 @@ const CITY_DATA: Record<string, { name: string; districts: string[]; schedule: s
     description: 'Water jug delivery in Walnut Grove, Langley Township. Fresh 5-gallon spring and alkaline water delivered to your door.',
     why: 'Walnut Grove is a family-oriented community in Langley Township where clean drinking water is a priority. TajWater delivers spring, alkaline, and distilled water jugs to all Walnut Grove neighbourhoods three times a week.',
     faq: [
-      { q: 'How much does water delivery cost in Walnut Grove?', a: 'Water delivery in Walnut Grove starts at $8.99 per 5-gallon jug with free delivery.' },
+      { q: 'How much does water delivery cost in Walnut Grove?', a: 'Water delivery in Walnut Grove starts at $8.99 per 5-gallon jug with Delivery available.' },
       { q: 'What areas of Walnut Grove do you cover?', a: 'We cover Walnut Grove Town Centre, Walnut Grove North, Walnut Grove South, and Topham Park.' },
       { q: 'What days do you deliver in Walnut Grove?', a: 'We deliver to Walnut Grove on Tuesdays, Thursdays, and Saturdays.' },
     ],
@@ -478,7 +478,7 @@ export default async function CityPage({ params }: Props) {
               Water Delivery Prices in {data.name}
             </h2>
             <p className="text-[#4a7fa5] text-center mb-8 max-w-xl mx-auto">
-              Free delivery on every order. No contracts. Cancel or pause anytime.
+              Delivery available. No contracts. Cancel or pause anytime.
             </p>
             <div className="overflow-x-auto rounded-2xl border border-[#cce7f0] bg-white">
               <table className="w-full text-sm">
@@ -524,7 +524,7 @@ export default async function CityPage({ params }: Props) {
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
-                { label: 'Free delivery', detail: 'On every order, every time' },
+                { label: 'Delivery available', detail: 'On every order, every time' },
                 { label: 'No contracts', detail: 'Order once or subscribe — your choice' },
                 { label: 'BPA-free jugs', detail: 'Food-grade polycarbonate, sanitized before each fill' },
               ].map((item) => (

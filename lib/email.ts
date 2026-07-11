@@ -411,3 +411,33 @@ export function buildPaymentReceiptEmail({ paymentId, amount, description, custo
 <p style="margin:0;font-size:13px;color:#94a3b8;line-height:1.7;text-align:center;">This email serves as your official receipt. Keep it for your records. If you have any questions, please contact <a href="mailto:${coEmail}" style="color:#0c4a6e;text-decoration:none;">${coEmail}</a>.</p>
 `, `Receipt for Payment ${paymentId}`, coEmail, coUrl)
 }
+
+// ─── Reset Password ────────────────────────────────────────────────────────────
+export function buildResetPasswordEmail({ resetLink, customerName }: {
+  resetLink: string; customerName?: string
+}): string {
+  const coEmail = process.env.NEXT_PUBLIC_COMPANY_EMAIL ?? 'info@tajwater.ca'
+  const coUrl   = process.env.NEXT_PUBLIC_SITE_URL      ?? 'https://tajwater.ca'
+  const greet = customerName ? `Dear ${customerName},` : 'Hello,'
+
+  return shell(`
+<div style="text-align:center;margin-bottom:24px;">
+  <div style="font-size:48px;margin-bottom:16px;">🔐</div>
+  <h1 style="margin:0;font-size:24px;font-weight:800;color:#0f172a;letter-spacing:-0.5px;">Password Reset Request</h1>
+</div>
+<p style="margin:0 0 32px;font-size:16px;color:#334155;line-height:1.6;text-align:center;">${greet}<br/><br/>We received a request to reset the password for your TajWater account. Click the button below to choose a new password.</p>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
+  <tr><td align="center">
+    <a href="${resetLink}" style="display:inline-block;background:#0c4a6e;color:#ffffff;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:600;text-decoration:none;">Reset Your Password &rarr;</a>
+  </td></tr>
+</table>
+
+<p style="margin:0 0 16px;font-size:13px;color:#64748b;line-height:1.6;text-align:center;">This link will expire in 1 hour. If you did not request a password reset, you can safely ignore this email.</p>
+
+<div style="background:#f1f5f9;border-radius:12px;padding:16px;margin-bottom:32px;text-align:center;">
+  <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">Trouble clicking?</p>
+  <p style="margin:0;font-size:11px;color:#475569;word-break:break-all;">Copy and paste this URL into your browser:<br/><a href="${resetLink}" style="color:#0097a7;text-decoration:underline;">${resetLink}</a></p>
+</div>
+`, 'Reset your TajWater password', coEmail, coUrl)
+}

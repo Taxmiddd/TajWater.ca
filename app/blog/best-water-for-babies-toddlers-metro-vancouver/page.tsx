@@ -286,7 +286,7 @@ export default function BestWaterBabiesVancouver() {
               <h3 className="text-2xl font-extrabold mb-3">Distilled Water Delivery for Your Family</h3>
               <p className="text-[#b3e5fc] mb-6">
                 Distilled water for baby formula — delivered weekly to your door anywhere in Metro Vancouver.
-                $7.99/jug on subscription. Free delivery. No contract.
+                $7.99/jug on subscription. Delivery available. No contract.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/distilled-water-delivery-vancouver" className="bg-white text-[#0097a7] font-bold px-6 py-3 rounded-xl hover:bg-[#f0f9ff] transition-colors">

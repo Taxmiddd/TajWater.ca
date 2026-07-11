@@ -13,8 +13,9 @@ import {
   ArrowLeft, 
   Truck as TruckIcon, 
   AlertCircle, 
-  Wallet, 
-  Coins 
+  Wallet,
+  Info,
+  Package,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -26,22 +27,26 @@ import {
   PaymentForm, 
   CreditCard as SquareCreditCard, 
   ApplePay, 
-  GooglePay, 
-  CashAppPay,
-  Ach
+  GooglePay,
 } from 'react-square-web-payments-sdk'
 import { supabase } from '@/lib/supabase'
 
 type Step = 'cart' | 'address' | 'payment' | 'confirmed'
 type Zone = { id: string; name: string; delivery_fee: number }
 
+// Wallet-eligible product categories (water refills and water products only)
+const WALLET_ELIGIBLE_CATEGORIES = ['water', 'refill', 'water_product']
+
 // --- Main checkout page ---
 export default function CheckoutPage() {
   const { items, updateQuantity, removeItem, total, clearCart } = useCart()
-  const [paymentMode, setPaymentMode] = useState<'online' | 'offline'>('online')
-  const [offlineMethod, setOfflineMethod] = useState<'cash_on_delivery' | 'card_on_delivery'>('cash_on_delivery')
+  const [paymentMode, setPaymentMode] = useState<'online' | 'offline' | 'wallet'>('online')
+  const [fulfillmentType, setFulfillmentType] = useState<'delivery' | 'pickup'>('delivery')
+
+  const PICKUP_ADDRESS = '1770 McLean Ave, Port Coquitlam, BC V3C 4K8'
 
   const [step, setStep] = useState<Step>('cart')
+  const [walletBalance, setWalletBalance] = useState<number>(0)
   const [address, setAddress] = useState({ name: '', phone: '', street: '', city: '', zone: '', postal: '', notes: '', email: '' })
   const [zones, setZones] = useState<Zone[]>([])
   const [intentError, setIntentError] = useState('')
@@ -52,6 +57,8 @@ export default function CheckoutPage() {
   const [serverTotal, setServerTotal] = useState<number | null>(null)
   const [deliveryFee, setDeliveryFee] = useState(0)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isFirstOrder, setIsFirstOrder] = useState(false)
+  const [cartError, setCartError] = useState('')
   const router = useRouter()
 
   // Fetch active zones from DB
@@ -64,11 +71,15 @@ export default function CheckoutPage() {
       .then(({ data }) => { if (data) setZones(data) })
   }, [])
 
-  // Update delivery fee when zone changes
+  // Update delivery fee when zone changes (pickup always has $0 delivery)
   useEffect(() => {
-    const zone = zones.find(z => z.name === address.zone)
-    setDeliveryFee(zone?.delivery_fee ?? 0)
-  }, [address.zone, zones])
+    if (fulfillmentType === 'pickup') {
+      setDeliveryFee(0)
+    } else {
+      const zone = zones.find(z => z.name === address.zone)
+      setDeliveryFee(zone?.delivery_fee ?? 0)
+    }
+  }, [address.zone, zones, fulfillmentType])
 
   // Require login — redirect if not authenticated; pre-fill address from profile
   useEffect(() => {
@@ -78,11 +89,12 @@ export default function CheckoutPage() {
         setUserId(session.user.id)
         const { data: profile } = await supabase
           .from('profiles')
-          .select('name, phone, delivery_address, zone_id, email')
+          .select('name, phone, delivery_address, zone_id, email, wallet_balance')
           .eq('id', session.user.id)
           .single()
 
         if (profile) {
+          setWalletBalance(profile.wallet_balance ?? 0)
           let zoneName = ''
           if (profile.zone_id) {
             const { data: zoneRow } = await supabase
@@ -103,6 +115,13 @@ export default function CheckoutPage() {
         } else {
           setAddress(prev => ({ ...prev, email: session.user.email ?? '' }))
         }
+
+        // Check if this is a first-time order
+        const { count } = await supabase
+          .from('orders')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', session.user.id)
+        setIsFirstOrder((count ?? 0) === 0)
       }
       setAuthChecked(true)
     }
@@ -110,13 +129,47 @@ export default function CheckoutPage() {
   }, [router])
   
   const subtotal = total()
-  const discountAmt = 0
   const taxableSubtotal = items.reduce((acc, item) => acc + (item.product.taxable !== false ? item.product.price * item.quantity : 0), 0)
   const tax = Math.round(taxableSubtotal * 0.12 * 100) / 100
-  const deliveryFeeValue = deliveryFee // For clarity in callbacks
-  const orderTotal = Math.max(0, subtotal - discountAmt) + deliveryFeeValue + tax
+  const deliveryFeeValue = deliveryFee
+
+  // Wallet: covers items + tax only. Delivery always paid by card.
+  const walletItemsTotal = Math.max(0, subtotal) + tax
+  // Online / card on delivery: full total
+  const orderTotal = Math.max(0, subtotal) + deliveryFeeValue + tax
   const displayTotal = serverTotal ?? orderTotal
 
+  // For wallet mode, wallet covers items+tax; delivery charged to card separately
+  const walletDeductAmount = walletItemsTotal
+  const walletDeliveryCardAmount = deliveryFeeValue
+
+  // Check if all items in cart are wallet-eligible
+  const allItemsWalletEligible = items.every(i =>
+    WALLET_ELIGIBLE_CATEGORIES.includes(i.product.category)
+  )
+
+  // Total water jug quantity in cart
+  const waterJugQty = items
+    .filter(i => i.product.category === 'water')
+    .reduce((sum, i) => sum + i.quantity, 0)
+
+  // --- Cart validation ---
+  const validateCart = (): boolean => {
+    setCartError('')
+    if (items.length === 0) return false
+
+    // First-order minimum: 2 water jugs
+    if (isFirstOrder && waterJugQty > 0 && waterJugQty < 2) {
+      setCartError('Your first order must include at least 2 water jugs.')
+      return false
+    }
+
+    return true
+  }
+
+  const handleProceedFromCart = () => {
+    if (validateCart()) setStep('address')
+  }
 
   // --- Validation Logic ---
   const validateField = (name: string, value: string) => {
@@ -151,6 +204,13 @@ export default function CheckoutPage() {
     const isNameValid   = validateField('name', address.name)
     const isPhoneValid  = validateField('phone', address.phone)
     const isEmailValid  = validateField('email', address.email)
+
+    if (fulfillmentType === 'pickup') {
+      // For pickup: only name, phone, email required
+      if (isNameValid && isPhoneValid && isEmailValid) setStep('payment')
+      return
+    }
+
     const isPostalValid = validateField('postal', address.postal)
     const isStreetValid = !!address.street.trim()
     const isZoneValid   = !!address.zone
@@ -192,6 +252,7 @@ export default function CheckoutPage() {
           discountCodeId: null,
           discountAmount: 0,
           paymentMethod: 'square_online',
+          fulfillmentType,
         }),
       })
       const data = await res.json()
@@ -238,7 +299,54 @@ export default function CheckoutPage() {
           userId,
           discountCodeId: null,
           discountAmount: 0,
-          paymentMethod: offlineMethod,
+          paymentMethod: 'card_on_delivery',
+          fulfillmentType,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to place order')
+      clearCart()
+      setOrderId(data.orderId)
+      setStep('confirmed')
+      window.scrollTo(0, 0)
+    } catch (err: unknown) {
+      setIntentError(err instanceof Error ? err.message : 'Failed to place order')
+    } finally {
+      setProcessing(false)
+    }
+  }
+
+  const handleWalletOrder = async (deliveryToken?: string) => {
+    setProcessing(true)
+    setIntentError('')
+    try {
+      const res = await fetch('/api/create-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: walletDeductAmount,
+          deliveryFeeCardToken: deliveryToken ?? null,
+          items: items.map(i => ({
+            product_id: i.product.id,
+            quantity: i.quantity,
+            price: i.product.price,
+            category: i.product.category,
+            name: i.product.name,
+          })),
+          address: {
+            name: address.name,
+            phone: address.phone,
+            street: address.street,
+            zone: address.zone,
+            postal: address.postal,
+            email: address.email,
+          },
+          notes: address.notes || null,
+          userId,
+          discountCodeId: null,
+          discountAmount: 0,
+          paymentMethod: 'wallet',
+          fulfillmentType,
         }),
       })
       const data = await res.json()
@@ -304,13 +412,27 @@ export default function CheckoutPage() {
               #{`TW-${orderId.slice(-8).toUpperCase()}`}
             </p>
           )}
-          <p className="text-[#4a7fa5] mb-6">Your water is on its way. You&apos;ll receive a confirmation email shortly with your tracking details.</p>
+          <p className="text-[#4a7fa5] mb-6">
+            {fulfillmentType === 'pickup'
+              ? 'Your order is confirmed. We\'ll call you when it\'s ready for pickup!'
+              : 'Your water is on its way. You\'ll receive a confirmation email shortly with your tracking details.'}
+          </p>
           <div className="bg-[#e0f7fa] rounded-2xl p-4 mb-6 text-left">
             <div className="flex items-center gap-2 text-[#0097a7] font-semibold text-sm mb-1">
-              <TruckIcon className="w-4 h-4" /> Estimated Delivery
+              {fulfillmentType === 'pickup' ? <Package className="w-4 h-4" /> : <TruckIcon className="w-4 h-4" />}
+              {fulfillmentType === 'pickup' ? 'Pickup Location' : 'Estimated Delivery'}
             </div>
-            <p className="text-[#0c2340] font-bold">Within 1–2 business days</p>
-            <p className="text-xs text-[#4a7fa5] mt-1">Our driver will call before arrival.</p>
+            {fulfillmentType === 'pickup' ? (
+              <>
+                <p className="text-[#0c2340] font-bold">1770 McLean Ave, Port Coquitlam, BC</p>
+                <p className="text-xs text-[#4a7fa5] mt-1">Mon–Fri 9am–5pm · We&apos;ll call when ready.</p>
+              </>
+            ) : (
+              <>
+                <p className="text-[#0c2340] font-bold">Within 1–2 business days</p>
+                <p className="text-xs text-[#4a7fa5] mt-1">Our driver will call before arrival.</p>
+              </>
+            )}
           </div>
           <div className="flex flex-col gap-3">
             <Link href="/dashboard/orders">
@@ -385,10 +507,63 @@ export default function CheckoutPage() {
                     ))}
                   </div>
                 )}
+
+                {/* First-order notice */}
+                {isFirstOrder && waterJugQty > 0 && (
+                  <div className="mx-5 mb-3 flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl p-3">
+                    <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <p className="text-xs text-amber-700 font-medium">
+                      First order requires a minimum of <strong>2 water jugs</strong>.
+                      {waterJugQty < 2 && ` You currently have ${waterJugQty}.`}
+                    </p>
+                  </div>
+                )}
+
+                {cartError && (
+                  <div className="mx-5 mb-3 flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl p-3">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    {cartError}
+                  </div>
+                )}
+
+                {/* Delivery or Pickup toggle */}
                 {items.length > 0 && (
-                  <div className="p-5">
-                    <Button onClick={() => setStep('address')} className="w-full h-12 rounded-xl bg-gradient-to-r from-[#0097a7] to-[#1565c0] text-white font-semibold">
-                      Continue to Address
+                  <div className="mx-5 mb-4">
+                    <p className="text-xs font-semibold text-[#4a7fa5] mb-2 uppercase tracking-wider">Fulfillment</p>
+                    <div className="flex p-1 bg-[#f0f9ff] rounded-2xl border border-[#cce7f0]">
+                      <button
+                        onClick={() => setFulfillmentType('delivery')}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                          fulfillmentType === 'delivery' ? 'bg-white text-[#0097a7] shadow-sm' : 'text-[#4a7fa5] hover:text-[#0097a7]'
+                        }`}
+                      >
+                        <TruckIcon className="w-4 h-4" /> Delivery
+                      </button>
+                      <button
+                        onClick={() => { setFulfillmentType('pickup'); setPaymentMode('online') }}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                          fulfillmentType === 'pickup' ? 'bg-white text-[#0097a7] shadow-sm' : 'text-[#4a7fa5] hover:text-[#0097a7]'
+                        }`}
+                      >
+                        <Package className="w-4 h-4" /> Store Pickup
+                      </button>
+                    </div>
+                    {fulfillmentType === 'pickup' && (
+                      <div className="mt-3 flex items-start gap-2 bg-green-50 border border-green-200 rounded-xl p-3">
+                        <Package className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-xs font-bold text-green-700">No delivery charge — pickup is free!</p>
+                          <p className="text-xs text-green-600 mt-0.5">Pick up at: 1770 McLean Ave, Port Coquitlam, BC V3C 4K8</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {items.length > 0 && (
+                  <div className="p-5 pt-0">
+                    <Button onClick={handleProceedFromCart} className="w-full h-12 rounded-xl bg-gradient-to-r from-[#0097a7] to-[#1565c0] text-white font-semibold">
+                      {fulfillmentType === 'pickup' ? 'Continue to Details' : 'Continue to Address'}
                     </Button>
                   </div>
                 )}
@@ -398,10 +573,23 @@ export default function CheckoutPage() {
             {step === 'address' && (
               <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="bg-white rounded-3xl border border-[#cce7f0] shadow-sm overflow-hidden">
                 <div className="p-5 border-b border-[#cce7f0] flex items-center gap-2">
-                  <MapPin className="w-5 h-5 text-[#0097a7]" />
-                  <h2 className="font-bold text-[#0c2340]">Delivery Address</h2>
+                  {fulfillmentType === 'pickup' ? <Package className="w-5 h-5 text-[#0097a7]" /> : <MapPin className="w-5 h-5 text-[#0097a7]" />}
+                  <h2 className="font-bold text-[#0c2340]">{fulfillmentType === 'pickup' ? 'Your Details' : 'Delivery Address'}</h2>
                 </div>
                 <form onSubmit={handleNextFromAddress} className="p-5 space-y-4">
+
+                  {/* Pickup info banner */}
+                  {fulfillmentType === 'pickup' && (
+                    <div className="flex items-start gap-3 bg-[#e0f7fa] rounded-2xl p-4 border border-[#b3e5fc]">
+                      <Package className="w-5 h-5 text-[#0097a7] shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-bold text-[#0c2340] text-sm">Store Pickup — No Delivery Fee</p>
+                        <p className="text-xs text-[#0097a7] mt-1">📍 1770 McLean Ave, Port Coquitlam, BC V3C 4K8</p>
+                        <p className="text-xs text-[#4a7fa5] mt-1">We&apos;ll contact you when your order is ready for pickup. Mon–Fri 9am–5pm.</p>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Full Name</label>
@@ -428,17 +616,7 @@ export default function CheckoutPage() {
                       {errors.phone && <p className="text-[10px] text-red-500 mt-1 ml-1 font-medium">{errors.phone}</p>}
                     </div>
                   </div>
-                  <div>
-                    <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Street Address</label>
-                    <Input 
-                      placeholder="123 Main Street, Suite 4" 
-                      className={`border-[#cce7f0] ${errors.street ? 'border-red-500 bg-red-50' : ''}`}
-                      required 
-                      value={address.street} 
-                      onChange={(e) => handleAddressChange('street', e.target.value)}
-                    />
-                    {errors.street && <p className="text-[10px] text-red-500 mt-1 ml-1 font-medium">{errors.street}</p>}
-                  </div>
+
                   <div>
                     <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Email Address</label>
                     <Input 
@@ -453,46 +631,64 @@ export default function CheckoutPage() {
                     {errors.email ? (
                       <p className="text-[10px] text-red-500 mt-1 ml-1 font-medium">{errors.email}</p>
                     ) : (
-                      !userId && <p className="text-[10px] text-[#4a7fa5] mt-1">Used for sending your order confirmation and invoice.</p>
+                      !userId && <p className="text-[10px] text-[#4a7fa5] mt-1">Used for your order confirmation and pickup notification.</p>
                     )}
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Delivery Zone</label>
-                      <select
-                        required
-                        value={address.zone}
-                        onChange={(e) => handleAddressChange('zone', e.target.value)}
-                        className={`w-full h-10 px-3 rounded-xl border border-[#cce7f0] text-sm focus:border-[#0097a7] focus:outline-none text-[#0c2340] ${errors.zone ? 'border-red-500 bg-red-50' : ''}`}
-                      >
-                        <option value="">Select zone...</option>
-                        {zones.map((z) => <option key={z.id} value={z.name}>{z.name}</option>)}
-                      </select>
-                      {errors.zone && <p className="text-[10px] text-red-500 mt-1 ml-1 font-medium">{errors.zone}</p>}
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Postal / Zip Code</label>
-                      <Input 
-                        placeholder="V6B 1A1" 
-                        className={`border-[#cce7f0] ${errors.postal ? 'border-red-500 bg-red-50' : ''}`}
-                        required 
-                        value={address.postal} 
-                        onChange={(e) => handleAddressChange('postal', e.target.value)}
-                        onBlur={(e) => validateField('postal', e.target.value)}
-                      />
-                      {errors.postal && <p className="text-[10px] text-red-500 mt-1 ml-1 font-medium">{errors.postal}</p>}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Delivery Instructions <span className="text-[#4a7fa5] font-normal">(optional)</span></label>
-                    <textarea
-                      placeholder="Leave at back door, call before arriving, gate code: 1234…"
-                      value={address.notes}
-                      onChange={(e) => setAddress({ ...address, notes: e.target.value })}
-                      rows={2}
-                      className="w-full px-3 py-2 rounded-xl border border-[#cce7f0] text-sm focus:border-[#0097a7] focus:outline-none text-[#0c2340] resize-none"
-                    />
-                  </div>
+
+                  {/* Delivery-only fields */}
+                  {fulfillmentType === 'delivery' && (
+                    <>
+                      <div>
+                        <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Street Address</label>
+                        <Input 
+                          placeholder="123 Main Street, Suite 4" 
+                          className={`border-[#cce7f0] ${errors.street ? 'border-red-500 bg-red-50' : ''}`}
+                          required 
+                          value={address.street} 
+                          onChange={(e) => handleAddressChange('street', e.target.value)}
+                        />
+                        {errors.street && <p className="text-[10px] text-red-500 mt-1 ml-1 font-medium">{errors.street}</p>}
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Delivery Zone</label>
+                          <select
+                            required
+                            value={address.zone}
+                            onChange={(e) => handleAddressChange('zone', e.target.value)}
+                            className={`w-full h-10 px-3 rounded-xl border border-[#cce7f0] text-sm focus:border-[#0097a7] focus:outline-none text-[#0c2340] ${errors.zone ? 'border-red-500 bg-red-50' : ''}`}
+                          >
+                            <option value="">Select zone...</option>
+                            {zones.map((z) => <option key={z.id} value={z.name}>{z.name}</option>)}
+                          </select>
+                          {errors.zone && <p className="text-[10px] text-red-500 mt-1 ml-1 font-medium">{errors.zone}</p>}
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Postal / Zip Code</label>
+                          <Input 
+                            placeholder="V6B 1A1" 
+                            className={`border-[#cce7f0] ${errors.postal ? 'border-red-500 bg-red-50' : ''}`}
+                            required 
+                            value={address.postal} 
+                            onChange={(e) => handleAddressChange('postal', e.target.value)}
+                            onBlur={(e) => validateField('postal', e.target.value)}
+                          />
+                          {errors.postal && <p className="text-[10px] text-red-500 mt-1 ml-1 font-medium">{errors.postal}</p>}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Delivery Instructions <span className="text-[#4a7fa5] font-normal">(optional)</span></label>
+                        <textarea
+                          placeholder="Leave at back door, call before arriving, gate code: 1234…"
+                          value={address.notes}
+                          onChange={(e) => setAddress({ ...address, notes: e.target.value })}
+                          rows={2}
+                          className="w-full px-3 py-2 rounded-xl border border-[#cce7f0] text-sm focus:border-[#0097a7] focus:outline-none text-[#0c2340] resize-none"
+                        />
+                      </div>
+                    </>
+                  )}
+
                   <div className="flex gap-3 pt-2">
                     <Button type="button" variant="outline" onClick={() => setStep('cart')} className="flex-1 border-[#cce7f0]">Back to Cart</Button>
                     <Button type="submit" className="flex-1 bg-gradient-to-r from-[#0097a7] to-[#1565c0] text-white shadow-md shadow-[#0097a7]/20">
@@ -525,17 +721,32 @@ export default function CheckoutPage() {
                       <CreditCardIcon className="w-4 h-4" />
                       Pay Online
                     </button>
-                    <button
-                      onClick={() => setPaymentMode('offline')}
-                      className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all ${
-                        paymentMode === 'offline'
-                          ? 'bg-white text-[#0097a7] shadow-sm'
-                          : 'text-[#4a7fa5] hover:text-[#0097a7]'
-                      }`}
-                    >
-                      <TruckIcon className="w-4 h-4" />
-                      Pay on Delivery
-                    </button>
+                    {fulfillmentType === 'delivery' && (
+                      <button
+                        onClick={() => setPaymentMode('offline')}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all ${
+                          paymentMode === 'offline'
+                            ? 'bg-white text-[#0097a7] shadow-sm'
+                            : 'text-[#4a7fa5] hover:text-[#0097a7]'
+                        }`}
+                      >
+                        <TruckIcon className="w-4 h-4" />
+                        Card on Delivery
+                      </button>
+                    )}
+                    {userId && allItemsWalletEligible && (
+                      <button
+                        onClick={() => setPaymentMode('wallet')}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all ${
+                          paymentMode === 'wallet'
+                            ? 'bg-white text-[#0097a7] shadow-sm'
+                            : 'text-[#4a7fa5] hover:text-[#0097a7]'
+                        }`}
+                      >
+                        <Wallet className="w-4 h-4" />
+                        Wallet
+                      </button>
+                    )}
                   </div>
 
                   {intentError && (
@@ -582,15 +793,11 @@ export default function CheckoutPage() {
                             <ApplePay />
                             <GooglePay />
                           </div>
-                          <CashAppPay 
-                            redirectURL={typeof window !== 'undefined' ? `${window.location.origin}/checkout` : ''}
-                            referenceId={userId || 'guest'}
-                          />
                         </div>
 
                         <div className="relative flex py-3 items-center">
                           <div className="flex-grow border-t border-[#cce7f0]"></div>
-                          <span className="flex-shrink mx-4 text-[#4a7fa5] text-xs">Or Pay by Card / Bank</span>
+                          <span className="flex-shrink mx-4 text-[#4a7fa5] text-xs">Or Pay by Card</span>
                           <div className="flex-grow border-t border-[#cce7f0]"></div>
                         </div>
 
@@ -610,63 +817,132 @@ export default function CheckoutPage() {
                         >
                           {processing ? 'Processing...' : `Pay $${displayTotal.toFixed(2)} with Card`}
                         </SquareCreditCard>
-
-                        <div className="mt-6 p-4 border border-[#cce7f0] rounded-2xl bg-[#fafdfe]">
-                           <p className="text-xs font-bold text-[#0097a7] mb-3 uppercase tracking-wider flex items-center gap-2">
-                             <CreditCardIcon className="w-3 h-3" /> Pay with Bank Account (ACH)
-                           </p>
-                           <div className="min-h-[40px]">
-                             <Ach 
-                               accountHolderName={address.name || 'Customer'} 
-                               redirectURI={typeof window !== 'undefined' ? `${window.location.origin}/checkout` : ''}
-                             />
-                           </div>
-                           <p className="text-[10px] text-[#8caab8] mt-2 italic">Secure bank verification via Plaid/Square.</p>
-                        </div>
                       </div>
                     </PaymentForm>
-                  ) : (
+                  ) : paymentMode === 'wallet' ? (
                     <div className="space-y-4">
-                      <div className="grid grid-cols-1 gap-3">
-                        <button
-                          onClick={() => setOfflineMethod('cash_on_delivery')}
-                          className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all text-left ${
-                            offlineMethod === 'cash_on_delivery' ? 'border-[#0097a7] bg-[#f0f9ff]' : 'border-[#cce7f0] hover:border-[#0097a7] bg-white'
-                          }`}
-                        >
-                          <div className={`p-2 rounded-xl ${offlineMethod === 'cash_on_delivery' ? 'bg-[#0097a7] text-white' : 'bg-[#f0f9ff] text-[#0097a7]'}`}>
-                            <Coins className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <p className="font-bold text-[#0c2340]">Cash on Delivery</p>
-                            <p className="text-xs text-[#4a7fa5]">Pay with cash when your water arrives</p>
-                          </div>
-                          {offlineMethod === 'cash_on_delivery' && (
-                            <div className="ml-auto w-5 h-5 rounded-full bg-[#0097a7] flex items-center justify-center">
-                              <div className="w-2 h-2 rounded-full bg-white" />
-                            </div>
-                          )}
-                        </button>
-
-                        <button
-                          onClick={() => setOfflineMethod('card_on_delivery')}
-                          className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all text-left ${
-                            offlineMethod === 'card_on_delivery' ? 'border-[#0097a7] bg-[#f0f9ff]' : 'border-[#cce7f0] hover:border-[#0097a7] bg-white'
-                          }`}
-                        >
-                          <div className={`p-2 rounded-xl ${offlineMethod === 'card_on_delivery' ? 'bg-[#0097a7] text-white' : 'bg-[#f0f9ff] text-[#0097a7]'}`}>
+                      {/* Wallet balance info */}
+                      <div className="p-4 rounded-2xl border-2 border-[#0097a7] bg-[#f0f9ff]">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="p-2 rounded-xl bg-[#0097a7] text-white">
                             <Wallet className="w-5 h-5" />
                           </div>
                           <div>
-                            <p className="font-bold text-[#0c2340]">Card on Delivery</p>
-                            <p className="text-xs text-[#4a7fa5]">Driver will bring a Square POS terminal</p>
+                            <p className="font-bold text-[#0c2340]">Wallet Balance</p>
+                            <p className="text-xl font-black text-[#0097a7]">{walletBalance.toFixed(0)} credits</p>
                           </div>
-                          {offlineMethod === 'card_on_delivery' && (
-                            <div className="ml-auto w-5 h-5 rounded-full bg-[#0097a7] flex items-center justify-center">
-                              <div className="w-2 h-2 rounded-full bg-white" />
+                        </div>
+
+                        {/* Split payment explanation */}
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between font-medium text-[#0c2340]">
+                            <span>Wallet pays (items + tax)</span>
+                            <span className="text-[#0097a7] font-bold">{walletDeductAmount.toFixed(0)} credits</span>
+                          </div>
+                          {walletDeliveryCardAmount > 0 && (
+                            <div className="flex justify-between font-medium text-[#0c2340]">
+                              <span>Card pays (delivery fee)</span>
+                              <span className="font-bold">${walletDeliveryCardAmount.toFixed(2)}</span>
                             </div>
                           )}
-                        </button>
+                        </div>
+
+                        {walletBalance < walletDeductAmount ? (
+                          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-xl border border-red-200 mt-3">
+                            Insufficient wallet credits. You need {walletDeductAmount.toFixed(0)} credits but have {walletBalance.toFixed(0)}.
+                          </div>
+                        ) : (
+                          <div className="flex items-start gap-2 bg-green-50 p-3 rounded-xl border border-green-200 mt-3">
+                            <Info className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
+                            <p className="text-sm text-green-700">You have sufficient credits for this order.</p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Delivery fee card payment (if applicable) */}
+                      {walletDeliveryCardAmount > 0 ? (
+                        <div className="p-4 rounded-2xl border border-[#cce7f0] bg-white">
+                          <div className="flex items-center gap-2 mb-3">
+                            <CreditCardIcon className="w-4 h-4 text-[#0097a7]" />
+                            <p className="text-sm font-bold text-[#0c2340]">
+                              Card required for delivery fee (${walletDeliveryCardAmount.toFixed(2)})
+                            </p>
+                          </div>
+                          <p className="text-xs text-[#4a7fa5] mb-4">
+                            Delivery charges are always collected by card. Enter your card below to pay the ${walletDeliveryCardAmount.toFixed(2)} delivery fee.
+                          </p>
+                          <PaymentForm
+                            applicationId={process.env.NEXT_PUBLIC_SQUARE_APPLICATION_ID ?? ''}
+                            locationId={process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID ?? ''}
+                            cardTokenizeResponseReceived={async (token) => {
+                              if (token.status === 'OK' && token.token) {
+                                await handleWalletOrder(token.token)
+                              } else {
+                                setIntentError('Card payment for delivery fee failed. Please check your card details.')
+                              }
+                            }}
+                            createPaymentRequest={() => ({
+                              countryCode: 'CA',
+                              currencyCode: 'CAD',
+                              total: {
+                                amount: walletDeliveryCardAmount.toFixed(2),
+                                label: 'Delivery Fee',
+                              },
+                            })}
+                          >
+                            <SquareCreditCard
+                              buttonProps={{
+                                css: {
+                                  backgroundColor: walletBalance < walletDeductAmount ? '#94a3b8' : '#0097a7',
+                                  color: '#fff',
+                                  fontSize: '14px',
+                                  fontWeight: '600',
+                                  borderRadius: '12px',
+                                  padding: '12px 0',
+                                  marginTop: '10px',
+                                },
+                              }}
+                            >
+                              {processing
+                                ? 'Processing...'
+                                : walletBalance < walletDeductAmount
+                                ? 'Insufficient Wallet Credits'
+                                : `Pay $${walletDeliveryCardAmount.toFixed(2)} Delivery & Confirm`}
+                            </SquareCreditCard>
+                          </PaymentForm>
+                        </div>
+                      ) : (
+                        // No delivery fee — wallet-only checkout
+                        <Button
+                          onClick={() => handleWalletOrder()}
+                          disabled={processing || walletBalance < walletDeductAmount}
+                          className="w-full bg-[#0097a7] hover:bg-[#00838f] text-white font-bold py-4 h-auto rounded-2xl shadow-lg shadow-[#0097a7]/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                        >
+                          {processing ? 'Processing...' : `Confirm Order — ${walletDeductAmount.toFixed(0)} Credits`}
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
+                    // Card on Delivery
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3 p-4 rounded-2xl border-2 border-[#0097a7] bg-[#f0f9ff]">
+                        <div className="p-2 rounded-xl bg-[#0097a7] text-white">
+                          <CreditCardIcon className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-[#0c2340]">Card on Delivery</p>
+                          <p className="text-xs text-[#4a7fa5]">Our driver will bring a Square POS terminal</p>
+                        </div>
+                        <div className="ml-auto w-5 h-5 rounded-full bg-[#0097a7] flex items-center justify-center">
+                          <div className="w-2 h-2 rounded-full bg-white" />
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-2 bg-[#e0f7fa] p-3 rounded-xl">
+                        <Info className="w-4 h-4 text-[#0097a7] shrink-0 mt-0.5" />
+                        <p className="text-xs text-[#0097a7]">
+                          Payment is collected by credit or debit card when your order arrives. Our driver carries a Square POS machine.
+                        </p>
                       </div>
 
                       <Button
@@ -678,7 +954,7 @@ export default function CheckoutPage() {
                       </Button>
 
                       <p className="text-[10px] text-center text-[#4a7fa5] mt-2 italic">
-                        No immediate payment required. Pay your driver upon delivery.
+                        Payment by credit or debit card collected on delivery.
                       </p>
                     </div>
                   )}
@@ -729,8 +1005,17 @@ export default function CheckoutPage() {
                     <span>${subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-xs text-[#4a7fa5]">
-                    <span>Delivery</span>
-                    <span>{deliveryFee === 0 ? 'FREE' : `$${deliveryFee.toFixed(2)}`}</span>
+                    {fulfillmentType === 'pickup' ? (
+                      <>
+                        <span>Pickup</span>
+                        <span className="text-green-600 font-semibold">Free</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Delivery</span>
+                        <span>${deliveryFee.toFixed(2)}</span>
+                      </>
+                    )}
                   </div>
                   {tax > 0 && (
                     <div className="flex justify-between text-xs text-[#4a7fa5]">
@@ -738,13 +1023,49 @@ export default function CheckoutPage() {
                       <span>${tax.toFixed(2)}</span>
                     </div>
                   )}
-                  <div className="flex justify-between text-base font-black text-[#0c2340] pt-2 border-t border-[#f0f9ff]">
-                    <span>Total</span>
-                    <span>${displayTotal.toFixed(2)}</span>
-                  </div>
+
+                  {paymentMode === 'wallet' && (
+                    <>
+                      <div className="flex justify-between text-xs font-medium text-[#0097a7] bg-[#f0f9ff] rounded-lg px-2 py-1.5">
+                        <span>Wallet (items + tax)</span>
+                        <span>{walletDeductAmount.toFixed(0)} credits</span>
+                      </div>
+                      {walletDeliveryCardAmount > 0 && (
+                        <div className="flex justify-between text-xs font-medium text-[#4a7fa5] bg-[#f0f9ff] rounded-lg px-2 py-1.5">
+                          <span>Card (delivery)</span>
+                          <span>${walletDeliveryCardAmount.toFixed(2)}</span>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {paymentMode !== 'wallet' && (
+                    <div className="flex justify-between text-base font-black text-[#0c2340] pt-2 border-t border-[#f0f9ff]">
+                      <span>Total</span>
+                      <span>${displayTotal.toFixed(2)}</span>
+                    </div>
+                  )}
                 </div>
 
-                {address.zone && (
+                {paymentMode === 'wallet' && (
+                  <div className="flex items-start gap-2 bg-[#e0f7fa] p-3 rounded-xl">
+                    <Info className="w-3.5 h-3.5 text-[#0097a7] shrink-0 mt-0.5" />
+                    <p className="text-[10px] leading-relaxed text-[#0097a7]">
+                      Delivery fees are always charged by card. Wallet credits cover water products and tax only.
+                    </p>
+                  </div>
+                )}
+
+                {fulfillmentType === 'pickup' ? (
+                  <div className="bg-green-50 border border-green-200 p-3 rounded-xl flex items-start gap-2">
+                    <Package className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
+                    <p className="text-[10px] leading-tight text-green-700 font-medium">
+                      <span className="font-bold">Store Pickup — No Delivery Fee</span><br/>
+                      1770 McLean Ave, Port Coquitlam<br/>
+                      Mon–Fri 9am–5pm
+                    </p>
+                  </div>
+                ) : address.zone ? (
                    <div className="bg-[#e0f7fa] p-3 rounded-xl flex items-start gap-2">
                      <TruckIcon className="w-4 h-4 text-[#0097a7] shrink-0 mt-0.5" />
                      <p className="text-[10px] leading-tight text-[#0097a7] font-medium">
@@ -752,7 +1073,7 @@ export default function CheckoutPage() {
                        Usually arrives in 24-48 hours.
                      </p>
                    </div>
-                )}
+                ) : null}
               </div>
             </div>
           </div>
@@ -761,4 +1082,3 @@ export default function CheckoutPage() {
     </div>
   )
 }
-

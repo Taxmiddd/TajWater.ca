@@ -1,6 +1,6 @@
 'use client'
 
-import { Star } from 'lucide-react'
+import { Star, Users, Clock, Wallet, MapPin } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Script from 'next/script'
 import Link from 'next/link'
@@ -97,11 +97,11 @@ export default function EnhancedTestimonials() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(reviewsSchema) }}
       />
 
-      <section className="py-24 bg-[#f0f9ff]">
+      <section className="py-24 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-5xl font-extrabold text-[#0c2340] mb-4">
-              Loved by <span className="gradient-text">5,000+ Metro Vancouver Families</span>
+              Loved by <span className="gradient-text">500+ Metro Vancouver Families</span>
             </h2>
             <div className="flex items-center justify-center gap-3 mb-4">
               <div className="flex gap-1">
@@ -160,13 +160,15 @@ export default function EnhancedTestimonials() {
             <h3 className="text-2xl font-bold text-[#0c2340] mb-8 text-center">Why Customers Trust TajWater</h3>
             <div className="grid md:grid-cols-4 gap-6">
               {[
-                { icon: '✓', label: '5,000+ Families', desc: 'Active happy customers' },
-                { icon: '🎯', label: 'Same-Day Delivery', desc: 'Available on most areas' },
-                { icon: '💰', label: 'Best Prices', desc: 'From $6.49/jug subscription' },
-                { icon: '🏠', label: 'Local Business', desc: 'Port Coquitlam-based' },
+                { icon: Users, label: '2,000+ Families', desc: 'Active happy customers', color: '#0097a7' },
+                { icon: Clock, label: 'Same-Day Delivery', desc: 'Available on most areas', color: '#1565c0' },
+                { icon: Wallet, label: 'Best Prices', desc: 'From $6.49/jug subscription', color: '#006064' },
+                { icon: MapPin, label: 'Local Business', desc: 'Port Coquitlam-based', color: '#00acc1' },
               ].map((item, idx) => (
                 <div key={idx} className="text-center">
-                  <p className="text-4xl mb-2">{item.icon}</p>
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3" style={{ background: item.color + '18' }}>
+                    <item.icon className="w-6 h-6" style={{ color: item.color }} />
+                  </div>
                   <p className="font-bold text-[#0c2340] text-sm">{item.label}</p>
                   <p className="text-xs text-[#4a7fa5] mt-1">{item.desc}</p>
                 </div>

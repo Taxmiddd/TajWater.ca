@@ -5,7 +5,7 @@ import ServicesContent from './ServicesContent'
 
 export const metadata: Metadata = {
   title: 'Water Delivery Services — Metro Vancouver | Taj Water',
-  description: '5-gallon water jug delivery, water filter installation, and commercial water supply across Metro Vancouver. Spring, alkaline & distilled water from $8.99/jug. Free delivery, no contracts.',
+  description: '5-gallon water jug delivery, water filter installation, and commercial water supply across Metro Vancouver. Spring, alkaline & distilled water from $8.99/jug. Delivery available, no contracts.',
   keywords: [
     'water delivery services Vancouver',
     'water filter installation Metro Vancouver',
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://tajwater.ca/services' },
   openGraph: {
     title: 'Water Delivery Services — Metro Vancouver | Taj Water',
-    description: '5-gallon jug delivery, filter installation, and commercial supply across 21 Metro Vancouver cities. Free delivery, no contracts.',
+    description: '5-gallon jug delivery, filter installation, and commercial supply across 21 Metro Vancouver cities. Delivery available, no contracts.',
     url: 'https://tajwater.ca/services',
     type: 'website',
     images: [{ url: 'https://tajwater.ca/opengraph-image', width: 1200, height: 630 }],
@@ -30,7 +30,7 @@ const servicesJsonLd = {
       '@type': 'Service',
       name: '5-Gallon Water Jug Delivery',
       serviceType: 'Water Delivery',
-      description: 'Fresh 5-gallon spring, alkaline, and distilled water jug delivery to homes and offices across Metro Vancouver. Same-day delivery available before 12pm. Free delivery on every order.',
+      description: 'Fresh 5-gallon spring, alkaline, and distilled water jug delivery to homes and offices across Metro Vancouver. Same-day delivery available before 12pm. Delivery available.',
       provider: { '@id': 'https://tajwater.ca/#business' },
       areaServed: { '@type': 'AdministrativeArea', name: 'Metro Vancouver, British Columbia, Canada' },
       offers: {
@@ -76,7 +76,7 @@ const servicesJsonLd = {
         { '@type': 'Question', name: 'Can I pause or cancel my water delivery subscription?', acceptedAnswer: { '@type': 'Answer', text: 'Yes. You can pause, change frequency, or cancel your subscription anytime from your customer dashboard — no fees, no questions asked.' } },
         { '@type': 'Question', name: 'Does Taj Water service commercial and industrial clients?', acceptedAnswer: { '@type': 'Answer', text: 'Yes. Taj Water has dedicated commercial accounts with custom pricing, Net-30 invoicing, and a dedicated account manager for businesses needing 10 or more jugs per delivery.' } },
         { '@type': 'Question', name: 'What Metro Vancouver cities does Taj Water deliver to?', acceptedAnswer: { '@type': 'Answer', text: 'Taj Water delivers to 21 cities across Metro Vancouver and the Sea-to-Sky corridor: Vancouver, Burnaby, Richmond, Surrey, Coquitlam, Port Coquitlam, Port Moody, North Vancouver, West Vancouver, Delta, Langley, Langley Township, Maple Ridge, Pitt Meadows, White Rock, Cloverdale, Tsawwassen, Walnut Grove, Mary Hill, Squamish, and Whistler.' } },
-        { '@type': 'Question', name: 'How do I pay for water delivery?', acceptedAnswer: { '@type': 'Answer', text: 'Taj Water accepts Visa, Mastercard, American Express, e-Transfer, and cash on delivery. Business accounts can apply for Net-30 invoicing.' } },
+        { '@type': 'Question', name: 'How do I pay for water delivery?', acceptedAnswer: { '@type': 'Answer', text: 'Taj Water accepts all major credit and debit cards (Visa, Mastercard, American Express). Pay online before delivery or use our driver\'s Square POS terminal to pay by card on delivery. Cash is not accepted. Business accounts can apply for Net-30 invoicing.' } },
       ],
     },
     {
@@ -93,11 +93,11 @@ const FALLBACK_SERVICES = [
   {
     id: 'water-delivery',
     title: '5-Gallon Water Jug Delivery',
-    description: 'Fresh 5-gallon (20L) spring, alkaline, and distilled water jug delivery to your home or office across Metro Vancouver. Same-day delivery available for orders placed before 12pm. Free delivery on every order — no minimum, no contracts.',
+    description: 'Fresh 5-gallon (20L) spring, alkaline, and distilled water jug delivery to your home or office across Metro Vancouver. Same-day delivery available for orders placed before 12pm. Delivery available — no minimum, no contracts.',
     features: [
       'Spring, alkaline, and distilled water available',
       'BPA-free food-grade polycarbonate jugs',
-      'Free delivery on all orders across 21 zones',
+      'Delivery available on all orders across 21 zones',
       'Same-day delivery before 12pm',
       'Flexible subscription — pause or cancel anytime',
       'Jug swap system — leave empties, get fresh filled jugs',

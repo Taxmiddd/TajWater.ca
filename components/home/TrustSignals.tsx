@@ -33,7 +33,7 @@ const stats = [
   { icon: Users, value: 2000, suffix: '+', label: 'Happy Customers', color: '#0097a7' },
   { icon: MapPin, value: 21, suffix: '', label: 'Delivery Zones', color: '#1565c0' },
   { icon: Droplets, value: 30000, suffix: '+', label: 'Jugs Delivered', color: '#00acc1' },
-  { icon: Award, value: 5, suffix: '+', label: 'Years In Business', color: '#006064' },
+  { icon: Award, value: 100, suffix: '%', label: 'NSF Certified', color: '#006064' },
   { icon: Star, value: 4.9, suffix: '★', label: 'Average Rating', color: '#0097a7' },
   { icon: Shield, value: 100, suffix: '%', label: 'Quality Certified', color: '#1565c0' },
 ]

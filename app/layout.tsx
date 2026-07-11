@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   keywords: [
     'drinking water supplier Vancouver',
     '5 gallon water jug delivery Vancouver',
-    'cheap water delivery Vancouver',
+    'water delivery Vancouver',
     'water dispenser delivery Vancouver',
     'water filter installation Vancouver',
     'bulk water delivery Metro Vancouver',
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     url: BASE_URL,
     siteName: 'Taj Water',
     title: 'Taj Water — Vancouver\'s Best Drinking Water Supplier | 5 Gallon Jugs',
-    description: 'Affordable and Competitive 5-gallon jug delivery, filter installation, and commercial supply in Vancouver. Same-day delivery available.',
+    description: 'Premium 5-gallon jug delivery, filter installation, and commercial supply in Vancouver. Same-day delivery available.',
     images: [
       {
         url: '/opengraph-image',
@@ -61,7 +61,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Taj Water — Vancouver\'s Best Drinking Water Supplier | 5 Gallon Jugs',
-    description: 'Affordable and Competitive 5-gallon jug delivery, filter installation, and commercial supply in Vancouver. Order now.',
+    description: 'Premium 5-gallon jug delivery, filter installation, and commercial supply in Vancouver. Order now.',
     images: ['/opengraph-image'],
   },
   alternates: {
@@ -95,7 +95,7 @@ const localBusinessJsonLd = {
   email: process.env.NEXT_PUBLIC_COMPANY_EMAIL ?? 'info@tajwater.ca',
   priceRange: '$$',
   currenciesAccepted: 'CAD',
-  paymentAccepted: 'Cash, Credit Card, Debit Card, Online Payment',
+  paymentAccepted: 'Credit Card, Debit Card, Online Payment',
   areaServed: [
     { '@type': 'City', name: 'Vancouver', '@id': 'https://www.wikidata.org/wiki/Q24639' },
     { '@type': 'City', name: 'Burnaby' },
@@ -171,7 +171,7 @@ const localBusinessJsonLd = {
       {
         '@type': 'Offer',
         name: '5 Gallon (20L) Water Jug Delivery',
-        description: 'Affordable and Competitive 5-gallon spring, alkaline & distilled water jug delivery to your home or office across Metro Vancouver',
+        description: 'Premium 5-gallon spring, alkaline & distilled water jug delivery to your home or office across Metro Vancouver',
         price: '8.99',
         priceCurrency: 'CAD',
         availability: 'https://schema.org/InStock',

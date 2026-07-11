@@ -2,13 +2,13 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, HelpCircle } from 'lucide-react'
+import { ChevronDown, HelpCircle, Droplets, CreditCard, Truck } from 'lucide-react'
 import Script from 'next/script'
 
 const faqSections = [
   {
     title: 'General Questions',
-    icon: '❓',
+    icon: HelpCircle,
     faqs: [
       {
         q: 'How quickly can I get my first water delivery?',
@@ -30,7 +30,7 @@ const faqSections = [
   },
   {
     title: 'Water Quality & Types',
-    icon: '💧',
+    icon: Droplets,
     faqs: [
       {
         q: 'What is the difference between Spring, Alkaline, and Distilled water?',
@@ -52,7 +52,7 @@ const faqSections = [
   },
   {
     title: 'Pricing & Billing',
-    icon: '💰',
+    icon: CreditCard,
     faqs: [
       {
         q: 'How much does water delivery cost?',
@@ -74,7 +74,7 @@ const faqSections = [
   },
   {
     title: 'Delivery & Service',
-    icon: '🚚',
+    icon: Truck,
     faqs: [
       {
         q: 'Do I need to be home when the water is delivered?',
@@ -151,7 +151,7 @@ export default function ExpandedFAQ() {
                 {/* Section Header */}
                 <div className="bg-gradient-to-r from-[#0097a7] to-[#006064] px-6 sm:px-8 py-5">
                   <h3 className="text-lg sm:text-xl font-bold text-white flex items-center gap-3">
-                    <span className="text-2xl">{section.icon}</span>
+                    {(() => { const Icon = section.icon; return <Icon className="w-5 h-5" /> })()}
                     {section.title}
                   </h3>
                 </div>
@@ -222,13 +222,13 @@ export default function ExpandedFAQ() {
                 href="tel:+17785047880"
                 className="px-6 py-3 bg-white text-[#0097a7] font-bold rounded-xl hover:shadow-lg transition-shadow"
               >
-                📞 Call Us
+                Call Us
               </a>
               <a
                 href="/contact"
                 className="px-6 py-3 bg-white/20 text-white font-bold rounded-xl border-2 border-white/40 hover:bg-white/30 transition-colors"
               >
-                ✉️ Send Message
+                Send Message
               </a>
             </div>
           </div>

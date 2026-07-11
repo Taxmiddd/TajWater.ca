@@ -2,10 +2,10 @@ import Hero from '@/components/home/Hero'
 import ProductShowcase from '@/components/home/ProductShowcase'
 import HowItWorks from '@/components/home/HowItWorks'
 import TrustSignals from '@/components/home/TrustSignals'
-import WaterGuide from '@/components/home/WaterGuide'
 import EnhancedTestimonials from '@/components/home/EnhancedTestimonials'
+import WaterGuide from '@/components/home/WaterGuide'
 import ExpandedFAQ from '@/components/home/ExpandedFAQ'
-import Newsletter from '@/components/home/Newsletter'
+import CTABanner from '@/components/home/CTABanner'
 
 import { createServerClient } from '@/lib/supabase'
 
@@ -33,10 +33,10 @@ export default async function HomePage() {
       <ProductShowcase />
       <HowItWorks />
       <TrustSignals />
-      <WaterGuide />
       <EnhancedTestimonials />
+      <WaterGuide />
       <ExpandedFAQ />
-      <Newsletter />
+      <CTABanner />
     </>
   )
 }

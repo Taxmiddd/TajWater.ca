@@ -15,7 +15,7 @@ export default function TermsPage() {
 
         <div className="bg-white rounded-3xl border border-[#cce7f0] shadow-sm p-8 sm:p-12 prose prose-slate max-w-none">
           <h1 className="text-3xl font-extrabold text-[#0c2340] mb-2">Terms of Service</h1>
-          <p className="text-[#4a7fa5] text-sm mb-8">Last updated: April 2026</p>
+          <p className="text-[#4a7fa5] text-sm mb-8">Last updated: July 2026</p>
 
           <h2 className="text-lg font-bold text-[#0c2340] mt-8 mb-3">1. Acceptance of Terms</h2>
           <p className="text-[#4a7fa5] leading-relaxed">
@@ -59,17 +59,26 @@ export default function TermsPage() {
             Subscription plans renew automatically at the selected frequency (weekly, biweekly, or monthly). You may pause or cancel your subscription at any time from your dashboard. No cancellation fees apply.
           </p>
 
-          <h2 className="text-lg font-bold text-[#0c2340] mt-8 mb-3">8. Limitation of Liability</h2>
+          <h2 className="text-lg font-bold text-[#0c2340] mt-8 mb-3">8. Wallet Credits</h2>
+          <ul className="text-[#4a7fa5] leading-relaxed space-y-2 list-disc list-inside">
+            <li><strong>Non-Refundable:</strong> Wallet credits are non-refundable and have no cash value. Once purchased, credits cannot be reversed, returned, or exchanged for money.</li>
+            <li><strong>Fixed Recharge Packages Only:</strong> Credits may only be added to your wallet by purchasing one of the available fixed recharge packages ($100, $200, $300, $400, or $500 CAD).</li>
+            <li><strong>Eligible Items Only:</strong> Wallet credits may only be used toward water refills and water products. They cannot be applied to delivery fees, accessories, equipment, or any other charges.</li>
+            <li><strong>Delivery Fees by Card:</strong> Delivery charges are always collected separately by credit or debit card and are never deducted from wallet credits, regardless of payment method selected.</li>
+            <li><strong>Account-Linked:</strong> Wallet credits are tied to your TajWater account and are non-transferable.</li>
+          </ul>
+
+          <h2 className="text-lg font-bold text-[#0c2340] mt-8 mb-3">9. Limitation of Liability</h2>
           <p className="text-[#4a7fa5] leading-relaxed">
             TajWater&apos;s liability is strictly limited to the value of the order or payment in question. We are not liable for indirect, incidental, or consequential damages. Our products are food-grade certified and tested regularly.
           </p>
 
-          <h2 className="text-lg font-bold text-[#0c2340] mt-8 mb-3">9. Changes to Terms</h2>
+          <h2 className="text-lg font-bold text-[#0c2340] mt-8 mb-3">10. Changes to Terms</h2>
           <p className="text-[#4a7fa5] leading-relaxed">
             We may update these terms at any time. Continued use of our services after changes constitutes acceptance of the new terms.
           </p>
 
-          <h2 className="text-lg font-bold text-[#0c2340] mt-8 mb-3">10. Contact</h2>
+          <h2 className="text-lg font-bold text-[#0c2340] mt-8 mb-3">11. Contact</h2>
           <p className="text-[#4a7fa5] leading-relaxed">
             Questions about these terms? Contact us at{' '}
             <a href="mailto:info@tajwater.ca" className="text-[#0097a7] hover:underline">info@tajwater.ca</a>.

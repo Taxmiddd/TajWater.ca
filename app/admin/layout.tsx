@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, ShoppingBag, Users, Package, Truck, CreditCard,
   Settings, Menu, X, Shield, LogOut, Bell, FileEdit, BarChart2, MessageSquare, Droplets, UserCog, RefreshCw, Tag, ClipboardList,
-  Sun, Moon
+  Sun, Moon, Wallet
 } from 'lucide-react'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
@@ -23,6 +23,7 @@ const NAV_ITEMS = [
   { icon: Droplets,        label: 'Services',      href: '/admin/services',       roles: ['super_admin', 'manager'] },
   { icon: Truck,           label: 'Deliveries', href: '/admin/deliveries',  roles: ['super_admin', 'manager', 'delivery'] },
   { icon: CreditCard,      label: 'Payments',   href: '/admin/payments',    roles: ['super_admin', 'manager'] },
+  { icon: Wallet,          label: 'Wallets',    href: '/admin/wallet',      roles: ['super_admin', 'manager'] },
   { icon: Tag,             label: 'Discounts',  href: '/admin/discounts',   roles: ['super_admin', 'manager'] },
   { icon: MessageSquare,   label: 'Tickets',    href: '/admin/tickets',     roles: ['super_admin', 'manager'] },
   { icon: BarChart2,       label: 'Analytics',  href: '/admin/analytics',   roles: ['super_admin', 'manager'] },

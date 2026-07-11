@@ -68,13 +68,22 @@ export async function POST(req: NextRequest) {
 
   try {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { amount, items, address, userId, notes, discountCodeId, discountAmount: clientDiscountAmount, sourceId, paymentMethod = 'square_online' } = await req.json()
+    const { amount, items, address, userId, notes, discountCodeId, discountAmount: clientDiscountAmount, sourceId, paymentMethod = 'square_online', deliveryFeeCardToken, fulfillmentType = 'delivery' } = await req.json()
     type CartItem = { product_id: string; quantity: number; subscribeFrequency?: 'weekly' | 'biweekly' | 'monthly'; category?: string; name?: string }
 
-    const isOffline = paymentMethod === 'cash_on_delivery' || paymentMethod === 'card_on_delivery'
+    // Cash on delivery is no longer accepted — only card_on_delivery or online payments
+    if (paymentMethod === 'cash_on_delivery') {
+      return NextResponse.json({ error: 'Cash on delivery is not accepted. Please pay by card online or on delivery.' }, { status: 400 })
+    }
+
+    const isOffline = paymentMethod === 'card_on_delivery'
+    const isWallet = paymentMethod === 'wallet'
+
+    // Wallet-eligible product categories
+    const WALLET_ELIGIBLE_CATEGORIES = ['water', 'refill', 'water_product']
 
     const isSubscriptionOrder = Array.isArray(items) && (items as CartItem[]).some(i => !!i.subscribeFrequency || i.category === 'subscription')
-    if (!sourceId && !isOffline && !isSubscriptionOrder) {
+    if (!sourceId && !isOffline && !isWallet && !isSubscriptionOrder) {
       return NextResponse.json({ error: 'Payment source token is required' }, { status: 400 })
     }
 
@@ -82,8 +91,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No items provided' }, { status: 400 })
     }
 
-    if (isSubscriptionOrder && !userId) {
-      return NextResponse.json({ error: 'Subscription checkout requires a logged-in account' }, { status: 400 })
+    if ((isSubscriptionOrder || isWallet) && !userId) {
+      return NextResponse.json({ error: 'This payment method requires a logged-in account' }, { status: 400 })
     }
 
     const db = createServerClient()
@@ -91,7 +100,10 @@ export async function POST(req: NextRequest) {
     // 1. Resolve zone and fetch delivery fee from DB (not from client)
     let zoneId: string | null = null
     let deliveryFee = 0
-    if (address?.zone) {
+    
+    if (fulfillmentType === 'pickup') {
+      deliveryFee = 0
+    } else if (address?.zone) {
       const { data: zoneRow } = await db
         .from('zones')
         .select('id, delivery_fee')
@@ -165,21 +177,42 @@ export async function POST(req: NextRequest) {
     // Scale taxable subtotal proportionally if discount was applied
     const taxablePortion = subtotal > 0 ? (taxableSubtotal / subtotal) * discountedSubtotal : 0
     const taxAmount = Math.round(taxablePortion * 0.12 * 100) / 100
-    const serverTotal = Math.round((discountedSubtotal + deliveryFee + taxAmount) * 100) / 100
+
+    // For wallet payments: wallet covers items + tax only. Delivery fee is always charged by card.
+    // serverTotal for wallet = subtotal + tax (no delivery fee from wallet)
+    // serverTotal for card/offline = full total including delivery
+    const serverTotal = isWallet
+      ? Math.round((discountedSubtotal + taxAmount) * 100) / 100
+      : Math.round((discountedSubtotal + deliveryFee + taxAmount) * 100) / 100
+
+    // 5a. For wallet payments, enforce that all items are wallet-eligible
+    if (isWallet) {
+      const ineligibleItems = (items as CartItem[]).filter(i =>
+        !WALLET_ELIGIBLE_CATEGORIES.includes(productMap[i.product_id]?.category ?? '')
+      )
+      if (ineligibleItems.length > 0) {
+        return NextResponse.json(
+          { error: 'Wallet credits can only be used for water refills and water products. Please use card payment for other items.' },
+          { status: 400 }
+        )
+      }
+    }
 
     // 6. Reject if client amount differs by more than $0.01
     if (typeof amount === 'number' && Math.abs(amount - serverTotal) > 0.01) {
       return NextResponse.json({ error: 'Price mismatch — please refresh and try again' }, { status: 400 })
     }
 
-    if (serverTotal < 0.50) {
+    if (serverTotal < 0 || (serverTotal < 0.50 && !isWallet)) {
       return NextResponse.json({ error: 'Order total is too low' }, { status: 400 })
     }
 
     // 7. Build delivery address string
-    const deliveryAddress = address
-      ? [address.street, address.zone, `BC ${address.postal}`].filter(Boolean).join(', ')
-      : null
+    const deliveryAddress = fulfillmentType === 'pickup'
+      ? 'Store Pickup'
+      : address
+        ? [address.street, address.zone, `BC ${address.postal}`].filter(Boolean).join(', ')
+        : null
 
     // 8. Create the order in Supabase (pending payment)
     const trackingToken = crypto.randomUUID()
@@ -220,7 +253,7 @@ export async function POST(req: NextRequest) {
     const { error: itemsError } = await db.from('order_items').insert(orderItems)
     if (itemsError) console.error('Order items error:', itemsError)
 
-    // 10. Process Square payment ONLY if online
+    // 10. Process payment
     let squarePaymentId: string | null = null
     let squareCustomerId: string | null = null
     let squareCardId: string | null = null
@@ -229,8 +262,72 @@ export async function POST(req: NextRequest) {
     let squareCardExpMonth: number | null = null
     let squareCardExpYear: number | null = null
 
+    // 10a. Handle wallet payment
+    if (isWallet && userId) {
+      const { data: walletProfile, error: walletErr } = await db
+        .from('profiles')
+        .select('wallet_balance')
+        .eq('id', userId)
+        .single()
+
+      if (walletErr || !walletProfile) {
+        return NextResponse.json({ error: 'Failed to fetch wallet balance' }, { status: 500 })
+      }
+
+      const currentBalance = walletProfile.wallet_balance ?? 0
+      if (currentBalance < serverTotal) {
+        return NextResponse.json({ error: 'Insufficient wallet balance' }, { status: 400 })
+      }
+
+      const newBalance = Math.round((currentBalance - serverTotal) * 100) / 100
+      const { error: deductErr } = await db
+        .from('profiles')
+        .update({ wallet_balance: newBalance })
+        .eq('id', userId)
+
+      if (deductErr) {
+        return NextResponse.json({ error: 'Failed to deduct wallet balance' }, { status: 500 })
+      }
+
+      // Log the wallet transaction (items + tax only — delivery charged to card separately)
+      await db.from('wallet_transactions').insert({
+        user_id: userId,
+        amount: -serverTotal,
+        balance_after: newBalance,
+        transaction_type: 'order_payment',
+        reason: 'Order Payment (water products + tax)',
+        order_id: order.id,
+        created_by: 'Customer',
+      })
+
+      // If there's a delivery fee card token, charge it separately via Square
+      if (deliveryFeeCardToken && deliveryFee > 0) {
+        try {
+          const square = getSquareClient()
+          const deliveryCents = Math.round(deliveryFee * 100)
+          const deliveryResponse = await square.payments.create({
+            sourceId: deliveryFeeCardToken,
+            idempotencyKey: crypto.randomUUID(),
+            amountMoney: {
+              amount: BigInt(deliveryCents),
+              currency: 'CAD',
+            },
+            locationId: process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID!,
+            referenceId: order.id,
+            note: `TajWater delivery fee — order ${order.id.slice(-8).toUpperCase()}`,
+          })
+          const deliveryPayment = deliveryResponse.payment
+          if (!deliveryPayment || (deliveryPayment.status !== 'COMPLETED' && deliveryPayment.status !== 'APPROVED')) {
+            console.error('Delivery fee card charge failed')
+          }
+        } catch (deliveryChargeErr) {
+          console.error('Failed to charge delivery fee card:', deliveryChargeErr)
+        }
+      }
+    }
+
     const subscriptionItems = (items as CartItem[]).filter(i => productMap[i.product_id].category === 'subscription')
-    if (!isOffline && subscriptionItems.length > 0 && userId) {
+    if (!isOffline && !isWallet && subscriptionItems.length > 0 && userId) {
       const { data: profile, error: profileError } = await db
         .from('profiles')
         .select('name, email, phone, delivery_address, zone_id, square_customer_id, square_card_id, square_card_brand, square_card_last4, square_card_exp_month, square_card_exp_year')
@@ -275,7 +372,7 @@ export async function POST(req: NextRequest) {
       }).eq('id', userId)
     }
 
-    if (!isOffline) {
+    if (!isOffline && !isWallet) {
       const square = getSquareClient()
       const amountCents = Math.round(serverTotal * 100)
       const idempotencyKey = crypto.randomUUID()
@@ -308,7 +405,7 @@ export async function POST(req: NextRequest) {
       .from('orders')
       .update({
         square_payment_id: squarePaymentId,
-        payment_status: isOffline ? 'pending' : 'paid',
+        payment_status: (isOffline) ? 'pending' : 'paid',
         status: 'processing',
       })
       .eq('id', order.id)

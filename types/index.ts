@@ -54,7 +54,7 @@ export interface Order {
   customer_phone?: string
   zone_id: string
   created_at: string
-  payment_method: 'square_online' | 'cash_on_delivery' | 'card_on_delivery'
+  payment_method: 'square_online' | 'cash_on_delivery' | 'card_on_delivery' | 'wallet'
   payment_status: 'pending' | 'paid' | 'failed' | 'refunded' | 'disputed'
   tracking_token?: string
   items?: OrderItem[]
