@@ -160,7 +160,7 @@ export default function EnhancedTestimonials() {
             <h3 className="text-2xl font-bold text-[#0c2340] mb-8 text-center">Why Customers Trust TajWater</h3>
             <div className="grid md:grid-cols-4 gap-6">
               {[
-                { icon: Users, label: '2,000+ Families', desc: 'Active happy customers', color: '#0097a7' },
+                { icon: Users, label: '500+ Families', desc: 'Active happy customers', color: '#0097a7' },
                 { icon: Clock, label: 'Same-Day Delivery', desc: 'Available on most areas', color: '#1565c0' },
                 { icon: Wallet, label: 'Best Prices', desc: 'From $6.49/jug subscription', color: '#006064' },
                 { icon: MapPin, label: 'Local Business', desc: 'Port Coquitlam-based', color: '#00acc1' },

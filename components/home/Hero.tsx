@@ -109,7 +109,7 @@ export default function Hero({ description }: { description: string }) {
           {/* Quick stats */}
           <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-4 sm:gap-6 mt-12">
             {[
-              { value: '2,000+', label: 'Happy Customers' },
+              { value: '500+', label: 'Happy Customers' },
               { value: '21', label: 'Delivery Zones' },
               { value: '4.9★', label: 'Avg. Rating' },
               { value: '24h', label: 'Delivery Window' },

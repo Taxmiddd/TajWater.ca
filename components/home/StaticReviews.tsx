@@ -47,7 +47,7 @@ export default function StaticReviews() {
               What Metro Vancouver Customers Say About TajWater
             </h2>
             <p className="text-[#4a7fa5]">
-              4.9 stars · Trusted by 2,000+ households and businesses across Metro Vancouver
+              4.9 stars · Trusted by 500+ households and businesses across Metro Vancouver
             </p>
           </div>
 
