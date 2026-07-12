@@ -134,7 +134,7 @@ export default async function WalletInfoPage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, idx) => (
-              <div key={idx} className="bg-slate-50 border border-slate-100 p-6 rounded-3xl hover:shadow-xl hover:-translate-y-1 transition-all duration-300 animate-in fade-in slide-in-from-bottom-8" style={{ animationDelay: \`\${300 + idx * 100}ms\`, animationFillMode: 'both' }}>
+              <div key={idx} className="bg-slate-50 border border-slate-100 p-6 rounded-3xl hover:shadow-xl hover:-translate-y-1 transition-all duration-300 animate-in fade-in slide-in-from-bottom-8" style={{ animationDelay: `${300 + idx * 100}ms`, animationFillMode: 'both' }}>
                 <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-6">
                   {feature.icon}
                 </div>
