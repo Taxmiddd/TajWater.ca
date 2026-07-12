@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { amount } = await req.json()
+    const { amount, sourceId } = await req.json()
 
     // Validate that amount is exactly one of the allowed package values
     if (typeof amount !== 'number' || !RECHARGE_PACKAGES[amount]) {
@@ -30,6 +30,10 @@ export async function POST(req: NextRequest) {
         { error: 'Invalid package. Please choose one of: $100, $200, $300, $400, or $500.' },
         { status: 400 }
       )
+    }
+    
+    if (!sourceId) {
+      return NextResponse.json({ error: 'Missing payment source token.' }, { status: 400 })
     }
 
     const creditsToAdd = RECHARGE_PACKAGES[amount]
@@ -63,21 +67,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
     }
 
-    if (!profile.square_card_id || !profile.square_customer_id) {
-      return NextResponse.json(
-        { error: 'No saved card found. Please make a regular purchase to save a card first.' },
-        { status: 400 }
-      )
-    }
-
     // Charge the CAD amount via Square
     const square = getSquareClient()
     const amountCents = Math.round(amount * 100)
     const idempotencyKey = crypto.randomUUID()
 
-    const response = await square.payments.create({
-      sourceId: profile.square_card_id,
-      customerId: profile.square_customer_id,
+    const paymentBody: any = {
+      sourceId,
       idempotencyKey,
       amountMoney: {
         amount: BigInt(amountCents),
@@ -85,7 +81,13 @@ export async function POST(req: NextRequest) {
       },
       locationId: process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID!,
       note: `TajWater Wallet Recharge — $${amount} package (${creditsToAdd} credits)`,
-    })
+    }
+
+    if (profile.square_customer_id) {
+      paymentBody.customerId = profile.square_customer_id
+    }
+
+    const response = await square.payments.create(paymentBody)
 
     const payment = response.payment
     if (!payment || (payment.status !== 'COMPLETED' && payment.status !== 'APPROVED')) {

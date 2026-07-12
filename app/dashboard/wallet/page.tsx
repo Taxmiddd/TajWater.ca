@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Wallet, History, ArrowDownLeft, ArrowUpRight, Gift, CreditCard, Info } from 'lucide-react'
+import { Wallet, History, ArrowDownLeft, ArrowUpRight, Gift, CreditCard as CreditCardIcon, Info } from 'lucide-react'
+import { PaymentForm, CreditCard, ApplePay, GooglePay } from 'react-square-web-payments-sdk'
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
 
@@ -55,7 +56,7 @@ export default function WalletPage() {
     }
   }
 
-  const handleTopUp = async () => {
+  const handleTopUp = async (token: string) => {
     if (!selectedPkg) return
 
     setIsProcessing(true)
@@ -67,7 +68,7 @@ export default function WalletPage() {
       const res = await fetch('/api/wallet/topup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: selectedPkg.pay }),
+        body: JSON.stringify({ amount: selectedPkg.pay, sourceId: token }),
       })
 
       const data = await res.json()
@@ -155,7 +156,7 @@ export default function WalletPage() {
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm ${
                       isSelected ? 'bg-[#0097a7] text-white' : 'bg-[#f0f9ff] text-[#0097a7]'
                     }`}>
-                      <CreditCard className="w-5 h-5" />
+                      <CreditCardIcon className="w-5 h-5" />
                     </div>
                     <div>
                       <p className="font-bold text-[#0c2340]">${pkg.pay} CAD</p>
@@ -183,20 +184,84 @@ export default function WalletPage() {
             </p>
           )}
 
-          <Button
-            onClick={handleTopUp}
-            disabled={isProcessing || !selectedPkg}
-            className="w-full h-12 bg-[#0097a7] hover:bg-[#00838f] text-white font-bold text-lg rounded-xl mt-5"
-          >
-            {isProcessing
-              ? 'Processing...'
-              : selectedPkg
-              ? `Pay $${selectedPkg.pay} → Get ${selectedPkg.credits} Credits`
-              : 'Select a Package'}
-          </Button>
-          <p className="text-xs text-center text-[#4a7fa5] mt-2">
-            Charged to your saved card. Credits are non-refundable.
-          </p>
+          {selectedPkg ? (
+            <div className="mt-6 pt-6 border-t border-[#cce7f0]">
+              <p className="font-bold text-[#0c2340] mb-4 text-center">Complete your purchase of ${selectedPkg.pay}</p>
+              
+              {isProcessing && (
+                <div className="flex items-center justify-center gap-3 text-[#4a7fa5] py-4">
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+                    className="w-5 h-5 border-2 border-[#cce7f0] border-t-[#0097a7] rounded-full"
+                  />
+                  Processing payment...
+                </div>
+              )}
+              
+              <div className={isProcessing ? 'opacity-50 pointer-events-none' : ''}>
+                <PaymentForm
+                  applicationId={process.env.NEXT_PUBLIC_SQUARE_APPLICATION_ID ?? ''}
+                  locationId={process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID ?? ''}
+                  cardTokenizeResponseReceived={async (token) => {
+                    if (token.status === 'OK' && token.token) {
+                      await handleTopUp(token.token)
+                    } else {
+                      setMessage('Payment failed. Please check your details.')
+                    }
+                  }}
+                  createPaymentRequest={() => ({
+                    countryCode: 'CA',
+                    currencyCode: 'CAD',
+                    total: {
+                      amount: selectedPkg.pay.toFixed(2),
+                      label: 'TajWater Wallet Recharge',
+                    },
+                  })}
+                >
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                      <ApplePay />
+                      <GooglePay />
+                    </div>
+                    <div className="relative flex py-3 items-center">
+                      <div className="flex-grow border-t border-[#cce7f0]"></div>
+                      <span className="flex-shrink mx-4 text-[#4a7fa5] text-xs">Or Pay by Card</span>
+                      <div className="flex-grow border-t border-[#cce7f0]"></div>
+                    </div>
+                    <div className="bg-[#f8fafc] p-4 rounded-xl border border-[#cce7f0]">
+                      <CreditCard
+                        buttonProps={{
+                          css: {
+                            backgroundColor: '#0097a7',
+                            color: '#fff',
+                            '&:hover': { backgroundColor: '#00838f' },
+                            borderRadius: '0.75rem',
+                            fontWeight: 'bold',
+                          }
+                        }}
+                        focus="cardNumber"
+                      />
+                    </div>
+                  </div>
+                </PaymentForm>
+              </div>
+              <button 
+                onClick={() => setSelectedPkg(null)} 
+                disabled={isProcessing}
+                className="w-full mt-4 text-[#4a7fa5] text-sm hover:text-[#0097a7]"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <Button
+              disabled={true}
+              className="w-full h-12 bg-[#0097a7] hover:bg-[#00838f] text-white font-bold text-lg rounded-xl mt-5"
+            >
+              Select a Package
+            </Button>
+          )}
         </motion.div>
 
         {/* Transaction History */}
