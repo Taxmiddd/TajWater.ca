@@ -15,7 +15,7 @@ import type { Product } from '@/types'
 const categories = ['water', 'equipment', 'subscription', 'accessories']
 const categoryEmoji: Record<string, string> = { water: '💧', equipment: '🔧', subscription: '🔄', accessories: '🧹' }
 
-const empty: Omit<Product, 'id'> = { name: '', description: '', price: 0, image_url: '', stock: 0, category: 'water', active: true, featured: false, unit_label: 'unit', rating: 5.0, review_count: 0, subscription_interval: null, taxable: true, wallet_eligible: true, call_for_price: false }
+const empty: Omit<Product, 'id'> = { name: '', slug: '', description: '', price: 0, image_url: '', stock: 0, category: 'water', active: true, featured: false, unit_label: 'unit', rating: 5.0, review_count: 0, subscription_interval: null, taxable: true, wallet_eligible: true, call_for_price: false }
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
@@ -88,10 +88,13 @@ export default function AdminProductsPage() {
     e.preventDefault()
     setSaving(true)
     
+    const generatedSlug = form.slug?.trim() || form.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+    const formToSave = { ...form, slug: generatedSlug }
+
     if (editing) {
       const { data: updatedData, error } = await supabase
         .from('products')
-        .update(form)
+        .update(formToSave)
         .eq('id', editing.id)
         .select()
         
@@ -107,7 +110,7 @@ export default function AdminProductsPage() {
     } else {
       const { data: insertedData, error } = await supabase
         .from('products')
-        .insert(form)
+        .insert(formToSave)
         .select()
         
       if (error) {
@@ -329,6 +332,10 @@ export default function AdminProductsPage() {
             <div>
               <label className="text-sm font-semibold text-[#0c2340] dark:text-[#f8fafc] mb-1.5 block">Product Name *</label>
               <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. 20L Spring Water Jug" className="border-[#cce7f0] dark:border-white/10 dark:bg-white/5 dark:text-white" required />
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-[#0c2340] dark:text-[#f8fafc] mb-1.5 block">URL Slug</label>
+              <Input value={form.slug || ''} onChange={(e) => setForm({ ...form, slug: e.target.value })} placeholder="e.g. spring-water-jug (Leave empty to auto-generate)" className="border-[#cce7f0] dark:border-white/10 dark:bg-white/5 dark:text-white" />
             </div>
             <div>
               <label className="text-sm font-semibold text-[#0c2340] dark:text-[#f8fafc] mb-1.5 block">Description</label>
