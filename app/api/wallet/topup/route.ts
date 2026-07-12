@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSquareClient } from '@/lib/square'
 import { createServerClient } from '@/lib/supabase'
+import { createServerClient as createSsrClient } from '@supabase/ssr'
 import { rateLimit } from '@/lib/ratelimit'
 import crypto from 'crypto'
 
@@ -33,12 +34,23 @@ export async function POST(req: NextRequest) {
 
     const creditsToAdd = RECHARGE_PACKAGES[amount]
 
-    const db = createServerClient()
-    const { data: { session } } = await db.auth.getSession()
+    const ssrClient = createSsrClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll: () => req.cookies.getAll(),
+          setAll: () => { },
+        },
+      }
+    )
+    const { data: { session } } = await ssrClient.auth.getSession()
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     const userId = session.user.id
+    
+    const db = createServerClient()
 
     // Fetch user profile for Square details
     const { data: profile } = await db
