@@ -51,6 +51,8 @@ export default function TermsPage() {
             <br/><br/>
             <strong>Custom Payments:</strong> Refunds for transactions processed via pay.tajwater.ca must be requested by contacting support within 48 hours of payment.
             <br/><br/>
+            <strong>Wallet Credits:</strong> Purchases of wallet credits are strictly non-refundable and are not eligible for cancellation or return.
+            <br/><br/>
             Refunds are processed to the original payment method and may take 5–10 business days to appear on your statement.
           </p>
 
@@ -63,8 +65,9 @@ export default function TermsPage() {
           <ul className="text-[#4a7fa5] leading-relaxed space-y-2 list-disc list-inside">
             <li><strong>Non-Refundable:</strong> Wallet credits are non-refundable and have no cash value. Once purchased, credits cannot be reversed, returned, or exchanged for money.</li>
             <li><strong>Fixed Recharge Packages Only:</strong> Credits may only be added to your wallet by purchasing one of the available fixed recharge packages ($100, $200, $300, $400, or $500 CAD).</li>
-            <li><strong>Eligible Items Only:</strong> Wallet credits may only be used toward water refills and water products. They cannot be applied to delivery fees, accessories, equipment, or any other charges.</li>
-            <li><strong>Delivery Fees by Card:</strong> Delivery charges are always collected separately by credit or debit card and are never deducted from wallet credits, regardless of payment method selected.</li>
+            <li><strong>Eligible Items Only:</strong> Wallet credits may only be used toward water refills and water products. They cannot be applied to delivery fees, accessories, equipment, or any other non-eligible items in the shop.</li>
+            <li><strong>Delivery Fees by Card:</strong> Delivery charges are always collected separately by credit or debit card and are never deducted from wallet credits.</li>
+            <li><strong>No Expiration:</strong> Wallet credits do not expire and will remain in your account balance until used.</li>
             <li><strong>Account-Linked:</strong> Wallet credits are tied to your TajWater account and are non-transferable.</li>
           </ul>
 
