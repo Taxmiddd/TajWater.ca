@@ -59,6 +59,7 @@ export default function AdminProductDetailPage() {
       setProduct(data)
       setForm({
         name: data.name || '',
+        slug: data.slug || '',
         description: data.description || '',
         price: data.price || 0,
         stock: data.stock || 0,
@@ -70,6 +71,8 @@ export default function AdminProductDetailPage() {
         rating: data.rating || 5.0,
         review_count: data.review_count || 0,
         taxable: data.taxable !== false,
+        wallet_eligible: data.wallet_eligible !== false,
+        call_for_price: data.call_for_price || false,
       })
       setLoading(false)
     }
@@ -235,6 +238,16 @@ export default function AdminProductDetailPage() {
                 className="border-[#cce7f0] focus:border-[#0097a7]"
               />
             </div>
+            
+            <div>
+              <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">URL Slug</label>
+              <Input
+                value={form.slug || ''}
+                onChange={(e) => setForm({ ...form, slug: e.target.value })}
+                placeholder="e.g. spring-water-jug"
+                className="border-[#cce7f0] focus:border-[#0097a7]"
+              />
+            </div>
 
             <div>
               <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Description</label>
@@ -316,21 +329,59 @@ export default function AdminProductDetailPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3 bg-[#f0f9ff] rounded-xl px-4 py-3 border border-[#cce7f0]">
-              <input
-                type="checkbox"
-                id="taxable"
-                checked={form.taxable !== false}
-                onChange={(e) => setForm({ ...form, taxable: e.target.checked })}
-                className="w-4 h-4 accent-[#0097a7]"
-              />
-              <div>
-                <label htmlFor="taxable" className="text-sm font-medium text-[#0c2340] cursor-pointer">
-                  Taxable (apply 12% BC tax at checkout)
-                </label>
-                <p className="text-[10px] text-[#4a7fa5] mt-0.5">
-                  Uncheck for tax-exempt products. Affects checkout and order totals.
-                </p>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 bg-[#f0f9ff] rounded-xl px-4 py-3 border border-[#cce7f0]">
+                <input
+                  type="checkbox"
+                  id="taxable"
+                  checked={form.taxable !== false}
+                  onChange={(e) => setForm({ ...form, taxable: e.target.checked })}
+                  className="w-4 h-4 accent-[#0097a7]"
+                />
+                <div>
+                  <label htmlFor="taxable" className="text-sm font-medium text-[#0c2340] cursor-pointer">
+                    Taxable (apply 12% BC tax at checkout)
+                  </label>
+                  <p className="text-[10px] text-[#4a7fa5] mt-0.5">
+                    Uncheck for tax-exempt products. Affects checkout and order totals.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 bg-[#f0f9ff] rounded-xl px-4 py-3 border border-[#cce7f0]">
+                <input
+                  type="checkbox"
+                  id="wallet_eligible"
+                  checked={form.wallet_eligible !== false}
+                  onChange={(e) => setForm({ ...form, wallet_eligible: e.target.checked })}
+                  className="w-4 h-4 accent-[#0097a7]"
+                />
+                <div>
+                  <label htmlFor="wallet_eligible" className="text-sm font-medium text-[#0c2340] cursor-pointer">
+                    Wallet Eligible
+                  </label>
+                  <p className="text-[10px] text-[#4a7fa5] mt-0.5">
+                    Can this product be paid for using TajWater Wallet credits?
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 bg-[#f0f9ff] rounded-xl px-4 py-3 border border-[#cce7f0]">
+                <input
+                  type="checkbox"
+                  id="call_for_price"
+                  checked={form.call_for_price === true}
+                  onChange={(e) => setForm({ ...form, call_for_price: e.target.checked })}
+                  className="w-4 h-4 accent-[#0097a7]"
+                />
+                <div>
+                  <label htmlFor="call_for_price" className="text-sm font-medium text-[#0c2340] cursor-pointer">
+                    Call for Price
+                  </label>
+                  <p className="text-[10px] text-[#4a7fa5] mt-0.5">
+                    Hide the price and display a "Call for Price" button on the shop.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
