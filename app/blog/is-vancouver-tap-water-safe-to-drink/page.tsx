@@ -123,6 +123,14 @@ export default function ArticlePage() {
               or older parts of Surrey and New Westminster, this is worth knowing.
             </p>
 
+            <h2 className="text-2xl font-extrabold text-[#0c2340] mt-10 mb-4">2026 Updates: Microplastics and Heavy Metals</h2>
+            <p className="text-[#4a7fa5] leading-relaxed mb-4">
+              A growing concern for Vancouver residents in 2026 is the presence of microplastics in municipal water supplies across North America. While Metro Vancouver continues to monitor this emerging issue, traditional municipal filtration systems are not always designed to catch microscopic polymer particles.
+            </p>
+            <p className="text-[#4a7fa5] leading-relaxed mb-6">
+              Additionally, recent discussions around heavy metals and agricultural runoff highlight why many families in Surrey, Langley, and Coquitlam are choosing professional <strong className="text-[#0c2340]">water filtration installation</strong> or opting for <strong className="text-[#0c2340]">bottled water delivery near me</strong> to guarantee purity.
+            </p>
+
             <h2 className="text-2xl font-extrabold text-[#0c2340] mt-10 mb-4">Does Vancouver Tap Water Have Fluoride?</h2>
             <p className="text-[#4a7fa5] leading-relaxed mb-4">
               <strong className="text-[#0c2340]">No.</strong> Metro Vancouver stopped fluoridating its water supply in 1992.

@@ -174,9 +174,12 @@ export default function WaterGuide() {
           className="bg-[#f0f9ff] rounded-2xl border border-[#cce7f0] p-6 mb-6"
         >
           <h3 className="text-lg font-extrabold text-[#0c2340] mb-2">Is Vancouver Tap Water Safe to Drink?</h3>
-          <p className="text-[#4a7fa5] text-sm leading-relaxed">
+          <p className="text-[#4a7fa5] text-sm leading-relaxed mb-3">
             Metro Vancouver tap water meets all Health Canada guidelines and is technically safe to drink. However, many residents in Burnaby, Surrey, Coquitlam, and Port Coquitlam report a chlorine taste and odour from municipal treatment. Older buildings with aging pipes can also introduce sediment and heavy metals at the tap. TajWater delivers purified, independently tested water so you never have to think about what&apos;s in your glass.
           </p>
+          <Link href="/blog/is-vancouver-tap-water-safe-to-drink" className="text-[#0097a7] font-semibold text-sm hover:underline flex items-center gap-1">
+            Read the full 2026 Tap Water Safety Report →
+          </Link>
         </motion.div>
 
         <div className="text-center">
