@@ -87,6 +87,7 @@ export default function AdminDashboard() {
     const [
       todayRes, activeRes, custRes, recentRes, stockRes,
       mtdRes, prevMtdRes, subsRes, ticketsRes,
+      walletTodayRes, walletMtdRes, walletPrevMtdRes
     ] = await Promise.all([
       supabase.from('orders').select('id, total').gte('created_at', todayStart.toISOString()).eq('payment_status', 'paid'),
       supabase.from('orders').select('id, driver_name').in('status', ['pending', 'processing', 'out_for_delivery']),
@@ -114,9 +115,9 @@ export default function AdminDashboard() {
       return sum + (match ? parseFloat(match[1]) : 0)
     }, 0)
 
-    const todayWallet = getWalletCad(arguments[10].data ?? [])
-    const mtdWallet   = getWalletCad(arguments[11].data ?? [])
-    const prevWallet  = getWalletCad(arguments[12].data ?? [])
+    const todayWallet = getWalletCad(walletTodayRes.data ?? [])
+    const mtdWallet   = getWalletCad(walletMtdRes.data ?? [])
+    const prevWallet  = getWalletCad(walletPrevMtdRes.data ?? [])
 
     setStats({
       ordersToday:    todayOrders.length,
@@ -140,7 +141,13 @@ export default function AdminDashboard() {
       profs?.forEach((p: { id: string; name: string }) => { profMap[p.id] = p })
     }
     setRecentOrders(recent.map(o => ({ ...o, profile: o.user_id ? (profMap[o.user_id] ?? null) : null })))
-    setLoading(false)
+    try {
+      // existing code is wrapped above
+      setLoading(false)
+    } catch (e) {
+      console.error(e)
+      setLoading(false)
+    }
   }
 
   useEffect(() => { fetchData() }, [])
