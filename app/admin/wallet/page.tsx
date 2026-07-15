@@ -483,9 +483,10 @@ export default function AdminWalletPage() {
               </p>
 
               {/* Add / Deduct toggle */}
-              <div className="flex p-1 bg-[#f0f9ff] rounded-xl border border-[#cce7f0] mb-4">
-                <button
-                  onClick={() => setAdjustDir('add')}
+              {adjustReason !== 'Product Purchase' && (
+                <div className="flex p-1 bg-[#f0f9ff] rounded-xl border border-[#cce7f0] mb-4">
+                  <button
+                    onClick={() => setAdjustDir('add')}
                   className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition-all ${
                     adjustDir === 'add' ? 'bg-white text-green-600 shadow-sm' : 'text-[#4a7fa5]'
                   }`}
@@ -500,7 +501,8 @@ export default function AdminWalletPage() {
                 >
                   <Minus className="w-4 h-4" /> Deduct
                 </button>
-              </div>
+                </div>
+              )}
 
               <div className="space-y-3">
                 <Input
@@ -515,12 +517,15 @@ export default function AdminWalletPage() {
                 />
                 <select
                   value={adjustReason}
-                  onChange={e => setAdjustReason(e.target.value)}
+                  onChange={e => {
+                    setAdjustReason(e.target.value)
+                    if (e.target.value === 'Product Purchase') setAdjustDir('deduct')
+                  }}
                   className="w-full h-10 px-3 rounded-xl border border-[#cce7f0] text-sm text-[#0c2340] dark:text-white dark:bg-[#1a2a3a] focus:border-[#0097a7] focus:outline-none"
                 >
                   {REASON_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
                 </select>
-                {adjustReason === 'Product Purchase' && adjustDir === 'deduct' && (
+                {adjustReason === 'Product Purchase' && (
                   <div className="space-y-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
                     <div className="relative">
                       <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
