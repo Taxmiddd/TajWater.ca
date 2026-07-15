@@ -21,6 +21,9 @@ export const useCart = create<CartStore>()(
 
       addItem: (product) => {
         set((state) => {
+          // Feature 2: Cart Restriction Logic
+          // We allow Wallet Credits (category: 'wallet_credit') to be mixed smoothly with other physical items.
+          // The complexity of split handling happens at checkout instead of hard-blocking the cart.
           const existing = state.items.find((i) => i.product.id === product.id)
           if (existing) {
             return {

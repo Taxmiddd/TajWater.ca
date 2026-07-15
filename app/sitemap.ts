@@ -24,6 +24,9 @@ const PRODUCT_PAGES = [
   'spring-water-delivery-vancouver',
   'alkaline-water-delivery-vancouver',
   'distilled-water-delivery-vancouver',
+  'spring-water-delivery-coquitlam',
+  'alkaline-water-delivery-coquitlam',
+  'distilled-water-delivery-coquitlam',
 ]
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

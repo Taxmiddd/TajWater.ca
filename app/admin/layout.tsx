@@ -95,13 +95,13 @@ function AdminSidebar({
               key={item.href}
               href={item.href}
               onClick={() => setSidebarOpen(false)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all hover:scale-105 duration-200 ${
                 active
-                  ? 'bg-white/20 text-white shadow-sm'
+                  ? 'bg-white/20 text-white shadow-[0_0_15px_rgba(255,255,255,0.1)]'
                   : 'text-[#b3e5fc]/80 hover:bg-white/10 hover:text-white'
               }`}
             >
-              <Icon className={`w-4 h-4 shrink-0 ${active ? 'text-white' : 'text-[#b3e5fc]/60'}`} />
+              <Icon className={`w-4 h-4 shrink-0 transition-colors ${active ? 'text-white' : 'text-[#b3e5fc]/60'}`} />
               {item.label}
               {active && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[#00bcd4]" />}
             </Link>
@@ -295,7 +295,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Main content */}
       <div className="flex-1 lg:ml-56 min-w-0">
         {/* Top bar */}
-        <header className="h-14 bg-white dark:bg-[#1e293b] border-b border-[#cce7f0] dark:border-white/10 flex items-center px-4 sm:px-6 gap-3 sticky top-0 z-20 shadow-sm transition-colors">
+        <header className="h-14 bg-white/80 dark:bg-[#1e293b]/80 backdrop-blur-md border-b border-[#cce7f0] dark:border-white/10 flex items-center px-4 sm:px-6 gap-3 sticky top-0 z-20 shadow-sm transition-colors">
           <button
             onClick={() => setSidebarOpen(true)}
             className="lg:hidden p-2 rounded-lg hover:bg-[#e0f7fa] transition-colors"
@@ -320,7 +320,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="w-8 h-8 rounded-lg hover:bg-[#e0f7fa] dark:hover:bg-white/10 flex items-center justify-center text-[#4a7fa5] dark:text-[#b3e5fc] transition-colors"
+              className="w-8 h-8 rounded-lg hover:bg-[#e0f7fa] dark:hover:bg-white/10 flex items-center justify-center text-[#4a7fa5] dark:text-[#b3e5fc] hover:scale-110 transition-all"
               title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
             >
               {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}

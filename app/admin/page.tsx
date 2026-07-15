@@ -197,9 +197,10 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.07 }}
-              className="bg-white dark:bg-[#1e293b] rounded-2xl p-4 border border-[#cce7f0] dark:border-white/10 shadow-sm transition-colors"
+              className="bg-white/90 dark:bg-[#1e293b]/90 backdrop-blur-sm rounded-2xl p-4 border border-[#cce7f0] dark:border-white/10 shadow-sm transition-all hover:shadow-lg hover:-translate-y-1 duration-300 relative overflow-hidden group"
             >
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-2" style={{ background: kpi.bg }}>
+              <div className="absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-10 transition-opacity duration-300" style={{ backgroundImage: `linear-gradient(to bottom right, ${kpi.color}, transparent)` }} />
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-2 relative z-10 transition-transform group-hover:scale-110" style={{ background: kpi.bg }}>
                 <Icon className="w-4 h-4" style={{ color: kpi.color }} />
               </div>
               <p className={`text-xl font-extrabold text-[#0c2340] dark:text-[#f8fafc] ${loading ? 'opacity-40' : ''}`}>{kpi.value}</p>
@@ -219,12 +220,13 @@ export default function AdminDashboard() {
             const Icon = action.icon
             return (
               <Link key={action.href} href={action.href}
-                className="flex flex-col items-center gap-2 group">
-                <div className="w-11 h-11 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110"
+                className="flex flex-col items-center gap-2 group transition-all hover:-translate-y-1">
+                <div className="w-11 h-11 rounded-2xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300 group-hover:scale-110 relative overflow-hidden"
                   style={{ background: action.bg }}>
-                  <Icon className="w-5 h-5" style={{ color: action.color }} />
+                  <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <Icon className="w-5 h-5 relative z-10" style={{ color: action.color }} />
                 </div>
-                <span className="text-[10px] text-[#4a7fa5] dark:text-[#94a3b8] text-center font-medium leading-tight group-hover:text-[#0097a7] transition-colors">{action.label}</span>
+                <span className="text-[10px] text-[#4a7fa5] dark:text-[#94a3b8] text-center font-bold leading-tight group-hover:text-[#0097a7] transition-colors">{action.label}</span>
               </Link>
             )
           })}
@@ -325,7 +327,7 @@ export default function AdminDashboard() {
               </thead>
               <tbody className="divide-y divide-[#f0f9ff] dark:divide-white/5 transition-colors">
                 {recentOrders.map(order => (
-                  <tr key={order.id} className="hover:bg-[#f0f9ff] dark:hover:bg-white/5 transition-colors">
+                  <tr key={order.id} className="hover:bg-[#e0f7fa] dark:hover:bg-white/10 transition-colors duration-200">
                     <td className="px-4 py-3 font-mono text-xs font-bold text-[#0097a7] dark:text-[#b3e5fc]">{shortId(order.id)}</td>
                     <td className="px-4 py-3 font-medium text-[#0c2340] dark:text-[#f8fafc] max-w-[120px] truncate">{order.profile?.name ?? order.customer_name ?? 'Guest'}</td>
                     <td className="hidden sm:table-cell px-4 py-3 text-[#4a7fa5] dark:text-[#b3e5fc]/60 text-xs text-nowrap">{(Array.isArray(order.zones) ? order.zones[0]?.name : order.zones?.name) ?? '—'}</td>
