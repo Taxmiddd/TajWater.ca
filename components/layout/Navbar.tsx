@@ -145,7 +145,7 @@ export default function Navbar() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className={`font-semibold ${transparent ? 'border-white/40 text-white hover:bg-white/15' : 'border-[#0097a7]/30 text-[#0097a7] hover:bg-[#e0f7fa]'}`}
+                      className={`font-semibold ${transparent ? 'border-white/40 text-white bg-transparent hover:bg-white/15' : 'border-[#0097a7]/30 text-[#0097a7] bg-transparent hover:bg-[#e0f7fa]'}`}
                     >
                       Sign Up
                     </Button>
