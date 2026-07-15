@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { Wallet, Gift, CheckCircle2, ShieldCheck, Zap, ArrowRight, CreditCard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import WalletPackages from './WalletPackages'
 
 export const metadata = {
   title: 'TajWater Wallet | Bonus Credits & Easy Payments',
@@ -94,29 +95,7 @@ export default async function WalletInfoPage() {
             <div className="absolute inset-0 bg-gradient-to-tr from-[#0097a7]/20 to-[#1565c0]/20 rounded-[3rem] blur-3xl transform -rotate-6" />
             <div className="relative bg-white border border-[#cce7f0] p-8 sm:p-12 rounded-[2rem] shadow-2xl">
               <h3 className="text-2xl font-bold text-[#0c2340] mb-6 text-center">Bonus Packages</h3>
-              <div className="space-y-4">
-                {packages.map((pkg, i) => {
-                  const bonus = pkg.credits - pkg.pay
-                  return (
-                    <div key={pkg.pay} className="flex items-center justify-between p-4 rounded-2xl bg-[#f8fafc] border border-slate-100 hover:border-[#0097a7]/30 hover:bg-[#f0f9ff] transition-colors">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-[#e0f7fa] flex items-center justify-center text-[#0097a7] font-black">
-                          ${pkg.pay}
-                        </div>
-                        <div>
-                          <p className="font-bold text-[#0c2340]">Get {pkg.credits} Credits</p>
-                          <p className="text-xs text-[#4a7fa5]">Pay ${pkg.pay} CAD</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <span className="inline-block bg-green-100 text-green-700 text-sm font-bold px-3 py-1 rounded-full shadow-sm">
-                          +{bonus} Bonus
-                        </span>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
+              <WalletPackages packages={packages} isLoggedIn={isLoggedIn} />
             </div>
           </div>
         </div>
