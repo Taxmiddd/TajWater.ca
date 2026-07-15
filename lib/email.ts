@@ -434,8 +434,18 @@ export function buildWalletAdjustmentEmail({ customerName, type, amount, newBala
     ${type === 'add' ? '+' : '-'}$${amount.toFixed(2)} CAD
   </p>
 
-  <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Reason</p>
-  <p style="margin:0 0 16px;font-size:15px;color:#1e293b;">${reason}</p>
+  ${reason.startsWith('Product Purchase: ') 
+    ? `
+      <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Items Billed</p>
+      <div style="background:#f1f5f9;border-radius:8px;padding:16px;margin-bottom:16px;">
+        <p style="margin:0;font-size:14px;color:#1e293b;line-height:1.8;">&bull; ${reason.replace('Product Purchase: ', '').split(', ').join('<br/>&bull; ')}</p>
+      </div>
+    ` 
+    : `
+      <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Reason</p>
+      <p style="margin:0 0 16px;font-size:15px;color:#1e293b;">${reason}</p>
+    `
+  }
 
   <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Date</p>
   <p style="margin:0 0 16px;font-size:15px;color:#1e293b;">${dateStr}</p>

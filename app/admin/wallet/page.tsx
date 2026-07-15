@@ -19,6 +19,12 @@ type CustomerWallet = {
   created_at: string
 }
 
+type Product = {
+  id: string
+  name: string
+  price: number
+}
+
 type WalletTransaction = {
   id: string
   user_id: string
@@ -32,6 +38,7 @@ type WalletTransaction = {
 
 const REASON_OPTIONS = [
   'Manual Adjustment',
+  'Product Purchase',
   'Promotional Bonus',
   'Refund',
   'Correction',
@@ -47,6 +54,12 @@ export default function AdminWalletPage() {
   const [transactions, setTransactions] = useState<WalletTransaction[]>([])
   const [loadingTx, setLoadingTx] = useState(false)
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
+  const [products, setProducts] = useState<Product[]>([])
+
+  // Product selection
+  const [selectedItems, setSelectedItems] = useState<{product: Product, qty: number}[]>([])
+  const [productSearch, setProductSearch] = useState('')
+  const [discountPercent, setDiscountPercent] = useState('0')
 
   // Adjust form
   const [adjustAmount, setAdjustAmount] = useState('')
@@ -91,15 +104,24 @@ export default function AdminWalletPage() {
     }
   }, [])
 
+  const fetchProducts = useCallback(async () => {
+    const { data } = await supabase.from('products').select('id, name, price').eq('active', true).order('name')
+    if (data) setProducts(data)
+  }, [])
+
   useEffect(() => {
     fetchCustomers()
     fetchSettings()
-  }, [fetchCustomers, fetchSettings])
+    fetchProducts()
+  }, [fetchCustomers, fetchSettings, fetchProducts])
 
   const openCustomer = async (customer: CustomerWallet) => {
     setSelected(customer)
     setAdjustAmount('')
     setAdjustDir('add')
+    setAdjustReason(REASON_OPTIONS[0])
+    setSelectedItems([])
+    setDiscountPercent('0')
     setLoadingTx(true)
     const { data } = await supabase
       .from('wallet_transactions')
@@ -111,11 +133,27 @@ export default function AdminWalletPage() {
     setLoadingTx(false)
   }
 
+  // Auto-calculate amount for product purchases
+  useEffect(() => {
+    if (adjustReason === 'Product Purchase' && adjustDir === 'deduct') {
+      const subtotal = selectedItems.reduce((sum, item) => sum + (item.product.price * item.qty), 0)
+      const discount = parseFloat(discountPercent) || 0
+      const total = subtotal - (subtotal * discount / 100)
+      setAdjustAmount(Math.max(0, total).toFixed(2))
+    }
+  }, [selectedItems, discountPercent, adjustReason, adjustDir])
+
   const handleAdjust = async () => {
     if (!selected) return
     const amount = parseFloat(adjustAmount)
     if (isNaN(amount) || amount <= 0) { showToast('Enter a valid amount', false); return }
-    const finalReason = adjustReason === 'Other' ? adjustCustomReason : adjustReason
+    let finalReason = adjustReason === 'Other' ? adjustCustomReason : adjustReason
+    if (adjustReason === 'Product Purchase' && adjustDir === 'deduct') {
+      if (selectedItems.length === 0) { showToast('Please select at least one product', false); return }
+      const itemsStr = selectedItems.map(i => `${i.qty}x ${i.product.name}`).join(', ')
+      const discountStr = (parseFloat(discountPercent) || 0) > 0 ? ` (${discountPercent}% Off)` : ''
+      finalReason = `Product Purchase: ${itemsStr}${discountStr}`
+    }
     if (!finalReason.trim()) { showToast('Please enter a reason', false); return }
 
     setAdjusting(true)
@@ -473,6 +511,7 @@ export default function AdminWalletPage() {
                   value={adjustAmount}
                   onChange={e => setAdjustAmount(e.target.value)}
                   className="border-[#cce7f0]"
+                  readOnly={adjustReason === 'Product Purchase' && adjustDir === 'deduct'}
                 />
                 <select
                   value={adjustReason}
@@ -481,6 +520,76 @@ export default function AdminWalletPage() {
                 >
                   {REASON_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
                 </select>
+                {adjustReason === 'Product Purchase' && adjustDir === 'deduct' && (
+                  <div className="space-y-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <div className="relative">
+                      <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+                      <Input
+                        placeholder="Search products..."
+                        value={productSearch}
+                        onChange={e => setProductSearch(e.target.value)}
+                        className="pl-9 border-slate-300 dark:border-slate-700"
+                      />
+                    </div>
+                    {productSearch && (
+                      <div className="max-h-40 overflow-y-auto space-y-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-1 shadow-sm">
+                        {products
+                          .filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase()))
+                          .map(p => (
+                            <button
+                              key={p.id}
+                              onClick={() => {
+                                const existing = selectedItems.find(i => i.product.id === p.id)
+                                if (existing) {
+                                  setSelectedItems(selectedItems.map(i => i.product.id === p.id ? { ...i, qty: i.qty + 1 } : i))
+                                } else {
+                                  setSelectedItems([...selectedItems, { product: p, qty: 1 }])
+                                }
+                                setProductSearch('')
+                              }}
+                              className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-700 flex justify-between items-center"
+                            >
+                              <span className="font-medium text-slate-800 dark:text-slate-200">{p.name}</span>
+                              <span className="text-slate-500">${p.price.toFixed(2)}</span>
+                            </button>
+                        ))}
+                        {products.filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase())).length === 0 && (
+                          <div className="px-3 py-2 text-sm text-slate-500 text-center">No products found</div>
+                        )}
+                      </div>
+                    )}
+                    {selectedItems.length > 0 && (
+                      <div className="space-y-2 mt-3">
+                        <label className="text-xs font-semibold text-slate-500 uppercase">Selected Products</label>
+                        {selectedItems.map(item => (
+                          <div key={item.product.id} className="flex items-center justify-between bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div className="flex flex-col">
+                              <span className="text-sm font-semibold">{item.product.name}</span>
+                              <span className="text-xs text-slate-500">${item.product.price.toFixed(2)} each</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button onClick={() => setSelectedItems(selectedItems.map(i => i.product.id === item.product.id ? { ...i, qty: Math.max(1, i.qty - 1) } : i))} className="w-6 h-6 rounded bg-slate-100 dark:bg-slate-700 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600">-</button>
+                              <span className="text-sm font-medium w-4 text-center">{item.qty}</span>
+                              <button onClick={() => setSelectedItems(selectedItems.map(i => i.product.id === item.product.id ? { ...i, qty: i.qty + 1 } : i))} className="w-6 h-6 rounded bg-slate-100 dark:bg-slate-700 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600">+</button>
+                              <button onClick={() => setSelectedItems(selectedItems.filter(i => i.product.id !== item.product.id))} className="w-6 h-6 rounded bg-red-100 text-red-500 flex items-center justify-center ml-2 hover:bg-red-200">×</button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <div className="mt-3">
+                      <label className="text-xs font-semibold text-slate-500 uppercase block mb-1">Discount (%)</label>
+                      <Input
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={discountPercent}
+                        onChange={e => setDiscountPercent(e.target.value)}
+                        className="border-slate-300 dark:border-slate-700 h-8 text-sm"
+                      />
+                    </div>
+                  </div>
+                )}
                 {adjustReason === 'Other' && (
                   <Input
                     placeholder="Enter custom reason..."
