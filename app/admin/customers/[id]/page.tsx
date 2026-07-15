@@ -310,7 +310,6 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
             <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm text-[#4a7fa5]">
               {profile.email   && <span className="flex items-center gap-1.5"><Mail    className="w-3.5 h-3.5 text-[#0097a7]" />{profile.email}</span>}
               {profile.phone   && <span className="flex items-center gap-1.5"><Phone   className="w-3.5 h-3.5 text-[#0097a7]" />{profile.phone}</span>}
-              {profile.zone_id && <span className="flex items-center gap-1.5"><MapPin  className="w-3.5 h-3.5 text-[#0097a7]" />{profile.zone_id}</span>}
               <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-[#0097a7]" />Since {memberSince}</span>
             </div>
           </div>
