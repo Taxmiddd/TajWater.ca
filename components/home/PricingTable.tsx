@@ -16,7 +16,7 @@ export default function PricingTable() {
             Transparent Water Delivery Pricing in Metro Vancouver
           </h2>
           <p className="text-[#4a7fa5] text-lg max-w-2xl mx-auto">
-            No hidden fees. No contracts required. Free delivery on every order across all 21 service zones.
+            No hidden fees. No contracts required.
             A one-time $12 bottle deposit applies per jug on your first order — returned when you stop service.
           </p>
         </div>

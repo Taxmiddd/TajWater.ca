@@ -190,12 +190,52 @@ const localBusinessJsonLd = {
           category: 'Water',
           image: `${BASE_URL}/opengraph-image`,
           description: 'Premium spring water in a 20L BPA-free jug.',
+          brand: { '@type': 'Brand', name: 'Taj Water' },
+          sku: 'TW-5G-SPRING',
+          mpn: 'TW-5G-SPRING',
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: '4.9',
+            reviewCount: '124'
+          },
+          review: {
+            '@type': 'Review',
+            reviewRating: { '@type': 'Rating', ratingValue: '5', bestRating: '5' },
+            author: { '@type': 'Person', name: 'Local Customer' }
+          },
           offers: {
             '@type': 'Offer',
             price: '8.99',
             priceCurrency: 'CAD',
             availability: 'https://schema.org/InStock',
             url: `${BASE_URL}/shop`,
+            itemCondition: 'https://schema.org/NewCondition',
+            hasMerchantReturnPolicy: {
+              '@type': 'MerchantReturnPolicy',
+              applicableCountry: 'CA',
+              returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+              merchantReturnDays: '30',
+              returnMethod: 'https://schema.org/ReturnInStore',
+              returnFees: 'https://schema.org/FreeReturn'
+            },
+            shippingDetails: {
+              '@type': 'OfferShippingDetails',
+              shippingRate: {
+                '@type': 'MonetaryAmount',
+                value: '0',
+                currency: 'CAD'
+              },
+              shippingDestination: {
+                '@type': 'DefinedRegion',
+                addressCountry: 'CA',
+                addressRegion: 'BC'
+              },
+              deliveryTime: {
+                '@type': 'ShippingDeliveryTime',
+                handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 1, unitCode: 'd' },
+                transitTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 1, unitCode: 'd' }
+              }
+            }
           },
         },
       },

@@ -45,7 +45,7 @@ export default function CTABanner() {
                 Fresh Water Delivered<br className="hidden sm:block" /> to Your Door — Today
               </h2>
               <p className="text-[#b3e5fc] text-lg">
-                Order online in minutes. Free delivery on every order. No contracts, no commitments.
+                Order online in minutes. No contracts, no commitments.
               </p>
             </div>
 
@@ -94,7 +94,6 @@ export default function CTABanner() {
           {/* Bottom trust strip */}
           <div className="relative mt-10 pt-6 border-t border-white/10 flex flex-wrap justify-center gap-x-8 gap-y-2">
             {[
-              '✓  Free delivery on every order',
               '✓  No contracts or commitments',
               '✓  Same-day delivery available',
               '✓  BPA-free, NSF tested jugs',

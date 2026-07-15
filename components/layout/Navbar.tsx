@@ -130,16 +130,27 @@ export default function Navbar() {
                   </Button>
                 </Link>
               ) : (
-                <Link href="/auth/login">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={`gap-2 ${transparent ? 'text-white hover:bg-white/15' : 'text-[#0c2340] hover:bg-[#e0f7fa]'}`}
-                  >
-                    <User className="w-4 h-4" />
-                    Login
-                  </Button>
-                </Link>
+                <>
+                  <Link href="/auth/login">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={`gap-2 ${transparent ? 'text-white hover:bg-white/15' : 'text-[#0c2340] hover:bg-[#e0f7fa]'}`}
+                    >
+                      <User className="w-4 h-4" />
+                      Login
+                    </Button>
+                  </Link>
+                  <Link href="/auth/signup">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={`font-semibold ${transparent ? 'border-white/40 text-white hover:bg-white/15' : 'border-[#0097a7]/30 text-[#0097a7] hover:bg-[#e0f7fa]'}`}
+                    >
+                      Sign Up
+                    </Button>
+                  </Link>
+                </>
               )}
               <Link href="/shop">
                 <Button size="sm" className="bg-gradient-to-r from-[#0097a7] to-[#1565c0] hover:from-[#006064] hover:to-[#0d47a1] text-white shadow-lg shadow-aqua/30 transition-all duration-300 hover:scale-105">
@@ -197,13 +208,29 @@ export default function Navbar() {
                       Cart {count > 0 && `(${count})`}
                     </Button>
                   </Link>
-                  <Link href={isLoggedIn ? '/dashboard' : '/auth/login'} className="flex-1" onClick={() => setMobileOpen(false)}>
-                    <Button variant="outline" className="w-full h-12 rounded-2xl border-[#cce7f0] text-[#0c2340] gap-2 font-semibold">
-                      <User className="w-4 h-4 text-[#0097a7]" />
-                      {isLoggedIn ? 'Account' : 'Login'}
+                  {isLoggedIn ? (
+                    <Link href="/dashboard" className="flex-1" onClick={() => setMobileOpen(false)}>
+                      <Button variant="outline" className="w-full h-12 rounded-2xl border-[#cce7f0] text-[#0c2340] gap-2 font-semibold">
+                        <User className="w-4 h-4 text-[#0097a7]" />
+                        Account
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Link href="/auth/login" className="flex-1" onClick={() => setMobileOpen(false)}>
+                      <Button variant="outline" className="w-full h-12 rounded-2xl border-[#cce7f0] text-[#0c2340] gap-2 font-semibold">
+                        <User className="w-4 h-4 text-[#0097a7]" />
+                        Login
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+                {!isLoggedIn && (
+                  <Link href="/auth/signup" onClick={() => setMobileOpen(false)}>
+                    <Button variant="outline" className="w-full h-12 rounded-2xl border-[#0097a7]/30 text-[#0097a7] bg-[#0097a7]/5 font-semibold">
+                      Sign Up
                     </Button>
                   </Link>
-                </div>
+                )}
                 <Link href="/shop" onClick={() => setMobileOpen(false)}>
                   <Button className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#0097a7] to-[#1565c0] text-white font-bold text-lg shadow-xl shadow-[#0097a7]/20 active:scale-[0.98] transition-transform">
                     Order Now

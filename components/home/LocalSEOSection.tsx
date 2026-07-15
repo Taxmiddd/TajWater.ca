@@ -63,7 +63,7 @@ export default function LocalSEOSection() {
             <p className="text-[#4a7fa5] text-sm leading-relaxed">
               TajWater delivers 5-gallon (20L) BPA-free water jugs to homes and offices across Metro Vancouver.
               Choose from natural spring water ($8.99/jug), alkaline water ($12.99/jug), or distilled water ($9.99/jug).
-              Free delivery on every order. Same-day delivery available for orders placed before 12pm.
+              Same-day delivery available for orders placed before 12pm.
               Our jug swap system means you never need to think about empties — leave them out and we replace them on your next delivery.
               Subscribe for weekly or bi-weekly delivery and save from $6.49/jug.
             </p>

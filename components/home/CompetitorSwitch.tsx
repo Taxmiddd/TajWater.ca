@@ -18,7 +18,7 @@ export default function CompetitorSwitch() {
             {[
               {
                 heading: '5-Gallon Water Jug Delivery — Home & Office',
-                body: 'Fresh 5-gallon (20L) BPA-free water jugs delivered to your home or office across Metro Vancouver. Choose spring water at $8.99/jug, alkaline water at $12.99/jug, or distilled water at $9.99/jug. Free delivery on every order. Same-day delivery available for orders placed before 12pm. Subscription customers save from $6.49/jug. Our jug swap system means you leave empties on your doorstep and we replace them — no hassle, no heavy lifting.',
+                body: 'Fresh 5-gallon (20L) BPA-free water jugs delivered to your home or office across Metro Vancouver. Choose spring water at $8.99/jug, alkaline water at $12.99/jug, or distilled water at $9.99/jug. Same-day delivery available for orders placed before 12pm. Subscription customers save from $6.49/jug. Our jug swap system means you leave empties on your doorstep and we replace them — no hassle, no heavy lifting.',
                 link: '/shop',
                 linkText: 'Order water delivery',
               },
