@@ -69,7 +69,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({
     ordersToday: 0, revenueToday: 0, customers: 0, activeOrders: 0,
-    revenueMTD: 0, revenuePrevMTD: 0, activeSubs: 0, openTickets: 0,
+    revenueMTD: 0, revenuePrevMTD: 0, activeSubs: 0, openTickets: 0, walletTopupToday: 0,
   })
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([])
   const [lowStock, setLowStock] = useState<Array<{ name: string; stock: number }>>([])
@@ -97,6 +97,10 @@ export default function AdminDashboard() {
       supabase.from('orders').select('total').gte('created_at', prevMtdStart.toISOString()).lt('created_at', prevMtdEnd.toISOString()).eq('payment_status', 'paid'),
       supabase.from('subscriptions').select('id', { count: 'exact', head: true }).eq('status', 'active'),
       supabase.from('tickets').select('id', { count: 'exact', head: true }).eq('status', 'open'),
+      // Wallet Topups
+      supabase.from('wallet_transactions').select('reason').gte('created_at', todayStart.toISOString()).eq('transaction_type', 'top_up'),
+      supabase.from('wallet_transactions').select('reason').gte('created_at', mtdStart.toISOString()).eq('transaction_type', 'top_up'),
+      supabase.from('wallet_transactions').select('reason').gte('created_at', prevMtdStart.toISOString()).lt('created_at', prevMtdEnd.toISOString()).eq('transaction_type', 'top_up'),
     ])
 
     const todayOrders  = todayRes.data  ?? []
@@ -104,15 +108,26 @@ export default function AdminDashboard() {
     const mtdOrders    = mtdRes.data    ?? []
     const prevOrders   = prevMtdRes.data ?? []
 
+    // Helper to extract $CAD from reason string: "Wallet Recharge — $100 package..."
+    const getWalletCad = (arr: any[]) => arr.reduce((sum, tx) => {
+      const match = (tx.reason ?? '').match(/\$(\d+(\.\d+)?)/)
+      return sum + (match ? parseFloat(match[1]) : 0)
+    }, 0)
+
+    const todayWallet = getWalletCad(arguments[10].data ?? [])
+    const mtdWallet   = getWalletCad(arguments[11].data ?? [])
+    const prevWallet  = getWalletCad(arguments[12].data ?? [])
+
     setStats({
       ordersToday:    todayOrders.length,
-      revenueToday:   todayOrders.reduce((s, o) => s + (o.total ?? 0), 0),
+      revenueToday:   todayOrders.reduce((s, o) => s + (o.total ?? 0), 0) + todayWallet,
       customers:      custRes.count ?? 0,
       activeOrders:   activeOrders.length,
-      revenueMTD:     mtdOrders.reduce((s, o) => s + (o.total ?? 0), 0),
-      revenuePrevMTD: prevOrders.reduce((s, o) => s + (o.total ?? 0), 0),
+      revenueMTD:     mtdOrders.reduce((s, o) => s + (o.total ?? 0), 0) + mtdWallet,
+      revenuePrevMTD: prevOrders.reduce((s, o) => s + (o.total ?? 0), 0) + prevWallet,
       activeSubs:     subsRes.count ?? 0,
       openTickets:    ticketsRes.count ?? 0,
+      walletTopupToday: todayWallet,
     })
     setUnassigned(activeOrders.filter(o => !o.driver_name).length)
     setLowStock(stockRes.data ?? [])
@@ -143,7 +158,8 @@ export default function AdminDashboard() {
     {
       icon: DollarSign, label: 'Revenue Today',
       value: loading ? '—' : `$${stats.revenueToday.toFixed(2)}`,
-      sub: null, color: '#1565c0', bg: '#e3f2fd',
+      sub: !loading && stats.walletTopupToday > 0 ? <span className="text-[10px] text-blue-500 font-medium">Incl. ${stats.walletTopupToday} from wallet topups</span> : null,
+      color: '#1565c0', bg: '#e3f2fd',
     },
     {
       icon: TrendingUp, label: 'Revenue MTD',

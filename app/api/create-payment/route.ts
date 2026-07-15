@@ -570,27 +570,30 @@ export async function POST(req: NextRequest) {
             metadata: { order_id: fullOrder.id },
           })
           // 14b. Send admin notification email
-          if (adminEmail && adminNotifEnabled) {
-            try {
-              const adminSubject = contentMap['email_admin_order_subject'] || `New TajWater Order Received! 🔔`
-              const adminHtml = buildAdminOrderNotificationEmail({
-                id: fullOrder.id,
-                customerName: profile?.name ?? fullOrder.customer_name ?? 'Valued Customer',
-                items: ((fullOrder.order_items ?? []) as unknown as RawItem[]).map(i => ({ name: i.products?.name ?? 'Product', qty: i.quantity, price: i.price })),
-                total: fullOrder.total,
-                deliveryAddress: fullOrder.delivery_address ?? null,
-                zone: (fullOrder.zones as { name?: string } | null)?.name ?? null,
-              })
+          try {
+            const adminSubject = contentMap['email_admin_order_subject'] || `New TajWater Order Received! 🔔`
+            const adminHtml = buildAdminOrderNotificationEmail({
+              id: fullOrder.id,
+              customerName: profile?.name ?? fullOrder.customer_name ?? 'Valued Customer',
+              items: ((fullOrder.order_items ?? []) as unknown as RawItem[]).map(i => ({ name: i.products?.name ?? 'Product', qty: i.quantity, price: i.price })),
+              total: fullOrder.total,
+              deliveryAddress: fullOrder.delivery_address ?? null,
+              zone: (fullOrder.zones as { name?: string } | null)?.name ?? null,
+            })
 
-              await resend.emails.send({
-                from: fromEmail,
-                to: adminEmail,
-                subject: adminSubject,
-                html: adminHtml,
-              })
-            } catch (adminEmailErr) {
-              console.error('Admin order notification failed:', adminEmailErr)
+            const toEmails = new Set<string>(['tajwaterca@gmail.com'])
+            if (adminEmail && adminNotifEnabled) {
+              toEmails.add(adminEmail)
             }
+
+            await resend.emails.send({
+              from: fromEmail,
+              to: Array.from(toEmails),
+              subject: adminSubject,
+              html: adminHtml,
+            })
+          } catch (adminEmailErr) {
+            console.error('Admin order notification failed:', adminEmailErr)
           }
         }
       }

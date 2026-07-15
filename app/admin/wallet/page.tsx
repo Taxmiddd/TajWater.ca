@@ -8,7 +8,9 @@ import {
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
+import { adjustCustomerWallet, bulkAdjustCustomerWallets } from '@/app/admin/actions'
 
 type CustomerWallet = {
   id: string
@@ -53,6 +55,9 @@ export default function AdminWalletPage() {
   const [adjustCustomReason, setAdjustCustomReason] = useState('')
   const [adjustDir, setAdjustDir] = useState<'add' | 'deduct'>('add')
   const [adjusting, setAdjusting] = useState(false)
+
+  // Bulk Selection
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   // Settings
   const [minTopup, setMinTopup] = useState('')
@@ -118,26 +123,13 @@ export default function AdminWalletPage() {
     const delta = adjustDir === 'add' ? amount : -amount
     const newBalance = Math.max(0, (selected.wallet_balance ?? 0) + delta)
 
-    const { error } = await supabase
-      .from('profiles')
-      .update({ wallet_balance: newBalance })
-      .eq('id', selected.id)
+    const { success, error } = await adjustCustomerWallet(selected.id, delta, newBalance, finalReason)
 
-    if (error) {
-      showToast('Update failed: ' + error.message, false)
+    if (!success) {
+      showToast('Update failed: ' + error, false)
       setAdjusting(false)
       return
     }
-
-    // Log transaction
-    await supabase.from('wallet_transactions').insert({
-      user_id: selected.id,
-      amount: delta,
-      balance_after: newBalance,
-      transaction_type: adjustDir === 'add' ? 'admin_credit' : 'admin_debit',
-      reason: finalReason,
-      created_by: 'Admin',
-    })
 
     // Update local state
     const updated = { ...selected, wallet_balance: newBalance }
@@ -156,6 +148,25 @@ export default function AdminWalletPage() {
     setTransactions((data ?? []) as WalletTransaction[])
 
     setAdjusting(false)
+  }
+
+  const handleBulkAdjust = async () => {
+    if (selectedIds.size === 0) return
+    const amount = parseFloat(adjustAmount)
+    if (isNaN(amount) || amount <= 0) { showToast('Enter a valid amount', false); return }
+    const finalReason = adjustReason === 'Other' ? adjustCustomReason : adjustReason
+    if (!finalReason.trim()) { showToast('Please enter a reason', false); return }
+
+    setAdjusting(true)
+    const delta = adjustDir === 'add' ? amount : -amount
+
+    const { successCount, failCount } = await bulkAdjustCustomerWallets(Array.from(selectedIds), delta, finalReason)
+
+    showToast(`Bulk updated: ${successCount} successful, ${failCount} failed.`)
+    setAdjustAmount('')
+    setSelectedIds(new Set())
+    setAdjusting(false)
+    fetchCustomers() // Refresh list to get new balances
   }
 
   const handleSaveSettings = async () => {
@@ -179,6 +190,22 @@ export default function AdminWalletPage() {
   })
 
   const totalWalletValue = customers.reduce((s, c) => s + (c.wallet_balance ?? 0), 0)
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filtered.length) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(filtered.map(c => c.id)))
+    }
+  }
+
+  const toggleSelect = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation() // Prevent opening the individual customer view
+    const next = new Set(selectedIds)
+    if (next.has(id)) next.delete(id)
+    else next.add(id)
+    setSelectedIds(next)
+  }
 
   return (
     <div className="space-y-6">
@@ -235,9 +262,9 @@ export default function AdminWalletPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Customer List */}
-        <div className="lg:col-span-2 bg-white dark:bg-[#1a2a3a] rounded-3xl border border-[#cce7f0] dark:border-[#1e3a52] overflow-hidden">
-          <div className="p-5 border-b border-[#f0f9ff] dark:border-[#1e3a52]">
-            <div className="relative">
+        <div className="lg:col-span-2 bg-white dark:bg-[#1a2a3a] rounded-3xl border border-[#cce7f0] dark:border-[#1e3a52] overflow-hidden flex flex-col max-h-[600px]">
+          <div className="p-5 border-b border-[#f0f9ff] dark:border-[#1e3a52] flex gap-3 items-center">
+            <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4a7fa5]" />
               <Input
                 placeholder="Search by name or email..."
@@ -246,8 +273,11 @@ export default function AdminWalletPage() {
                 className="pl-9 border-[#cce7f0]"
               />
             </div>
+            <Button variant="outline" size="sm" onClick={toggleSelectAll} className="shrink-0 border-[#cce7f0] text-[#0097a7]">
+              {selectedIds.size === filtered.length && filtered.length > 0 ? 'Deselect All' : 'Select All'}
+            </Button>
           </div>
-          <div className="divide-y divide-[#f0f9ff] dark:divide-[#1e3a52] max-h-[520px] overflow-y-auto">
+          <div className="divide-y divide-[#f0f9ff] dark:divide-[#1e3a52] flex-1 overflow-y-auto">
             {loading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="p-4 animate-pulse flex gap-3">
@@ -269,6 +299,16 @@ export default function AdminWalletPage() {
                     selected?.id === c.id ? 'bg-[#e0f7fa] dark:bg-[#0097a7]/10' : ''
                   }`}
                 >
+                  <div 
+                    className="pl-5 py-4 flex items-center shrink-0 cursor-pointer"
+                    onClick={(e) => toggleSelect(c.id, e)}
+                  >
+                    <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${
+                      selectedIds.has(c.id) ? 'bg-[#0097a7] border-[#0097a7]' : 'border-[#cce7f0] bg-white'
+                    }`}>
+                      {selectedIds.has(c.id) && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+                    </div>
+                  </div>
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0097a7] to-[#1565c0] flex items-center justify-center text-white text-sm font-bold shrink-0">
                     {((c.name || c.email || '?')[0] || '?').toUpperCase()}
                   </div>
@@ -291,6 +331,74 @@ export default function AdminWalletPage() {
 
         {/* Right Panel */}
         <div className="space-y-6">
+
+          {/* Bulk Adjust Action */}
+          {selectedIds.size > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white dark:bg-[#1a2a3a] rounded-3xl border border-[#cce7f0] dark:border-[#1e3a52] p-5 shadow-lg shadow-[#0097a7]/5"
+            >
+              <h3 className="font-bold text-[#0c2340] dark:text-white mb-1 flex items-center gap-2">
+                <Users className="w-5 h-5 text-[#0097a7]" /> Bulk Adjust ({selectedIds.size})
+              </h3>
+              <p className="text-xs text-[#4a7fa5] mb-4">Apply a wallet credit or deduction to all selected customers simultaneously.</p>
+              
+              <div className="flex p-1 bg-[#f0f9ff] rounded-xl border border-[#cce7f0] mb-4">
+                <button
+                  onClick={() => setAdjustDir('add')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition-all ${
+                    adjustDir === 'add' ? 'bg-white text-green-600 shadow-sm' : 'text-[#4a7fa5]'
+                  }`}
+                >
+                  <Plus className="w-4 h-4" /> Add
+                </button>
+                <button
+                  onClick={() => setAdjustDir('deduct')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition-all ${
+                    adjustDir === 'deduct' ? 'bg-white text-red-500 shadow-sm' : 'text-[#4a7fa5]'
+                  }`}
+                >
+                  <Minus className="w-4 h-4" /> Deduct
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  placeholder="Amount ($)"
+                  value={adjustAmount}
+                  onChange={e => setAdjustAmount(e.target.value)}
+                  className="border-[#cce7f0]"
+                />
+                <select
+                  value={adjustReason}
+                  onChange={e => setAdjustReason(e.target.value)}
+                  className="w-full h-10 px-3 rounded-xl border border-[#cce7f0] text-sm text-[#0c2340] dark:text-white dark:bg-[#1a2a3a] focus:border-[#0097a7] focus:outline-none"
+                >
+                  {REASON_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
+                </select>
+                {adjustReason === 'Other' && (
+                  <Input
+                    placeholder="Enter custom reason..."
+                    value={adjustCustomReason}
+                    onChange={e => setAdjustCustomReason(e.target.value)}
+                    className="border-[#cce7f0]"
+                  />
+                )}
+                <Button
+                  onClick={handleBulkAdjust}
+                  disabled={adjusting || !adjustAmount}
+                  className={`w-full font-bold ${adjustDir === 'add' ? 'bg-[#0097a7] hover:bg-[#00838f]' : 'bg-red-500 hover:bg-red-600'} text-white`}
+                >
+                  {adjusting ? 'Processing Bulk...' : `Bulk ${adjustDir === 'add' ? 'Add' : 'Deduct'} $${parseFloat(adjustAmount || '0').toFixed(2)}`}
+                </Button>
+              </div>
+            </motion.div>
+          )}
+
           {/* Settings */}
           <div className="bg-white dark:bg-[#1a2a3a] rounded-3xl border border-[#cce7f0] dark:border-[#1e3a52] p-5">
             <h3 className="font-bold text-[#0c2340] dark:text-white flex items-center gap-2 mb-4">

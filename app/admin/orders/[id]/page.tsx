@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { logAdminAction } from '@/app/admin/actions'
 
 type OrderItem = {
   id: string
@@ -138,6 +139,7 @@ export default function AdminOrderDetailPage() {
     if (!error) {
       setOrder(prev => prev ? { ...prev, status: next } : prev)
       showToast(`Status → ${next.replace(/_/g, ' ')}`)
+      logAdminAction('status_change', 'order', order.id, { oldStatus: order.status, newStatus: next })
       if (next === 'out_for_delivery' || next === 'delivered') {
         fetch('/api/admin/send-status-email', {
           method: 'POST',
@@ -164,10 +166,12 @@ export default function AdminOrderDetailPage() {
       if (!res.ok) { showToast(data.error ?? 'Refund failed'); setUpdating(false); return }
       setOrder(prev => prev ? { ...prev, status: 'cancelled', payment_status: 'refunded' } : prev)
       showToast('Order cancelled & refunded.')
+      // Refund action is already logged in the refund API route
     } else {
       await supabase.from('orders').update({ status: 'cancelled' }).eq('id', order.id)
       setOrder(prev => prev ? { ...prev, status: 'cancelled' } : prev)
       showToast('Order cancelled.')
+      logAdminAction('cancel', 'order', order.id)
     }
     setUpdating(false)
   }
@@ -178,6 +182,7 @@ export default function AdminOrderDetailPage() {
     setOrder(prev => prev ? { ...prev, driver_name: driverInput.trim() || null } : prev)
     setEditDriver(false)
     showToast(driverInput.trim() ? `Driver set: ${driverInput.trim()}` : 'Driver removed')
+    logAdminAction('driver_edit', 'order', order.id, { driver: driverInput.trim() })
   }
 
   const saveNotes = async () => {
@@ -186,6 +191,7 @@ export default function AdminOrderDetailPage() {
     setOrder(prev => prev ? { ...prev, notes: notesInput.trim() || null } : prev)
     setEditNotes(false)
     showToast('Notes updated')
+    logAdminAction('notes_edit', 'order', order.id, { notes: notesInput.trim() })
   }
 
   const sendEmailToCustomer = async () => {

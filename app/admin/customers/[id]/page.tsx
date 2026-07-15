@@ -56,6 +56,16 @@ interface Ticket {
   admin_reply: string | null
 }
 
+interface WalletTx {
+  id: string
+  amount: number
+  balance_after: number
+  transaction_type: string
+  reason: string | null
+  created_by: string | null
+  created_at: string
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function fmtDate(ts: string) {
@@ -88,6 +98,7 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
   const [orders,   setOrders]   = useState<OrderRow[]>([])
   const [emails,   setEmails]   = useState<EmailLog[]>([])
   const [tickets,  setTickets]  = useState<Ticket[]>([])
+  const [walletTxs, setWalletTxs] = useState<WalletTx[]>([])
   const [loading,  setLoading]  = useState(true)
 
   // Tags
@@ -122,7 +133,7 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
       const { data: { session } } = await supabase.auth.getSession()
       if (session?.user?.email) setAdminEmail(session.user.email)
 
-      const [profileRes, ordersRes, emailsRes, ticketsRes, tagsRes] = await Promise.all([
+      const [profileRes, ordersRes, emailsRes, ticketsRes, tagsRes, walletRes] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', id).single(),
         supabase.from('orders')
           .select('id, status, payment_status, total, delivery_address, created_at, order_items(quantity, price, products(name))')
@@ -137,6 +148,7 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
           .eq('user_id', id)
           .order('created_at', { ascending: false }),
         supabase.from('customer_tags').select('tag').eq('user_id', id).order('created_at'),
+        supabase.from('wallet_transactions').select('*').eq('user_id', id).order('created_at', { ascending: false })
       ])
 
       if (profileRes.data) {
@@ -147,6 +159,7 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
       setEmails((emailsRes.data ?? []) as EmailLog[])
       setTickets((ticketsRes.data ?? []) as Ticket[])
       setTags((tagsRes.data ?? []).map((r: { tag: string }) => r.tag))
+      setWalletTxs((walletRes.data ?? []) as WalletTx[])
       setLoading(false)
     }
     load()
@@ -435,6 +448,9 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
           <TabsTrigger value="orders"  className="data-[state=active]:bg-[#0097a7] data-[state=active]:text-white">
             Orders ({orders.length})
           </TabsTrigger>
+          <TabsTrigger value="wallet" className="data-[state=active]:bg-[#0097a7] data-[state=active]:text-white">
+            Wallet ({walletTxs.length})
+          </TabsTrigger>
           <TabsTrigger value="emails"  className="data-[state=active]:bg-[#0097a7] data-[state=active]:text-white">
             Emails ({emails.length})
           </TabsTrigger>
@@ -492,6 +508,43 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
                   </motion.div>
                 )
               })}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* ── Wallet tab ── */}
+        <TabsContent value="wallet" className="mt-4">
+          {walletTxs.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-[#cce7f0] p-10 text-center text-[#4a7fa5]">
+              <Wallet className="w-8 h-8 mx-auto mb-2 text-[#cce7f0]" />
+              No wallet transactions
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {walletTxs.map((tx, i) => (
+                <motion.div key={tx.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
+                  className="bg-white rounded-2xl border border-[#cce7f0] shadow-sm p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${tx.amount > 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-500'}`}>
+                      <Wallet className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-[#0c2340] text-sm">{tx.reason ?? tx.transaction_type.replace(/_/g, ' ')}</p>
+                      <div className="flex items-center gap-2 text-xs text-[#4a7fa5]">
+                        <span>{fmtDateTime(tx.created_at)}</span>
+                        <span>·</span>
+                        <span>{tx.created_by ? `By ${tx.created_by}` : 'System'}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className={`font-extrabold ${tx.amount > 0 ? 'text-green-600' : 'text-red-500'}`}>
+                      {tx.amount > 0 ? '+' : ''}${tx.amount.toFixed(2)}
+                    </p>
+                    <p className="text-[10px] text-slate-400 font-medium">Bal: ${tx.balance_after.toFixed(2)}</p>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           )}
         </TabsContent>

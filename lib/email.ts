@@ -412,6 +412,42 @@ export function buildPaymentReceiptEmail({ paymentId, amount, description, custo
 `, `Receipt for Payment ${paymentId}`, coEmail, coUrl)
 }
 
+// ─── Wallet Adjustment Receipt ────────────────────────────────────────────────
+export function buildWalletAdjustmentEmail({ customerName, type, amount, newBalance, reason, dateStr }: {
+  customerName?: string; type: 'add' | 'deduct'; amount: number; newBalance: number; reason: string; dateStr: string
+}): string {
+  const coEmail = process.env.NEXT_PUBLIC_COMPANY_EMAIL ?? 'billing@tajwater.ca'
+  const coUrl   = process.env.NEXT_PUBLIC_SITE_URL      ?? 'https://tajwater.ca'
+  const greet = customerName ? `Dear ${customerName},` : 'Hello,'
+  const actionText = type === 'add' ? 'added to' : 'deducted from'
+
+  return shell(`
+<div style="text-align:center;margin-bottom:24px;">
+  <div style="font-size:48px;margin-bottom:16px;">💳</div>
+  <h1 style="margin:0;font-size:24px;font-weight:800;color:#0f172a;letter-spacing:-0.5px;">Wallet Update</h1>
+</div>
+<p style="margin:0 0 32px;font-size:16px;color:#334155;line-height:1.6;text-align:center;">${greet}<br/><br/>An administrative adjustment has been made to your TajWater digital wallet.</p>
+
+<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:24px;margin-bottom:32px;">
+  <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Adjustment</p>
+  <p style="margin:0 0 16px;font-size:20px;font-weight:800;color:${type === 'add' ? '#16a34a' : '#dc2626'};">
+    ${type === 'add' ? '+' : '-'}$${amount.toFixed(2)} CAD
+  </p>
+
+  <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Reason</p>
+  <p style="margin:0 0 16px;font-size:15px;color:#1e293b;">${reason}</p>
+
+  <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Date</p>
+  <p style="margin:0 0 16px;font-size:15px;color:#1e293b;">${dateStr}</p>
+
+  <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">New Wallet Balance</p>
+  <p style="margin:0;font-size:20px;font-weight:800;color:#0c4a6e;">$${newBalance.toFixed(2)} CAD</p>
+</div>
+
+<p style="margin:0;font-size:13px;color:#94a3b8;line-height:1.7;text-align:center;">This email serves as your official receipt for this transaction. If you have any questions, please contact <a href="mailto:${coEmail}" style="color:#0c4a6e;text-decoration:none;">${coEmail}</a>.</p>
+`, `Wallet Update: ${type === 'add' ? '+' : '-'}$${amount.toFixed(2)} CAD`, coEmail, coUrl)
+}
+
 // ─── Reset Password ────────────────────────────────────────────────────────────
 export function buildResetPasswordEmail({ resetLink, customerName }: {
   resetLink: string; customerName?: string
