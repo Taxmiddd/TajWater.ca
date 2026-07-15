@@ -79,6 +79,56 @@ export default function WalletPackages({ packages, isLoggedIn }: WalletPackagesP
           </div>
         )
       })}
+
+      {/* Custom Amount */}
+      <div className="p-4 rounded-2xl bg-white border border-slate-200 mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <p className="font-bold text-[#0c2340]">Custom Amount</p>
+          <p className="text-xs text-[#4a7fa5]">Minimum $100 CAD. <span className="text-slate-500 italic">No bonus credits given.</span></p>
+        </div>
+        
+        {!isLoggedIn ? (
+          <button
+            onClick={() => router.push('/auth/login?redirect=/wallet')}
+            className="bg-slate-100 text-slate-500 px-4 py-2 rounded-xl text-sm font-bold w-full sm:w-auto"
+          >
+            Login to select custom amount
+          </button>
+        ) : (
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault()
+              const val = Number((e.currentTarget.elements.namedItem('customAmt') as HTMLInputElement).value)
+              if (val >= 100) {
+                handleAddToCart({ pay: val, credits: val })
+              } else {
+                alert('Minimum custom amount is $100')
+              }
+            }}
+            className="flex items-center gap-2 w-full sm:w-auto"
+          >
+            <div className="relative flex-1 sm:w-32">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+              <input 
+                name="customAmt"
+                type="number" 
+                min="100" 
+                step="1"
+                placeholder="100"
+                required
+                className="w-full pl-7 pr-3 py-2 rounded-xl border border-slate-200 focus:border-[#0097a7] focus:outline-none text-sm font-bold text-[#0c2340]"
+              />
+            </div>
+            <button
+              type="submit"
+              className="flex items-center gap-2 bg-[#0097a7] hover:bg-[#00838f] text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md"
+            >
+              <ShoppingCart className="w-4 h-4" />
+              Add
+            </button>
+          </form>
+        )}
+      </div>
     </div>
   )
 }
