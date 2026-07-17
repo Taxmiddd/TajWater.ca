@@ -65,6 +65,7 @@ export default function CheckoutPage() {
   const [pickupCharge, setPickupCharge] = useState(0)
   const [isUpstairs, setIsUpstairs] = useState(false)
   const [showDepositPopup, setShowDepositPopup] = useState(false)
+  const [hasBoughtDeposit, setHasBoughtDeposit] = useState(false)
   const [bottleDepositItem, setBottleDepositItem] = useState<any>(null)
 
   // Fetch active zones and settings from DB
@@ -150,6 +151,18 @@ export default function CheckoutPage() {
           .select('id', { count: 'exact', head: true })
           .eq('user_id', session.user.id)
         setIsFirstOrder((count ?? 0) === 0)
+
+        // Check if they have bought a bottle deposit before
+        const { data: depositProd } = await supabase.from('products').select('id').ilike('name', '%deposit%').limit(1).single()
+        if (depositProd) {
+          const { data: pastItems } = await supabase
+            .from('order_items')
+            .select('id, orders!inner(user_id)')
+            .eq('product_id', depositProd.id)
+            .eq('orders.user_id', session.user.id)
+            .limit(1)
+          setHasBoughtDeposit(pastItems !== null && pastItems.length > 0)
+        }
       }
       setAuthChecked(true)
     }
@@ -197,7 +210,7 @@ export default function CheckoutPage() {
 
   const handleProceedFromCart = () => {
     if (validateCart()) {
-      if (waterJugQty > 0) {
+      if (waterJugQty > 0 && !hasBoughtDeposit) {
         setShowDepositPopup(true)
       } else {
         setStep('address')
