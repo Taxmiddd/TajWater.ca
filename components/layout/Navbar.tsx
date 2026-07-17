@@ -18,7 +18,6 @@ const navLinks = [
   { label: 'Blog', href: '/blog' },
   { label: 'FAQ', href: '/faq' },
   { label: 'Contact', href: '/contact' },
-  { label: 'Sell TajWater', href: '/sell-tajwater' },
 ]
 
 import { supabase } from '@/lib/supabase'

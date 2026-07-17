@@ -5,6 +5,7 @@ import TrustSignals from '@/components/home/TrustSignals'
 import EnhancedTestimonials from '@/components/home/EnhancedTestimonials'
 import WaterGuide from '@/components/home/WaterGuide'
 import ExpandedFAQ from '@/components/home/ExpandedFAQ'
+import SellTajwaterBanner from '@/components/home/SellTajwaterBanner'
 import CTABanner from '@/components/home/CTABanner'
 
 import { createServerClient } from '@/lib/supabase'
@@ -36,6 +37,7 @@ export default async function HomePage() {
       <EnhancedTestimonials />
       <WaterGuide />
       <ExpandedFAQ />
+      <SellTajwaterBanner />
       <CTABanner />
     </>
   )
