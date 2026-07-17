@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { supabase } from '@/lib/supabase'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -25,6 +26,7 @@ interface Profile {
   zone_id: string | null
   wallet_balance: number
   customer_notes: string | null
+  account_type: 'customer' | 'business' | null
   created_at: string
 }
 
@@ -125,6 +127,22 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
   // Toast
   const [toast, setToast] = useState('')
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 3000) }
+
+  // Account Type
+  const [updatingAccountType, setUpdatingAccountType] = useState(false)
+
+  const updateAccountType = async (newType: string) => {
+    if (!profile) return
+    setUpdatingAccountType(true)
+    const { error } = await supabase.from('profiles').update({ account_type: newType }).eq('id', profile.id)
+    if (error) {
+      showToast('Failed to update account type')
+    } else {
+      setProfile({ ...profile, account_type: newType as 'customer' | 'business' })
+      showToast('Account type updated')
+    }
+    setUpdatingAccountType(false)
+  }
 
   // Load everything in parallel
   useEffect(() => {
@@ -311,6 +329,19 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
               {profile.email   && <span className="flex items-center gap-1.5"><Mail    className="w-3.5 h-3.5 text-[#0097a7]" />{profile.email}</span>}
               {profile.phone   && <span className="flex items-center gap-1.5"><Phone   className="w-3.5 h-3.5 text-[#0097a7]" />{profile.phone}</span>}
               <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-[#0097a7]" />Since {memberSince}</span>
+            </div>
+            
+            <div className="mt-3 flex items-center gap-2">
+              <span className="text-xs font-medium text-[#4a7fa5]">Account Type:</span>
+              <Select value={profile.account_type || 'customer'} onValueChange={updateAccountType} disabled={updatingAccountType}>
+                <SelectTrigger className="w-[120px] h-7 text-xs border-[#cce7f0]">
+                  <SelectValue placeholder="Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="customer">Customer</SelectItem>
+                  <SelectItem value="business">Business</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <div className="flex gap-2 shrink-0">

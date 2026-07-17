@@ -18,6 +18,7 @@ const navLinks = [
   { label: 'Blog', href: '/blog' },
   { label: 'FAQ', href: '/faq' },
   { label: 'Contact', href: '/contact' },
+  { label: 'Sell TajWater', href: '/sell-tajwater' },
 ]
 
 import { supabase } from '@/lib/supabase'
@@ -171,74 +172,96 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Drawer */}
       <AnimatePresence>
         {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.18 }}
-            className="fixed inset-x-0 top-16 z-40 glass border-b border-white/30 shadow-2xl lg:hidden"
-          >
-            <div className="px-5 py-8 flex flex-col gap-3">
-              <p className="px-4 text-[10px] font-bold text-[#0097a7] uppercase tracking-widest mb-1">Navigation</p>
-              {navLinks.map((link) => {
-                const active = link.href === '/' ? pathname === '/' : pathname.startsWith(link.href)
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className={`px-4 py-3.5 rounded-2xl text-base font-semibold transition-all flex items-center justify-between group ${active
-                      ? 'bg-[#0097a7] text-white shadow-lg shadow-[#0097a7]/20'
-                      : 'text-[#0c2340] hover:bg-[#e0f7fa] hover:text-[#0097a7]'
-                      }`}
-                  >
-                    {link.label}
-                    {!active && <div className="w-1.5 h-1.5 rounded-full bg-[#0097a7] opacity-0 group-hover:opacity-100 transition-opacity" />}
-                  </Link>
-                )
-              })}
-              <div className="mt-6 pt-6 border-t border-[#cce7f0] flex flex-col gap-3">
-                <div className="flex gap-3">
-                  <Link href={cartHydrated && count > 0 ? '/checkout' : '/shop'} className="flex-1" onClick={() => setMobileOpen(false)}>
-                    <Button variant="outline" className="w-full h-12 rounded-2xl border-[#cce7f0] text-[#0c2340] gap-2 font-semibold">
-                      <ShoppingCart className="w-4 h-4 text-[#0097a7]" />
-                      Cart {count > 0 && `(${count})`}
-                    </Button>
-                  </Link>
-                  {isLoggedIn ? (
-                    <Link href="/dashboard" className="flex-1" onClick={() => setMobileOpen(false)}>
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
+              onClick={() => setMobileOpen(false)}
+            />
+            {/* Drawer */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed inset-y-0 right-0 z-50 w-full max-w-sm bg-[#f0f9ff] shadow-2xl lg:hidden flex flex-col h-full border-l border-white overflow-y-auto"
+            >
+              <div className="flex items-center justify-between p-5 border-b border-[#cce7f0]">
+                <span className="font-extrabold text-[#0c2340] text-lg">Menu</span>
+                <button
+                  onClick={() => setMobileOpen(false)}
+                  className="p-2 rounded-lg text-[#0c2340] hover:bg-[#e0f7fa] transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="flex-1 px-5 py-6 flex flex-col gap-2">
+                <p className="px-3 text-[10px] font-bold text-[#0097a7] uppercase tracking-widest mb-2">Navigation</p>
+                {navLinks.map((link) => {
+                  const active = link.href === '/' ? pathname === '/' : pathname.startsWith(link.href)
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setMobileOpen(false)}
+                      className={`px-4 py-3.5 rounded-2xl text-base font-semibold transition-all flex items-center justify-between group ${active
+                        ? 'bg-[#0097a7] text-white shadow-lg shadow-[#0097a7]/20'
+                        : 'text-[#0c2340] hover:bg-[#e0f7fa] hover:text-[#0097a7]'
+                        }`}
+                    >
+                      {link.label}
+                      {!active && <div className="w-1.5 h-1.5 rounded-full bg-[#0097a7] opacity-0 group-hover:opacity-100 transition-opacity" />}
+                    </Link>
+                  )
+                })}
+                
+                <div className="mt-auto pt-8 flex flex-col gap-3">
+                  <div className="flex gap-3">
+                    <Link href={cartHydrated && count > 0 ? '/checkout' : '/shop'} className="flex-1" onClick={() => setMobileOpen(false)}>
                       <Button variant="outline" className="w-full h-12 rounded-2xl border-[#cce7f0] text-[#0c2340] gap-2 font-semibold">
-                        <User className="w-4 h-4 text-[#0097a7]" />
-                        Account
+                        <ShoppingCart className="w-4 h-4 text-[#0097a7]" />
+                        Cart {count > 0 && `(${count})`}
                       </Button>
                     </Link>
-                  ) : (
-                    <Link href="/auth/login" className="flex-1" onClick={() => setMobileOpen(false)}>
-                      <Button variant="outline" className="w-full h-12 rounded-2xl border-[#cce7f0] text-[#0c2340] gap-2 font-semibold">
-                        <User className="w-4 h-4 text-[#0097a7]" />
-                        Login
+                    {isLoggedIn ? (
+                      <Link href="/dashboard" className="flex-1" onClick={() => setMobileOpen(false)}>
+                        <Button variant="outline" className="w-full h-12 rounded-2xl border-[#cce7f0] text-[#0c2340] gap-2 font-semibold">
+                          <User className="w-4 h-4 text-[#0097a7]" />
+                          Account
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Link href="/auth/login" className="flex-1" onClick={() => setMobileOpen(false)}>
+                        <Button variant="outline" className="w-full h-12 rounded-2xl border-[#cce7f0] text-[#0c2340] gap-2 font-semibold">
+                          <User className="w-4 h-4 text-[#0097a7]" />
+                          Login
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
+                  {!isLoggedIn && (
+                    <Link href="/auth/signup" onClick={() => setMobileOpen(false)}>
+                      <Button variant="outline" className="w-full h-12 rounded-2xl border-[#0097a7]/30 text-[#0097a7] bg-[#0097a7]/5 font-semibold hover:bg-[#0097a7]/10">
+                        Sign Up
                       </Button>
                     </Link>
                   )}
-                </div>
-                {!isLoggedIn && (
-                  <Link href="/auth/signup" onClick={() => setMobileOpen(false)}>
-                    <Button variant="outline" className="w-full h-12 rounded-2xl border-[#0097a7]/30 text-[#0097a7] bg-[#0097a7]/5 font-semibold">
-                      Sign Up
+                  <Link href="/shop" onClick={() => setMobileOpen(false)}>
+                    <Button className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#0097a7] to-[#1565c0] text-white font-bold text-lg shadow-xl shadow-[#0097a7]/20 active:scale-[0.98] transition-transform">
+                      Order Now
                     </Button>
                   </Link>
-                )}
-                <Link href="/shop" onClick={() => setMobileOpen(false)}>
-                  <Button className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#0097a7] to-[#1565c0] text-white font-bold text-lg shadow-xl shadow-[#0097a7]/20 active:scale-[0.98] transition-transform">
-                    Order Now
-                  </Button>
-                </Link>
+                </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </>

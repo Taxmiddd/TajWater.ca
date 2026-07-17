@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  LayoutDashboard, ShoppingBag, Users, Package, Truck, CreditCard,
+  LayoutDashboard, ShoppingBag, Users, Package, Truck, CreditCard, Building,
   Settings, Menu, X, Shield, LogOut, Bell, FileEdit, BarChart2, MessageSquare, Droplets, UserCog, RefreshCw, Tag, ClipboardList,
   Sun, Moon, Wallet
 } from 'lucide-react'
@@ -22,6 +22,7 @@ const NAV_ITEMS = [
   { icon: RefreshCw,       label: 'Subscriptions', href: '/admin/subscriptions',  roles: ['super_admin', 'manager'] },
   { icon: Droplets,        label: 'Services',      href: '/admin/services',       roles: ['super_admin', 'manager'] },
   { icon: Truck,           label: 'Deliveries', href: '/admin/deliveries',  roles: ['super_admin', 'manager', 'delivery'] },
+  { icon: Building,        label: 'Wholesale',  href: '/admin/wholesale',   roles: ['super_admin', 'manager'] },
   { icon: CreditCard,      label: 'Payments',   href: '/admin/payments',    roles: ['super_admin', 'manager'] },
   { icon: Wallet,          label: 'Wallets',    href: '/admin/wallet',      roles: ['super_admin', 'manager'] },
   { icon: Tag,             label: 'Discounts',  href: '/admin/discounts',   roles: ['super_admin', 'manager'] },
