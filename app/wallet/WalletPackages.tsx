@@ -12,18 +12,21 @@ interface Package {
 interface WalletPackagesProps {
   packages: Package[]
   isLoggedIn: boolean
+  isBusiness?: boolean
 }
 
-export default function WalletPackages({ packages, isLoggedIn }: WalletPackagesProps) {
+export default function WalletPackages({ packages, isLoggedIn, isBusiness = false }: WalletPackagesProps) {
   const router = useRouter()
   const { addItem } = useCart()
 
   const handleAddToCart = (pkg: Package) => {
+    const credits = isBusiness ? pkg.pay : pkg.credits
+    
     // Add to cart store (which is persisted in localStorage)
     addItem({
       id: `wallet_credit_${pkg.pay}`,
       name: `Wallet Credit - $${pkg.pay}`,
-      description: `Adds ${pkg.credits} credits to your TajWater Wallet`,
+      description: `Adds ${credits} credits to your TajWater Wallet`,
       price: pkg.pay,
       image_url: '/images/wallet-icon.png', // Placeholder
       stock: 999,
@@ -44,7 +47,8 @@ export default function WalletPackages({ packages, isLoggedIn }: WalletPackagesP
   return (
     <div className="space-y-4">
       {packages.map((pkg) => {
-        const bonus = pkg.credits - pkg.pay
+        const credits = isBusiness ? pkg.pay : pkg.credits
+        const bonus = credits - pkg.pay
         return (
           <div 
             key={pkg.pay} 
@@ -56,15 +60,17 @@ export default function WalletPackages({ packages, isLoggedIn }: WalletPackagesP
                 ${pkg.pay}
               </div>
               <div>
-                <p className="font-bold text-[#0c2340]">Get {pkg.credits} Credits</p>
+                <p className="font-bold text-[#0c2340]">Get {credits} Credits</p>
                 <p className="text-xs text-[#4a7fa5]">Pay ${pkg.pay} CAD</p>
               </div>
             </div>
-            <div className="text-right transition-transform group-hover:translate-x-12 opacity-100 group-hover:opacity-0">
-              <span className="inline-block bg-green-100 text-green-700 text-sm font-bold px-3 py-1 rounded-full shadow-sm">
-                +{bonus} Bonus
-              </span>
-            </div>
+            {bonus > 0 && (
+              <div className="text-right transition-transform group-hover:translate-x-12 opacity-100 group-hover:opacity-0">
+                <span className="inline-block bg-green-100 text-green-700 text-sm font-bold px-3 py-1 rounded-full shadow-sm">
+                  +{bonus} Bonus
+                </span>
+              </div>
+            )}
 
             {/* Hover Cart Button */}
             <div className="absolute right-4 top-1/2 -translate-y-1/2 translate-x-12 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all">

@@ -30,6 +30,7 @@ export default function WalletPage() {
   const [balance, setBalance] = useState<number>(0)
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
+  const [accountType, setAccountType] = useState('customer')
   const [selectedPkg, setSelectedPkg] = useState<typeof RECHARGE_PACKAGES[number] | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [message, setMessage] = useState('')
@@ -44,11 +45,14 @@ export default function WalletPage() {
       if (!session) return
 
       const [profRes, transRes] = await Promise.all([
-        supabase.from('profiles').select('wallet_balance').eq('id', session.user.id).single(),
+        supabase.from('profiles').select('wallet_balance, account_type').eq('id', session.user.id).single(),
         supabase.from('wallet_transactions').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false }),
       ])
 
-      if (profRes.data) setBalance(profRes.data.wallet_balance ?? 0)
+      if (profRes.data) {
+        setBalance(profRes.data.wallet_balance ?? 0)
+        setAccountType(profRes.data.account_type || 'customer')
+      }
       if (transRes.data) setTransactions(transRes.data)
     } catch (e) {
       console.error(e)
@@ -71,11 +75,13 @@ export default function WalletPage() {
         return
       }
 
+      const credits = accountType === 'business' ? pkg.pay : pkg.credits
+
       // User is logged in: Add Wallet Credit to Shopping Cart
       addItem({
         id: `wallet_credit_${pkg.pay}`,
         name: `Wallet Credit - $${pkg.pay}`,
-        description: `Adds ${pkg.credits} credits to your TajWater Wallet`,
+        description: `Adds ${credits} credits to your TajWater Wallet`,
         price: pkg.pay,
         image_url: '/images/wallet-icon.png', // Placeholder
         stock: 999,
@@ -148,7 +154,8 @@ export default function WalletPage() {
 
           <div className="space-y-3">
             {RECHARGE_PACKAGES.map((pkg) => {
-              const bonus = pkg.credits - pkg.pay
+              const credits = accountType === 'business' ? pkg.pay : pkg.credits
+              const bonus = credits - pkg.pay
               const isSelected = selectedPkg?.pay === pkg.pay
               return (
                 <button
@@ -162,14 +169,16 @@ export default function WalletPage() {
                     </div>
                     <div>
                       <p className="font-bold text-[#0c2340]">${pkg.pay} CAD</p>
-                      <p className="text-xs text-[#4a7fa5]">{pkg.credits} credits</p>
+                      <p className="text-xs text-[#4a7fa5]">{credits} credits</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <span className="inline-block bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full">
-                      +{bonus} bonus
-                    </span>
-                  </div>
+                  {bonus > 0 && (
+                    <div className="text-right">
+                      <span className="inline-block bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full">
+                        +{bonus} bonus
+                      </span>
+                    </div>
+                  )}
                 </button>
               )
             })}

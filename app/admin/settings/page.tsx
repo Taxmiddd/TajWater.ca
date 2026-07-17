@@ -88,6 +88,8 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState('')
+  const [upstairsCharge, setUpstairsCharge] = useState('5.00')
+  const [pickupCharge, setPickupCharge] = useState('10.00')
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 2500) }
 
@@ -97,7 +99,7 @@ export default function SettingsPage() {
 
     const allContentKeys = [
       'settings_company', 'settings_phone', 'settings_email', 'settings_address', 'settings_hours',
-      'monthly_revenue_goal',
+      'monthly_revenue_goal', 'upstairs_delivery_charge', 'bottle_pickup_charge',
       'social_facebook', 'social_instagram', 'social_twitter', 'social_tiktok',
       ...NOTIF_KEYS.map(n => n.key),
       ...EMAIL_TEMPLATE_KEYS,
@@ -127,6 +129,8 @@ export default function SettingsPage() {
       })
       setNotifs(notifState)
       setRevenueGoal(map['monthly_revenue_goal'] ?? '')
+      setUpstairsCharge(map['upstairs_delivery_charge'] ?? '5.00')
+      setPickupCharge(map['bottle_pickup_charge'] ?? '10.00')
       setSocialsState({
         facebook: map['social_facebook'] ?? '',
         instagram: map['social_instagram'] ?? '',
@@ -178,6 +182,8 @@ export default function SettingsPage() {
       { key: 'settings_address', value: business.address },
       { key: 'settings_hours', value: business.hours },
       { key: 'monthly_revenue_goal', value: revenueGoal || '0' },
+      { key: 'upstairs_delivery_charge', value: upstairsCharge || '0' },
+      { key: 'bottle_pickup_charge', value: pickupCharge || '0' },
     ]
     const { error } = await supabase
       .from('site_content')
@@ -331,6 +337,30 @@ export default function SettingsPage() {
                     className="border-[#cce7f0] dark:border-white/10 dark:bg-white/5 dark:text-white max-w-xs transition-colors"
                   />
                   <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8] mt-1">Shown as a progress bar on the Analytics page.</p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-bold text-[#0c2340] dark:text-[#f8fafc] mb-1.5 block">Upstairs Delivery Charge ($)</label>
+                    <Input
+                      type="number" min="0" step="0.50"
+                      value={upstairsCharge}
+                      onChange={e => setUpstairsCharge(e.target.value)}
+                      placeholder="e.g. 5.00"
+                      className="border-[#cce7f0] dark:border-white/10 dark:bg-white/5 dark:text-white transition-colors"
+                    />
+                    <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8] mt-1">Extra fee added at checkout for apartment/upstairs delivery.</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-bold text-[#0c2340] dark:text-[#f8fafc] mb-1.5 block">Bottle Pickup Charge ($)</label>
+                    <Input
+                      type="number" min="0" step="0.50"
+                      value={pickupCharge}
+                      onChange={e => setPickupCharge(e.target.value)}
+                      placeholder="e.g. 10.00"
+                      className="border-[#cce7f0] dark:border-white/10 dark:bg-white/5 dark:text-white transition-colors"
+                    />
+                    <p className="text-xs text-[#4a7fa5] dark:text-[#94a3b8] mt-1">Amount stated in policy for picking up empty bottles.</p>
+                  </div>
                 </div>
               </div>
             )}

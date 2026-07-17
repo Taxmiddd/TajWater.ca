@@ -25,6 +25,12 @@ export default async function WalletInfoPage() {
 
   const { data: { session } } = await supabase.auth.getSession()
   const isLoggedIn = !!session
+  
+  let isBusiness = false
+  if (isLoggedIn) {
+    const { data: prof } = await supabase.from('profiles').select('account_type').eq('id', session.user.id).single()
+    if (prof?.account_type === 'business') isBusiness = true
+  }
 
   const features = [
     {
@@ -95,7 +101,7 @@ export default async function WalletInfoPage() {
             <div className="absolute inset-0 bg-gradient-to-tr from-[#0097a7]/20 to-[#1565c0]/20 rounded-[3rem] blur-3xl transform -rotate-6" />
             <div className="relative bg-white border border-[#cce7f0] p-8 sm:p-12 rounded-[2rem] shadow-2xl">
               <h3 className="text-2xl font-bold text-[#0c2340] mb-6 text-center">Bonus Packages</h3>
-              <WalletPackages packages={packages} isLoggedIn={isLoggedIn} />
+              <WalletPackages packages={packages} isLoggedIn={isLoggedIn} isBusiness={isBusiness} />
             </div>
           </div>
         </div>

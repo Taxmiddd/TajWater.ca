@@ -14,7 +14,7 @@ import { Suspense } from 'react'
 type Zone = { id: string; name: string }
 
 function RegisterContent() {
-  const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', address: '', zone: '' })
+  const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', address: '', zone: '', account_type: 'customer' })
   const [zones, setZones] = useState<Zone[]>([])
   const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -59,6 +59,7 @@ function RegisterContent() {
           phone: form.phone,
           address: form.address,
           zone_id: zoneId,
+          account_type: form.account_type,
         },
       },
     })
@@ -139,18 +140,30 @@ function RegisterContent() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
+                <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Account Type</label>
+                <select
+                  value={form.account_type}
+                  onChange={(e) => setForm({ ...form, account_type: e.target.value })}
+                  className="w-full h-11 px-3 rounded-xl border border-[#cce7f0] text-sm focus:border-[#0097a7] focus:outline-none text-[#0c2340]"
+                >
+                  <option value="customer">Personal / Customer</option>
+                  <option value="business">Business</option>
+                </select>
+              </div>
+              <div>
                 <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Email</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#0097a7]" />
                   <Input type="email" placeholder="email@..." value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="pl-9 border-[#cce7f0] h-11 text-sm" required />
                 </div>
               </div>
-              <div>
-                <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Phone</label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#0097a7]" />
-                  <Input placeholder="604-..." value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="pl-9 border-[#cce7f0] h-11 text-sm" />
-                </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-[#0c2340] mb-1.5 block">Phone</label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#0097a7]" />
+                <Input placeholder="604-..." value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="pl-9 border-[#cce7f0] h-11 text-sm" />
               </div>
             </div>
 

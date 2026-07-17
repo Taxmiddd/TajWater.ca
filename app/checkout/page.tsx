@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { 
   ShoppingCart, 
   MapPin, 
@@ -40,7 +40,7 @@ const WALLET_ELIGIBLE_CATEGORIES = ['water', 'refill', 'water_product']
 // --- Main checkout page ---
 export default function CheckoutPage() {
   const { items, updateQuantity, removeItem, total, clearCart } = useCart()
-  const [paymentMode, setPaymentMode] = useState<'online' | 'offline' | 'wallet'>('online')
+  const [paymentMode, setPaymentMode] = useState<'online' | 'wallet'>('online')
   const [fulfillmentType, setFulfillmentType] = useState<'delivery' | 'pickup'>('delivery')
 
   const PICKUP_ADDRESS = '1770 McLean Ave, Port Coquitlam, BC V3C 4K8'
@@ -61,7 +61,13 @@ export default function CheckoutPage() {
   const [cartError, setCartError] = useState('')
   const router = useRouter()
 
-  // Fetch active zones from DB
+  const [upstairsCharge, setUpstairsCharge] = useState(0)
+  const [pickupCharge, setPickupCharge] = useState(0)
+  const [isUpstairs, setIsUpstairs] = useState(false)
+  const [showDepositPopup, setShowDepositPopup] = useState(false)
+  const [bottleDepositItem, setBottleDepositItem] = useState<any>(null)
+
+  // Fetch active zones and settings from DB
   useEffect(() => {
     supabase
       .from('zones')
@@ -69,6 +75,28 @@ export default function CheckoutPage() {
       .eq('active', true)
       .order('name')
       .then(({ data }) => { if (data) setZones(data) })
+
+    supabase
+      .from('site_content')
+      .select('key, value')
+      .in('key', ['upstairs_delivery_charge', 'bottle_pickup_charge'])
+      .then(({ data }) => {
+        if (data) {
+          const map: Record<string, string> = {}
+          data.forEach(d => map[d.key] = d.value)
+          setUpstairsCharge(parseFloat(map['upstairs_delivery_charge'] ?? '5') || 0)
+          setPickupCharge(parseFloat(map['bottle_pickup_charge'] ?? '10') || 0)
+        }
+      })
+
+    supabase
+      .from('products')
+      .select('id, name, price, image_url, category')
+      .ilike('name', '%deposit%')
+      .eq('active', true)
+      .limit(1)
+      .single()
+      .then(({ data }) => { if (data) setBottleDepositItem(data) })
   }, [])
 
   // Update delivery fee when zone changes (pickup always has $0 delivery)
@@ -131,7 +159,7 @@ export default function CheckoutPage() {
   const subtotal = total()
   const taxableSubtotal = items.reduce((acc, item) => acc + (item.product.taxable !== false ? item.product.price * item.quantity : 0), 0)
   const tax = Math.round(taxableSubtotal * 0.12 * 100) / 100
-  const deliveryFeeValue = deliveryFee
+  const deliveryFeeValue = fulfillmentType === 'pickup' ? 0 : deliveryFee + (isUpstairs ? upstairsCharge : 0)
 
   // Wallet: covers items + tax only. Delivery always paid by card.
   const walletItemsTotal = Math.max(0, subtotal) + tax
@@ -168,7 +196,18 @@ export default function CheckoutPage() {
   }
 
   const handleProceedFromCart = () => {
-    if (validateCart()) setStep('address')
+    if (validateCart()) {
+      if (waterJugQty > 0) {
+        setShowDepositPopup(true)
+      } else {
+        setStep('address')
+      }
+    }
+  }
+
+  const handleConfirmDeposit = () => {
+    setShowDepositPopup(false)
+    setStep('address')
   }
 
   // --- Validation Logic ---
@@ -247,7 +286,7 @@ export default function CheckoutPage() {
             postal: address.postal,
             email: address.email,
           },
-          notes: address.notes || null,
+          notes: address.notes ? `${address.notes}${isUpstairs ? ' | Upstairs Delivery Requested' : ''}` : (isUpstairs ? 'Upstairs Delivery Requested' : null),
           userId,
           discountCodeId: null,
           discountAmount: 0,
@@ -270,51 +309,7 @@ export default function CheckoutPage() {
     }
   }, [orderTotal, items, address, userId, clearCart])
 
-  const handleOfflineOrder = async () => {
-    setProcessing(true)
-    setIntentError('')
-    try {
-      const res = await fetch('/api/create-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: orderTotal,
-          items: items.map(i => ({
-            product_id: i.product.id,
-            quantity: i.quantity,
-            price: i.product.price,
-            subscribeFrequency: i.product.subscription_interval ?? null,
-            category: i.product.category,
-            name: i.product.name,
-          })),
-          address: {
-            name: address.name,
-            phone: address.phone,
-            street: address.street,
-            zone: address.zone,
-            postal: address.postal,
-            email: address.email,
-          },
-          notes: address.notes || null,
-          userId,
-          discountCodeId: null,
-          discountAmount: 0,
-          paymentMethod: 'card_on_delivery',
-          fulfillmentType,
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to place order')
-      clearCart()
-      setOrderId(data.orderId)
-      setStep('confirmed')
-      window.scrollTo(0, 0)
-    } catch (err: unknown) {
-      setIntentError(err instanceof Error ? err.message : 'Failed to place order')
-    } finally {
-      setProcessing(false)
-    }
-  }
+
 
   const handleWalletOrder = async (deliveryToken?: string) => {
     setProcessing(true)
@@ -341,7 +336,7 @@ export default function CheckoutPage() {
             postal: address.postal,
             email: address.email,
           },
-          notes: address.notes || null,
+          notes: address.notes ? `${address.notes}${isUpstairs ? ' | Upstairs Delivery Requested' : ''}` : (isUpstairs ? 'Upstairs Delivery Requested' : null),
           userId,
           discountCodeId: null,
           discountAmount: 0,
@@ -448,7 +443,40 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f0f9ff] pt-24 pb-16">
+    <div className="min-h-screen bg-[#f0f9ff] pt-24 pb-16 relative">
+      <AnimatePresence>
+        {showDepositPopup && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0c2340]/40 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-[#cce7f0]"
+            >
+              <div className="w-16 h-16 bg-[#e0f7fa] rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertCircle className="w-8 h-8 text-[#0097a7]" />
+              </div>
+              <h3 className="text-2xl font-extrabold text-[#0c2340] text-center mb-3">Bottle Deposit Reminder</h3>
+              <p className="text-[#4a7fa5] text-center mb-6">
+                Do you have your own empty bottles to exchange? If not, please ensure you have added a Bottle Deposit to your cart.
+              </p>
+              
+              <div className="space-y-3">
+                <Button onClick={handleConfirmDeposit} className="w-full h-12 bg-gradient-to-r from-[#0097a7] to-[#1565c0] text-white font-bold rounded-xl shadow-md">
+                  I Have Empties / Added Deposit
+                </Button>
+                <Button onClick={() => setShowDepositPopup(false)} variant="outline" className="w-full h-12 border-[#cce7f0] text-[#0097a7] font-bold rounded-xl">
+                  Wait, Go Back to Cart
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-4 mb-8">
           <Link href="/shop">
@@ -686,6 +714,24 @@ export default function CheckoutPage() {
                           className="w-full px-3 py-2 rounded-xl border border-[#cce7f0] text-sm focus:border-[#0097a7] focus:outline-none text-[#0c2340] resize-none"
                         />
                       </div>
+                      <div className="pt-2">
+                        <label className="flex items-start gap-3 p-3 border border-[#cce7f0] rounded-xl cursor-pointer hover:bg-[#f0f9ff] transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={isUpstairs}
+                            onChange={(e) => setIsUpstairs(e.target.checked)}
+                            className="mt-1 w-4 h-4 accent-[#0097a7]"
+                          />
+                          <div>
+                            <p className="text-sm font-bold text-[#0c2340]">I need delivery upstairs / to my apartment</p>
+                            <p className="text-xs text-[#4a7fa5] mt-0.5">
+                              {isUpstairs 
+                                ? `An additional fee of $${upstairsCharge.toFixed(2)} will apply.` 
+                                : `If unchecked, delivery will be made to the downstairs/lobby only.`}
+                            </p>
+                          </div>
+                        </label>
+                      </div>
                     </>
                   )}
 
@@ -710,31 +756,18 @@ export default function CheckoutPage() {
                 <div className="p-5 space-y-6">
                   {/* Payment Mode Toggle */}
                   <div className="flex p-1 bg-[#f0f9ff] rounded-2xl border border-[#cce7f0]">
-                    <button
-                      onClick={() => setPaymentMode('online')}
-                      className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all ${
-                        paymentMode === 'online'
-                          ? 'bg-white text-[#0097a7] shadow-sm'
-                          : 'text-[#4a7fa5] hover:text-[#0097a7]'
-                      }`}
-                    >
-                      <CreditCardIcon className="w-4 h-4" />
-                      Pay Online
-                    </button>
-                    {fulfillmentType === 'delivery' && (
                       <button
-                        onClick={() => setPaymentMode('offline')}
+                        onClick={() => setPaymentMode('online')}
                         className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all ${
-                          paymentMode === 'offline'
+                          paymentMode === 'online'
                             ? 'bg-white text-[#0097a7] shadow-sm'
                             : 'text-[#4a7fa5] hover:text-[#0097a7]'
                         }`}
                       >
-                        <TruckIcon className="w-4 h-4" />
-                        Card on Delivery
+                        <CreditCardIcon className="w-4 h-4" />
+                        Pay Online
                       </button>
-                    )}
-                    {userId && allItemsWalletEligible && (
+                      {userId && allItemsWalletEligible && (
                       <button
                         onClick={() => setPaymentMode('wallet')}
                         className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all ${
@@ -819,7 +852,7 @@ export default function CheckoutPage() {
                         </SquareCreditCard>
                       </div>
                     </PaymentForm>
-                  ) : paymentMode === 'wallet' ? (
+                  ) : (
                     <div className="space-y-4">
                       {/* Wallet balance info */}
                       <div className="p-4 rounded-2xl border-2 border-[#0097a7] bg-[#f0f9ff]">
@@ -922,41 +955,6 @@ export default function CheckoutPage() {
                         </Button>
                       )}
                     </div>
-                  ) : (
-                    // Card on Delivery
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3 p-4 rounded-2xl border-2 border-[#0097a7] bg-[#f0f9ff]">
-                        <div className="p-2 rounded-xl bg-[#0097a7] text-white">
-                          <CreditCardIcon className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <p className="font-bold text-[#0c2340]">Card on Delivery</p>
-                          <p className="text-xs text-[#4a7fa5]">Our driver will bring a Square POS terminal</p>
-                        </div>
-                        <div className="ml-auto w-5 h-5 rounded-full bg-[#0097a7] flex items-center justify-center">
-                          <div className="w-2 h-2 rounded-full bg-white" />
-                        </div>
-                      </div>
-
-                      <div className="flex items-start gap-2 bg-[#e0f7fa] p-3 rounded-xl">
-                        <Info className="w-4 h-4 text-[#0097a7] shrink-0 mt-0.5" />
-                        <p className="text-xs text-[#0097a7]">
-                          Payment is collected by credit or debit card when your order arrives. Our driver carries a Square POS machine.
-                        </p>
-                      </div>
-
-                      <Button
-                        onClick={handleOfflineOrder}
-                        disabled={processing}
-                        className="w-full bg-[#0097a7] hover:bg-[#00838f] text-white font-bold py-4 h-auto rounded-2xl shadow-lg shadow-[#0097a7]/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2 mt-4"
-                      >
-                        {processing ? 'Processing...' : `Confirm Order for $${displayTotal.toFixed(2)}`}
-                      </Button>
-
-                      <p className="text-[10px] text-center text-[#4a7fa5] mt-2 italic">
-                        Payment by credit or debit card collected on delivery.
-                      </p>
-                    </div>
                   )}
 
                   <p className="text-xs text-center text-[#4a7fa5] pt-4">
@@ -1012,8 +1010,8 @@ export default function CheckoutPage() {
                       </>
                     ) : (
                       <>
-                        <span>Delivery</span>
-                        <span>${deliveryFee.toFixed(2)}</span>
+                        <span>Delivery {isUpstairs ? '(+ Upstairs)' : ''}</span>
+                        <span>${deliveryFeeValue.toFixed(2)}</span>
                       </>
                     )}
                   </div>
@@ -1074,6 +1072,15 @@ export default function CheckoutPage() {
                      </p>
                    </div>
                 ) : null}
+
+                {/* Bottle Return Policy Notice */}
+                <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <p className="text-[10px] leading-tight text-amber-800 font-medium">
+                    <strong className="text-amber-900 block mb-0.5">Bottle Return Policy</strong>
+                    Customers must return empty bottles to our depot. If you require us to pick them up, a pickup charge of ${pickupCharge.toFixed(2)} will apply.
+                  </p>
+                </div>
               </div>
             </div>
           </div>

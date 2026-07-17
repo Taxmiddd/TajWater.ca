@@ -17,6 +17,7 @@ type CustomerWallet = {
   email: string | null
   wallet_balance: number
   created_at: string
+  account_type: string
 }
 
 type Product = {
@@ -51,6 +52,7 @@ export default function AdminWalletPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<CustomerWallet | null>(null)
+  const [activeTab, setActiveTab] = useState<'customer' | 'business'>('customer')
   const [transactions, setTransactions] = useState<WalletTransaction[]>([])
   const [loadingTx, setLoadingTx] = useState(false)
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
@@ -70,6 +72,9 @@ export default function AdminWalletPage() {
 
   // Bulk Selection
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkSelectedItems, setBulkSelectedItems] = useState<{product: Product, qty: number}[]>([])
+  const [bulkProductSearch, setBulkProductSearch] = useState('')
+  const [bulkDiscountPercent, setBulkDiscountPercent] = useState('0')
 
   // Settings
   const [minTopup, setMinTopup] = useState('')
@@ -85,7 +90,7 @@ export default function AdminWalletPage() {
     setLoading(true)
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, name, email, wallet_balance, created_at')
+      .select('id, name, email, wallet_balance, created_at, account_type')
       .order('wallet_balance', { ascending: false })
     if (!error && data) setCustomers(data)
     setLoading(false)
@@ -136,12 +141,14 @@ export default function AdminWalletPage() {
   // Auto-calculate amount for product purchases
   useEffect(() => {
     if (adjustReason === 'Product Purchase' && adjustDir === 'deduct') {
-      const subtotal = selectedItems.reduce((sum, item) => sum + (item.product.price * item.qty), 0)
-      const discount = parseFloat(discountPercent) || 0
+      const itemsToUse = selectedIds.size > 0 ? bulkSelectedItems : selectedItems
+      const discountToUse = selectedIds.size > 0 ? bulkDiscountPercent : discountPercent
+      const subtotal = itemsToUse.reduce((sum, item) => sum + (item.product.price * item.qty), 0)
+      const discount = parseFloat(discountToUse) || 0
       const total = subtotal - (subtotal * discount / 100)
       setAdjustAmount(Math.max(0, total).toFixed(2))
     }
-  }, [selectedItems, discountPercent, adjustReason, adjustDir])
+  }, [selectedItems, discountPercent, bulkSelectedItems, bulkDiscountPercent, adjustReason, adjustDir, selectedIds.size])
 
   const handleAdjust = async () => {
     if (!selected) return
@@ -191,7 +198,13 @@ export default function AdminWalletPage() {
     if (selectedIds.size === 0) return
     const amount = parseFloat(adjustAmount)
     if (isNaN(amount) || amount <= 0) { showToast('Enter a valid amount', false); return }
-    const finalReason = adjustReason === 'Other' ? adjustCustomReason : adjustReason
+    let finalReason = adjustReason === 'Other' ? adjustCustomReason : adjustReason
+    if (adjustReason === 'Product Purchase' && adjustDir === 'deduct') {
+      if (bulkSelectedItems.length === 0) { showToast('Please select at least one product', false); return }
+      const itemsStr = bulkSelectedItems.map(i => `${i.qty}x ${i.product.name}`).join(', ')
+      const discountStr = (parseFloat(bulkDiscountPercent) || 0) > 0 ? ` (${bulkDiscountPercent}% Off)` : ''
+      finalReason = `Product Purchase: ${itemsStr}${discountStr}`
+    }
     if (!finalReason.trim()) { showToast('Please enter a reason', false); return }
 
     setAdjusting(true)
@@ -221,7 +234,9 @@ export default function AdminWalletPage() {
     setSavingSettings(false)
   }
 
-  const filtered = customers.filter(c => {
+  const customersInTab = customers.filter(c => (c.account_type || 'customer') === activeTab)
+
+  const filtered = customersInTab.filter(c => {
     const q = search.toLowerCase()
     return (c.name ?? '').toLowerCase().includes(q) || (c.email ?? '').toLowerCase().includes(q)
   })
@@ -300,14 +315,28 @@ export default function AdminWalletPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Customer List */}
         <div className="lg:col-span-2 bg-white dark:bg-[#1a2a3a] rounded-3xl border border-[#cce7f0] dark:border-[#1e3a52] overflow-hidden flex flex-col max-h-[600px]">
-          <div className="p-5 border-b border-[#f0f9ff] dark:border-[#1e3a52] flex gap-3 items-center">
-            <div className="relative flex-1">
+          <div className="p-5 border-b border-[#f0f9ff] dark:border-[#1e3a52] flex flex-col sm:flex-row gap-4 items-center">
+            <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl w-full sm:w-auto shrink-0">
+              <button
+                onClick={() => { setActiveTab('customer'); setSelectedIds(new Set()) }}
+                className={`flex-1 sm:flex-none px-4 py-1.5 text-sm font-semibold rounded-lg transition-colors ${activeTab === 'customer' ? 'bg-white dark:bg-slate-700 text-[#0097a7] shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'}`}
+              >
+                Customers
+              </button>
+              <button
+                onClick={() => { setActiveTab('business'); setSelectedIds(new Set()) }}
+                className={`flex-1 sm:flex-none px-4 py-1.5 text-sm font-semibold rounded-lg transition-colors ${activeTab === 'business' ? 'bg-white dark:bg-slate-700 text-[#0097a7] shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'}`}
+              >
+                Business
+              </button>
+            </div>
+            <div className="relative flex-1 w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4a7fa5]" />
               <Input
                 placeholder="Search by name or email..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="pl-9 border-[#cce7f0]"
+                className="pl-10 border-[#cce7f0] dark:border-[#1e3a52] bg-slate-50 dark:bg-slate-900/50 focus:border-[#0097a7]"
               />
             </div>
             <Button variant="outline" size="sm" onClick={toggleSelectAll} className="shrink-0 border-[#cce7f0] text-[#0097a7]">
@@ -412,11 +441,84 @@ export default function AdminWalletPage() {
                 />
                 <select
                   value={adjustReason}
-                  onChange={e => setAdjustReason(e.target.value)}
+                  onChange={e => {
+                    setAdjustReason(e.target.value)
+                    if (e.target.value === 'Product Purchase') setAdjustDir('deduct')
+                  }}
                   className="w-full h-10 px-3 rounded-xl border border-[#cce7f0] text-sm text-[#0c2340] dark:text-white dark:bg-[#1a2a3a] focus:border-[#0097a7] focus:outline-none"
                 >
                   {REASON_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
                 </select>
+                {adjustReason === 'Product Purchase' && (
+                  <div className="space-y-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <div className="relative">
+                      <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+                      <Input
+                        placeholder="Search products..."
+                        value={bulkProductSearch}
+                        onChange={e => setBulkProductSearch(e.target.value)}
+                        className="pl-9 border-slate-300 dark:border-slate-700"
+                      />
+                    </div>
+                    {bulkProductSearch && (
+                      <div className="max-h-40 overflow-y-auto space-y-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-1 shadow-sm">
+                        {products
+                          .filter(p => p.name.toLowerCase().includes(bulkProductSearch.toLowerCase()))
+                          .map(p => (
+                            <button
+                              key={p.id}
+                              onClick={() => {
+                                const existing = bulkSelectedItems.find(i => i.product.id === p.id)
+                                if (existing) {
+                                  setBulkSelectedItems(bulkSelectedItems.map(i => i.product.id === p.id ? { ...i, qty: i.qty + 1 } : i))
+                                } else {
+                                  setBulkSelectedItems([...bulkSelectedItems, { product: p, qty: 1 }])
+                                }
+                                setBulkProductSearch('')
+                              }}
+                              className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-700 flex justify-between items-center"
+                            >
+                              <span className="font-medium text-slate-800 dark:text-slate-200">{p.name}</span>
+                              <span className="text-slate-500">${p.price.toFixed(2)}</span>
+                            </button>
+                        ))}
+                        {products.filter(p => p.name.toLowerCase().includes(bulkProductSearch.toLowerCase())).length === 0 && (
+                          <div className="px-3 py-2 text-sm text-slate-500 text-center">No products found</div>
+                        )}
+                      </div>
+                    )}
+                    {bulkSelectedItems.length > 0 && (
+                      <div className="space-y-2 mt-3">
+                        <label className="text-xs font-semibold text-slate-500 uppercase">Selected Products</label>
+                        {bulkSelectedItems.map(item => (
+                          <div key={item.product.id} className="flex items-center justify-between bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div className="flex flex-col">
+                              <span className="text-sm font-semibold">{item.product.name}</span>
+                              <span className="text-xs text-slate-500">${item.product.price.toFixed(2)} each</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button onClick={() => setBulkSelectedItems(bulkSelectedItems.map(i => i.product.id === item.product.id ? { ...i, qty: Math.max(1, i.qty - 1) } : i))} className="w-6 h-6 rounded bg-slate-100 dark:bg-slate-700 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600">-</button>
+                              <span className="text-sm font-medium w-4 text-center">{item.qty}</span>
+                              <button onClick={() => setBulkSelectedItems(bulkSelectedItems.map(i => i.product.id === item.product.id ? { ...i, qty: i.qty + 1 } : i))} className="w-6 h-6 rounded bg-slate-100 dark:bg-slate-700 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600">+</button>
+                              <button onClick={() => setBulkSelectedItems(bulkSelectedItems.filter(i => i.product.id !== item.product.id))} className="w-6 h-6 rounded bg-red-100 text-red-500 flex items-center justify-center ml-2 hover:bg-red-200">×</button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <div className="mt-3">
+                      <label className="text-xs font-semibold text-slate-500 uppercase block mb-1">Discount (%)</label>
+                      <Input
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={bulkDiscountPercent}
+                        onChange={e => setBulkDiscountPercent(e.target.value)}
+                        className="border-slate-300 dark:border-slate-700 h-8 text-sm"
+                      />
+                    </div>
+                  </div>
+                )}
                 {adjustReason === 'Other' && (
                   <Input
                     placeholder="Enter custom reason..."
@@ -475,12 +577,34 @@ export default function AdminWalletPage() {
               animate={{ opacity: 1, y: 0 }}
               className="bg-white dark:bg-[#1a2a3a] rounded-3xl border border-[#cce7f0] dark:border-[#1e3a52] p-5"
             >
-              <h3 className="font-bold text-[#0c2340] dark:text-white mb-1">
-                {selected.name ?? selected.email}
-              </h3>
-              <p className="text-2xl font-extrabold text-[#0097a7] mb-4">
-                ${(selected.wallet_balance ?? 0).toFixed(2)}
-              </p>
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h3 className="font-bold text-[#0c2340] dark:text-white mb-1">
+                    {selected.name ?? selected.email}
+                  </h3>
+                  <p className="text-2xl font-extrabold text-[#0097a7]">
+                    ${(selected.wallet_balance ?? 0).toFixed(2)}
+                  </p>
+                </div>
+                <select
+                  value={selected.account_type || 'customer'}
+                  onChange={async (e) => {
+                    const newType = e.target.value
+                    const { error } = await supabase.from('profiles').update({ account_type: newType }).eq('id', selected.id)
+                    if (!error) {
+                      setSelected({ ...selected, account_type: newType })
+                      showToast('Account type updated')
+                      fetchCustomers() // Refresh list so it moves to correct tab if active tab doesn't match
+                    } else {
+                      showToast('Error updating account type', false)
+                    }
+                  }}
+                  className="px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 outline-none"
+                >
+                  <option value="customer">Customer</option>
+                  <option value="business">Business</option>
+                </select>
+              </div>
 
               {/* Add / Deduct toggle */}
               {adjustReason !== 'Product Purchase' && (
