@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
 
   try {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { amount, items, address, userId, notes, discountCodeId, discountAmount: clientDiscountAmount, sourceId, paymentMethod = 'square_online', deliveryFeeCardToken, fulfillmentType = 'delivery' } = await req.json()
+    const { amount, items, address, userId, notes, discountCodeId, discountAmount: clientDiscountAmount, sourceId, paymentMethod = 'square_online', deliveryFeeCardToken, fulfillmentType = 'delivery', isUpstairs } = await req.json()
     type CartItem = { product_id: string; quantity: number; subscribeFrequency?: 'weekly' | 'biweekly' | 'monthly'; category?: string; name?: string }
 
     // Cash on delivery is no longer accepted — only card_on_delivery or online payments
@@ -138,6 +138,7 @@ export async function POST(req: NextRequest) {
     // 3. Recalculate subtotal server-side using DB prices
     let subtotal = 0
     let taxableSubtotal = 0
+    let waterJugQty = 0
     for (const item of items as CartItem[]) {
       const pInfo = productMap[item.product_id]
       if (!pInfo) {
@@ -146,6 +147,20 @@ export async function POST(req: NextRequest) {
       const lineTotal = pInfo.price * item.quantity
       subtotal += lineTotal
       if (pInfo.taxable) taxableSubtotal += lineTotal
+      if (pInfo.category === 'water') waterJugQty += item.quantity
+    }
+
+    if (isUpstairs && fulfillmentType !== 'pickup') {
+      let upstairsCharge = 0
+      if (waterJugQty > 2) {
+        upstairsCharge = 7.5 + (waterJugQty - 2) * 2.5
+      } else if (waterJugQty > 0) {
+        upstairsCharge = 7.5
+      } else {
+        const { data: siteContent } = await db.from('site_content').select('value').eq('key', 'upstairs_delivery_charge').maybeSingle()
+        upstairsCharge = parseFloat(siteContent?.value ?? '5') || 0
+      }
+      deliveryFee += upstairsCharge
     }
 
     // 4. Validate discount code server-side if provided

@@ -50,6 +50,21 @@ const types = [
     accent: '#006064',
     tag: 'Ultra Pure',
   },
+  {
+    name: 'RO Water',
+    icon: Droplets,
+    ph: '6.5–7.5',
+    source: 'Multi-stage reverse osmosis purification',
+    minerals: 'Purified water with no added minerals',
+    bestFor: 'Daily drinking, coffee/tea making, humidifiers',
+    price: '$9.99',
+    href: '/ro-water-delivery-vancouver',
+    gradient: 'from-[#607d8b] to-[#455a64]',
+    lightBg: 'from-[#eceff1] to-[#cfd8dc]',
+    pill: 'bg-[#607d8b]',
+    accent: '#607d8b',
+    tag: 'Pure Taste',
+  },
 ]
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -85,7 +100,7 @@ export default function WaterGuide() {
         </motion.div>
 
         {/* Water type cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-7 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-7 mb-12">
           {types.map((type, i) => {
             const Icon = type.icon
             return (

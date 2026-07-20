@@ -141,7 +141,7 @@ export default function Navbar() {
                       Login
                     </Button>
                   </Link>
-                  <Link href="/auth/signup">
+                  <Link href="/auth/register">
                     <Button
                       variant="outline"
                       size="sm"
@@ -246,7 +246,7 @@ export default function Navbar() {
                     )}
                   </div>
                   {!isLoggedIn && (
-                    <Link href="/auth/signup" onClick={() => setMobileOpen(false)}>
+                    <Link href="/auth/register" onClick={() => setMobileOpen(false)}>
                       <Button variant="outline" className="w-full h-12 rounded-2xl border-[#0097a7]/30 text-[#0097a7] bg-[#0097a7]/5 font-semibold hover:bg-[#0097a7]/10">
                         Sign Up
                       </Button>

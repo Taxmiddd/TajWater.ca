@@ -169,10 +169,19 @@ export default function CheckoutPage() {
     checkAuth()
   }, [router])
   
+  // Total water jug quantity in cart
+  const waterJugQty = items
+    .filter(i => i.product.category === 'water')
+    .reduce((sum, i) => sum + i.quantity, 0)
+
+  const calculatedUpstairsCharge = waterJugQty > 2 
+    ? 7.5 + (waterJugQty - 2) * 2.5 
+    : (waterJugQty > 0 ? 7.5 : upstairsCharge);
+
   const subtotal = total()
   const taxableSubtotal = items.reduce((acc, item) => acc + (item.product.taxable !== false ? item.product.price * item.quantity : 0), 0)
   const tax = Math.round(taxableSubtotal * 0.12 * 100) / 100
-  const deliveryFeeValue = fulfillmentType === 'pickup' ? 0 : deliveryFee + (isUpstairs ? upstairsCharge : 0)
+  const deliveryFeeValue = fulfillmentType === 'pickup' ? 0 : deliveryFee + (isUpstairs ? calculatedUpstairsCharge : 0)
 
   // Wallet: covers items + tax only. Delivery always paid by card.
   const walletItemsTotal = Math.max(0, subtotal) + tax
@@ -188,11 +197,6 @@ export default function CheckoutPage() {
   const allItemsWalletEligible = items.every(i =>
     WALLET_ELIGIBLE_CATEGORIES.includes(i.product.category)
   )
-
-  // Total water jug quantity in cart
-  const waterJugQty = items
-    .filter(i => i.product.category === 'water')
-    .reduce((sum, i) => sum + i.quantity, 0)
 
   // --- Cart validation ---
   const validateCart = (): boolean => {
@@ -305,6 +309,7 @@ export default function CheckoutPage() {
           discountAmount: 0,
           paymentMethod: 'square_online',
           fulfillmentType,
+          isUpstairs,
         }),
       })
       const data = await res.json()
@@ -355,6 +360,7 @@ export default function CheckoutPage() {
           discountAmount: 0,
           paymentMethod: 'wallet',
           fulfillmentType,
+          isUpstairs,
         }),
       })
       const data = await res.json()
@@ -739,7 +745,7 @@ export default function CheckoutPage() {
                             <p className="text-sm font-bold text-[#0c2340]">I need delivery upstairs / to my apartment</p>
                             <p className="text-xs text-[#4a7fa5] mt-0.5">
                               {isUpstairs 
-                                ? `An additional fee of $${upstairsCharge.toFixed(2)} will apply.` 
+                                ? `An additional fee of $${calculatedUpstairsCharge.toFixed(2)} will apply.` 
                                 : `If unchecked, delivery will be made to the downstairs/lobby only.`}
                             </p>
                           </div>

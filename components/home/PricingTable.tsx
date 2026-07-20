@@ -61,11 +61,17 @@ export default function PricingTable() {
                 <td className="px-4 py-3 font-semibold text-[#0097a7]">$12.99/jug</td>
                 <td className="px-4 py-3 text-[#4a7fa5]">Health-conscious households</td>
               </tr>
-              <tr>
+              <tr className="border-b border-[#cce7f0]">
                 <td className="px-4 py-3 font-medium text-[#0c2340]">Distilled Water</td>
                 <td className="px-4 py-3 text-[#4a7fa5]">5 gallon (20L)</td>
                 <td className="px-4 py-3 font-semibold text-[#0097a7]">$9.99/jug</td>
                 <td className="px-4 py-3 text-[#4a7fa5]">CPAP machines, lab use, steam irons</td>
+              </tr>
+              <tr>
+                <td className="px-4 py-3 font-medium text-[#0c2340]">RO Water</td>
+                <td className="px-4 py-3 text-[#4a7fa5]">5 gallon (20L)</td>
+                <td className="px-4 py-3 font-semibold text-[#0097a7]">$9.99/jug</td>
+                <td className="px-4 py-3 text-[#4a7fa5]">Daily drinking, coffee/tea making, humidifiers</td>
               </tr>
             </tbody>
           </table>

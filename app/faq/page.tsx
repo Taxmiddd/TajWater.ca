@@ -33,7 +33,7 @@ const faqSections = [
       },
       {
         q: 'Do you offer same-day water delivery?',
-        a: 'Yes. Orders placed before 12pm (noon) are eligible for same-day delivery across most Metro Vancouver cities including Vancouver, Burnaby, Richmond, Surrey, Coquitlam, Port Coquitlam, North Vancouver, and West Vancouver. Contact us if you have an urgent same-day need.'
+        a: 'Yes. Same-day delivery is available for orders placed before 12pm (noon) only with an urgent delivery fee across most Metro Vancouver cities including Vancouver, Burnaby, Richmond, Surrey, Coquitlam, Port Coquitlam, North Vancouver, and West Vancouver.'
       },
       {
         q: 'Can I pick up my water order?',
@@ -46,7 +46,7 @@ const faqSections = [
       },
       {
         q: 'How do jug swaps work?',
-        a: 'On each delivery, our driver brings your fresh jugs and collects your empty ones. Simply leave your empty jugs outside your door (or in the designated spot) before your scheduled delivery window. No need to be home. We wash and sanitize all returned jugs before refilling.'
+        a: 'On each delivery, our driver brings your fresh jugs and collects your empty ones. Simply leave your empty jugs outside your door (or in the designated spot) before your scheduled delivery window. No need to be home. We wash and sanitize all returned jugs before refilling. If a new delivery is not scheduled, you must drop off the empty jugs to get your deposit back.'
       },
       {
         q: 'Do I need to be home for delivery?',
