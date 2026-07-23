@@ -179,7 +179,10 @@ export default function CheckoutPage() {
     : upstairsCharge;
 
   const subtotal = total()
-  const taxableSubtotal = items.reduce((acc, item) => acc + (item.product.taxable !== false ? item.product.price * item.quantity : 0), 0)
+  const taxableSubtotal = items.reduce((acc, item) => {
+    const isTaxable = item.product.category === 'wallet_credit' ? false : item.product.taxable !== false
+    return acc + (isTaxable ? item.product.price * item.quantity : 0)
+  }, 0)
   const tax = Math.round(taxableSubtotal * 0.12 * 100) / 100
   const deliveryFeeValue = fulfillmentType === 'pickup' ? 0 : deliveryFee + (isUpstairs ? calculatedUpstairsCharge : 0)
 
