@@ -180,7 +180,9 @@ export default function CheckoutPage() {
 
   const subtotal = total()
   const taxableSubtotal = items.reduce((acc, item) => {
-    const isTaxable = item.product.category === 'wallet_credit' ? false : item.product.taxable !== false
+    const isWalletCredit = item.product.category === 'wallet_credit'
+    const isDeposit = item.product.name.toLowerCase().includes('deposit')
+    const isTaxable = (isWalletCredit || isDeposit) ? false : item.product.taxable !== false
     return acc + (isTaxable ? item.product.price * item.quantity : 0)
   }, 0)
   const tax = Math.round(taxableSubtotal * 0.12 * 100) / 100
