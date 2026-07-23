@@ -290,15 +290,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to create order' }, { status: 500 })
     }
 
-    // 9. Create order_items using server-validated prices
-    const orderItems = (items as CartItem[]).map(item => ({
-      order_id: order.id,
-      product_id: item.product_id,
-      quantity: item.quantity,
-      price: productMap[item.product_id].price,
-    }))
-    const { error: itemsError } = await db.from('order_items').insert(orderItems)
-    if (itemsError) console.error('Order items error:', itemsError)
+    // 9. Insert Order Items
+    const physicalItems = (items as CartItem[]).filter((i: CartItem) => !i.product_id.startsWith('wallet_credit_'))
+    
+    if (physicalItems.length > 0) {
+      const orderItems = physicalItems.map((i: CartItem) => ({
+        order_id: order.id,
+        product_id: i.product_id,
+        quantity: i.quantity,
+        price: productMap[i.product_id].price,
+      }))
+      const { error: itemsError } = await db.from('order_items').insert(orderItems)
+      if (itemsError) console.error('Order items error:', itemsError)
+    }
 
     // 10. Process payment
     let squarePaymentId: string | null = null
@@ -456,6 +460,49 @@ export async function POST(req: NextRequest) {
         status: 'processing',
       })
       .eq('id', order.id)
+
+    // 11b. Apply wallet topups if payment was successful
+    if (userId && (!isOffline || (isOffline && false))) { // Wait, offline payments are pending. Wallet topups should only apply when paid.
+      // Since online payments are paid immediately, we process wallet topups now.
+      const walletItems = items.filter((i: CartItem) => i.product_id.startsWith('wallet_credit_'))
+      if (walletItems.length > 0) {
+        const { data: walletProfile } = await db.from('profiles').select('wallet_balance, account_type').eq('id', userId).single()
+        let addedCredits = 0
+        const isBiz = walletProfile?.account_type === 'business'
+        
+        for (const wi of walletItems) {
+          const payStr = wi.product_id.split('_')[2]
+          const pay = parseFloat(payStr)
+          let credits = pay
+          
+          if (!isBiz) {
+            // Consumer bonus logic
+            if (pay >= 500) credits = 600
+            else if (pay >= 400) credits = 450
+            else if (pay >= 300) credits = 330
+            else if (pay >= 200) credits = 220
+            else if (pay >= 100) credits = 107
+          }
+          addedCredits += (credits * wi.quantity)
+        }
+        
+        if (addedCredits > 0) {
+          const oldBalance = walletProfile?.wallet_balance ?? 0
+          const newBalance = Math.round((oldBalance + addedCredits) * 100) / 100
+          
+          await db.from('profiles').update({ wallet_balance: newBalance }).eq('id', userId)
+          await db.from('wallet_transactions').insert({
+            user_id: userId,
+            amount: addedCredits,
+            balance_after: newBalance,
+            transaction_type: 'topup',
+            reason: `Purchased Wallet Credit (Order #${order.id.slice(0, 8).toUpperCase()})`,
+            order_id: order.id,
+            created_by: 'Customer',
+          })
+        }
+      }
+    }
 
     if (userId) {
       const subscribeItems = (items as CartItem[]).filter(i => productMap[i.product_id].category === 'subscription')
