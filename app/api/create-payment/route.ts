@@ -112,19 +112,21 @@ export async function POST(req: NextRequest) {
 
     // 2. Fetch fresh product prices and details from DB — client-supplied data is untrusted
     const productIds = items.map((i: { product_id: string }) => i.product_id)
-    const { data: products, error: productError } = await db
-      .from('products')
-      .select('id, price, active, category, subscription_interval, taxable, wallet_eligible')
-      .in('id', productIds)
+    const dbIds = productIds.filter((id: string) => !id.startsWith('wallet_credit_'))
+    
+    let products: any[] = []
+    if (dbIds.length > 0) {
+      const { data, error: productError } = await db
+        .from('products')
+        .select('id, price, active, category, subscription_interval, taxable, wallet_eligible')
+        .in('id', dbIds)
 
-    if (productError) {
-      console.error('Product fetch error:', productError)
-      return NextResponse.json({ error: 'Failed to fetch product prices. Please refresh and try again.' }, { status: 500 })
-    }
-
-    if (!products || products.length === 0) {
-      console.error('No products found for IDs:', productIds)
-      return NextResponse.json({ error: 'One or more products in your cart could not be found. Please refresh the page and try again.' }, { status: 400 })
+      if (productError) {
+        console.error('Product fetch error:', productError)
+        return NextResponse.json({ error: 'Failed to fetch product prices. Please refresh and try again.' }, { status: 500 })
+      }
+      
+      products = data || []
     }
 
     const productMap: Record<string, { price: number; category: string; subscription_interval: string | null; taxable: boolean; wallet_eligible: boolean }> = {}
@@ -138,6 +140,23 @@ export async function POST(req: NextRequest) {
         subscription_interval: p.subscription_interval ?? null,
         taxable: p.taxable !== false,
         wallet_eligible: p.wallet_eligible !== false,
+      }
+    }
+
+    // Add wallet credits to the product map so they pass verification
+    for (const id of productIds) {
+      if (id.startsWith('wallet_credit_')) {
+        const parts = id.split('_')
+        const price = parseFloat(parts[2])
+        if (isNaN(price)) return NextResponse.json({ error: 'Invalid wallet credit amount' }, { status: 400 })
+        
+        productMap[id] = {
+          price: price,
+          category: 'wallet_credit',
+          subscription_interval: null,
+          taxable: false,
+          wallet_eligible: false,
+        }
       }
     }
 

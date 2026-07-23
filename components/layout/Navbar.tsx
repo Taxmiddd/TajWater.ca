@@ -116,10 +116,10 @@ export default function Navbar() {
                   >
                     <Link
                       href={announcements[annIdx].href}
-                      className="flex items-center justify-center gap-2 text-white text-xs sm:text-sm font-medium hover:underline"
+                      className="flex items-center justify-center gap-2 text-white text-xs sm:text-sm font-medium hover:underline w-full"
                     >
                       <Sparkles className="w-3.5 h-3.5 shrink-0" />
-                      {announcements[annIdx].text}
+                      <span className="truncate">{announcements[annIdx].text}</span>
                     </Link>
                   </motion.div>
                 </AnimatePresence>
