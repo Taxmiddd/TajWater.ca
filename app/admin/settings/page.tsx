@@ -152,7 +152,7 @@ export default function SettingsPage() {
       EMAIL_TEMPLATE_KEYS.forEach(k => { if (map[k]) tmpl[k] = map[k] })
       setEmailTmpl(tmpl)
 
-      const loadedAnn = [...ANNOUNCEMENT_DEFAULTS]
+      const loadedAnn = ANNOUNCEMENT_DEFAULTS.map(a => ({ ...a }))
       if (map['announcement_1_text']) loadedAnn[0].text = map['announcement_1_text']
       if (map['announcement_1_href']) loadedAnn[0].href = map['announcement_1_href']
       if (map['announcement_2_text']) loadedAnn[1].text = map['announcement_2_text']

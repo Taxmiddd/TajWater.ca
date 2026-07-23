@@ -69,13 +69,16 @@ export default function Navbar() {
         if (data && data.length > 0) {
           const map: Record<string, string> = {}
           data.forEach(r => { map[r.key] = r.value })
-          const loadedAnn = [...DEFAULT_ANNOUNCEMENTS]
+          
+          const loadedAnn = DEFAULT_ANNOUNCEMENTS.map(a => ({ ...a }))
+          
           if (map['announcement_1_text']) loadedAnn[0].text = map['announcement_1_text']
           if (map['announcement_1_href']) loadedAnn[0].href = map['announcement_1_href']
           if (map['announcement_2_text']) loadedAnn[1].text = map['announcement_2_text']
           if (map['announcement_2_href']) loadedAnn[1].href = map['announcement_2_href']
           if (map['announcement_3_text']) loadedAnn[2].text = map['announcement_3_text']
           if (map['announcement_3_href']) loadedAnn[2].href = map['announcement_3_href']
+          
           setAnnouncements(loadedAnn)
         }
       })
