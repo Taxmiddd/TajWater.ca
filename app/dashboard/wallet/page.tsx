@@ -87,6 +87,7 @@ export default function WalletPage() {
         stock: 999,
         category: 'wallet_credit',
         active: true,
+        taxable: false,
       })
 
       setMessage(`$${pkg.pay} Wallet Credit successfully added to your cart!`)

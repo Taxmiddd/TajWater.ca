@@ -35,6 +35,7 @@ export default function WalletPackages({ packages, isLoggedIn, isBusiness = fals
       stock: 999,
       category: 'wallet_credit',
       active: true,
+      taxable: false,
     })
 
     if (!isLoggedIn) {
