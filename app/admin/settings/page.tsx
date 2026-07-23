@@ -76,11 +76,6 @@ const EMAIL_TEMPLATE_DEFAULTS: Record<EmailTemplateKey, string> = {
 }
 
 type Announcement = { text: string; href: string }
-const ANNOUNCEMENT_DEFAULTS: Announcement[] = [
-  { text: '🚚 Free delivery on orders over $40 · Same-day available in most zones', href: '/shop' },
-  { text: '💧 New customers: get your first jug delivered FREE with code FIRSTJUG', href: '/auth/register' },
-  { text: '⭐ Rated 4.9/5 by 500+ Metro Vancouver families · Trusted since 2020', href: '/blog/water-delivery-coquitlam-reviews' },
-]
 
 // ── Component ────────────────────────────────────────────────────────────────
 export default function SettingsPage() {
@@ -92,7 +87,9 @@ export default function SettingsPage() {
   const [revenueGoal, setRevenueGoal] = useState('')
   const [socials, setSocialsState] = useState({ facebook: '', instagram: '', twitter: '', tiktok: '' })
   const [emailTmpl, setEmailTmpl] = useState<Record<EmailTemplateKey, string>>(EMAIL_TEMPLATE_DEFAULTS)
-  const [announcements, setAnnouncements] = useState<Announcement[]>(ANNOUNCEMENT_DEFAULTS)
+  const [announcements, setAnnouncements] = useState<Announcement[]>([
+    { text: '', href: '' }, { text: '', href: '' }, { text: '', href: '' }
+  ])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState('')
@@ -152,7 +149,11 @@ export default function SettingsPage() {
       EMAIL_TEMPLATE_KEYS.forEach(k => { if (map[k]) tmpl[k] = map[k] })
       setEmailTmpl(tmpl)
 
-      const loadedAnn = ANNOUNCEMENT_DEFAULTS.map(a => ({ ...a }))
+      const loadedAnn = [
+        { text: '', href: '' },
+        { text: '', href: '' },
+        { text: '', href: '' }
+      ]
       if (map['announcement_1_text']) loadedAnn[0].text = map['announcement_1_text']
       if (map['announcement_1_href']) loadedAnn[0].href = map['announcement_1_href']
       if (map['announcement_2_text']) loadedAnn[1].text = map['announcement_2_text']

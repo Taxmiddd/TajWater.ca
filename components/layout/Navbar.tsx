@@ -19,11 +19,7 @@ const navLinks = [
   { label: 'Contact', href: '/contact' },
 ]
 
-const DEFAULT_ANNOUNCEMENTS = [
-  { text: '🚚 Free delivery on orders over $40 · Same-day available in most zones', href: '/shop' },
-  { text: '💧 New customers: get your first jug delivered FREE with code FIRSTJUG', href: '/auth/register' },
-  { text: '⭐ Rated 4.9/5 by 500+ Metro Vancouver families · Trusted since 2020', href: '/blog/water-delivery-coquitlam-reviews' },
-]
+type Announcement = { text: string, href: string }
 
 import { supabase } from '@/lib/supabase'
 
@@ -54,7 +50,7 @@ export default function Navbar() {
 
   const [annIdx, setAnnIdx] = useState(0)
   const [annDismissed, setAnnDismissed] = useState(false)
-  const [announcements, setAnnouncements] = useState(DEFAULT_ANNOUNCEMENTS)
+  const [announcements, setAnnouncements] = useState<Announcement[]>([])
 
   useEffect(() => {
     supabase
@@ -70,14 +66,10 @@ export default function Navbar() {
           const map: Record<string, string> = {}
           data.forEach(r => { map[r.key] = r.value })
           
-          const loadedAnn = DEFAULT_ANNOUNCEMENTS.map(a => ({ ...a }))
-          
-          if (map['announcement_1_text']) loadedAnn[0].text = map['announcement_1_text']
-          if (map['announcement_1_href']) loadedAnn[0].href = map['announcement_1_href']
-          if (map['announcement_2_text']) loadedAnn[1].text = map['announcement_2_text']
-          if (map['announcement_2_href']) loadedAnn[1].href = map['announcement_2_href']
-          if (map['announcement_3_text']) loadedAnn[2].text = map['announcement_3_text']
-          if (map['announcement_3_href']) loadedAnn[2].href = map['announcement_3_href']
+          const loadedAnn: Announcement[] = []
+          if (map['announcement_1_text']) loadedAnn.push({ text: map['announcement_1_text'], href: map['announcement_1_href'] || '#' })
+          if (map['announcement_2_text']) loadedAnn.push({ text: map['announcement_2_text'], href: map['announcement_2_href'] || '#' })
+          if (map['announcement_3_text']) loadedAnn.push({ text: map['announcement_3_text'], href: map['announcement_3_href'] || '#' })
           
           setAnnouncements(loadedAnn)
         }
@@ -89,12 +81,14 @@ export default function Navbar() {
 
   // Cycle announcement bar
   useEffect(() => {
+    if (announcements.length <= 1) return
     const t = setInterval(() => setAnnIdx(i => (i + 1) % announcements.length), 4000)
     return () => clearInterval(t)
-  }, [])
+  }, [announcements.length])
 
   const isHome = pathname === '/'
   const transparent = isHome && !scrolled
+  const showAnnouncement = announcements.length > 0 && !annDismissed
 
   if (pathname.startsWith('/admin') || pathname.startsWith('/auth') || pathname.startsWith('/dashboard')) return null
 
@@ -102,7 +96,7 @@ export default function Navbar() {
     <>
       {/* ── Announcement bar ── */}
       <AnimatePresence>
-        {!annDismissed && (
+        {showAnnouncement && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
@@ -143,7 +137,7 @@ export default function Navbar() {
       </AnimatePresence>
 
       <header
-        className={`fixed left-0 right-0 z-50 transition-all duration-300 ${annDismissed ? 'top-0' : 'top-9'} ${
+        className={`fixed left-0 right-0 z-50 transition-all duration-300 ${showAnnouncement ? 'top-9' : 'top-0'} ${
           transparent
             ? 'bg-transparent'
             : 'glass shadow-lg shadow-aqua/10 border-b border-white/30'
