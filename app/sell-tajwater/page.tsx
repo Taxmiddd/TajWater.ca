@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import Link from 'next/link'
+import { supabase } from '@/lib/supabase'
 
 const benefits = [
   {
@@ -33,14 +34,41 @@ const benefits = [
 
 export default function SellTajWaterPage() {
   const [formState, setFormState] = useState<'idle' | 'submitting' | 'success'>('idle')
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    businessName: '',
+    email: '',
+    phone: '',
+    businessType: '',
+    estimatedVolume: ''
+  })
+  const [errorMsg, setErrorMsg] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setFormState('submitting')
-    // Mock submission
-    setTimeout(() => {
+    setErrorMsg('')
+    
+    const { error } = await supabase.from('wholesale_applications').insert([{
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+      business_name: formData.businessName,
+      email: formData.email,
+      phone: formData.phone,
+      business_type: formData.businessType,
+      estimated_volume: formData.estimatedVolume ? parseInt(formData.estimatedVolume) : null,
+      status: 'pending'
+    }])
+
+    if (error) {
+      console.error(error)
+      setErrorMsg('Something went wrong. Please try again.')
+      setFormState('idle')
+    } else {
       setFormState('success')
-    }, 1500)
+      setFormData({ firstName: '', lastName: '', businessName: '', email: '', phone: '', businessType: '', estimatedVolume: '' })
+    }
   }
 
   return (
@@ -118,36 +146,41 @@ export default function SellTajWaterPage() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-5">
+                  {errorMsg && (
+                    <div className="bg-red-50 text-red-600 text-sm font-medium px-4 py-3 rounded-xl border border-red-100">
+                      {errorMsg}
+                    </div>
+                  )}
                   <div className="grid sm:grid-cols-2 gap-5">
                     <div>
                       <label className="text-sm font-semibold text-[#0c2340] mb-1.5 block">First Name</label>
-                      <Input required placeholder="Jane" className="bg-[#f0f9ff] border-[#cce7f0] h-12 rounded-xl" />
+                      <Input required value={formData.firstName} onChange={e => setFormData(p => ({ ...p, firstName: e.target.value }))} placeholder="Jane" className="bg-[#f0f9ff] border-[#cce7f0] h-12 rounded-xl" />
                     </div>
                     <div>
                       <label className="text-sm font-semibold text-[#0c2340] mb-1.5 block">Last Name</label>
-                      <Input required placeholder="Doe" className="bg-[#f0f9ff] border-[#cce7f0] h-12 rounded-xl" />
+                      <Input required value={formData.lastName} onChange={e => setFormData(p => ({ ...p, lastName: e.target.value }))} placeholder="Doe" className="bg-[#f0f9ff] border-[#cce7f0] h-12 rounded-xl" />
                     </div>
                   </div>
                   
                   <div>
                     <label className="text-sm font-semibold text-[#0c2340] mb-1.5 block">Business Name</label>
-                    <Input required placeholder="Fitness Plus Gym" className="bg-[#f0f9ff] border-[#cce7f0] h-12 rounded-xl" />
+                    <Input required value={formData.businessName} onChange={e => setFormData(p => ({ ...p, businessName: e.target.value }))} placeholder="Fitness Plus Gym" className="bg-[#f0f9ff] border-[#cce7f0] h-12 rounded-xl" />
                   </div>
                   
                   <div className="grid sm:grid-cols-2 gap-5">
                     <div>
                       <label className="text-sm font-semibold text-[#0c2340] mb-1.5 block">Email Address</label>
-                      <Input required type="email" placeholder="jane@example.com" className="bg-[#f0f9ff] border-[#cce7f0] h-12 rounded-xl" />
+                      <Input required type="email" value={formData.email} onChange={e => setFormData(p => ({ ...p, email: e.target.value }))} placeholder="jane@example.com" className="bg-[#f0f9ff] border-[#cce7f0] h-12 rounded-xl" />
                     </div>
                     <div>
                       <label className="text-sm font-semibold text-[#0c2340] mb-1.5 block">Phone Number</label>
-                      <Input required type="tel" placeholder="(555) 123-4567" className="bg-[#f0f9ff] border-[#cce7f0] h-12 rounded-xl" />
+                      <Input required type="tel" value={formData.phone} onChange={e => setFormData(p => ({ ...p, phone: e.target.value }))} placeholder="(555) 123-4567" className="bg-[#f0f9ff] border-[#cce7f0] h-12 rounded-xl" />
                     </div>
                   </div>
 
                   <div>
                     <label className="text-sm font-semibold text-[#0c2340] mb-1.5 block">Business Type</label>
-                    <select required className="w-full bg-[#f0f9ff] border-[#cce7f0] h-12 rounded-xl px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0097a7]/20 border">
+                    <select required value={formData.businessType} onChange={e => setFormData(p => ({ ...p, businessType: e.target.value }))} className="w-full bg-[#f0f9ff] border-[#cce7f0] h-12 rounded-xl px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0097a7]/20 border">
                       <option value="">Select industry...</option>
                       <option value="gym">Gym / Fitness Center</option>
                       <option value="grocery">Grocery / Convenience</option>
@@ -158,7 +191,7 @@ export default function SellTajWaterPage() {
 
                   <div>
                     <label className="text-sm font-semibold text-[#0c2340] mb-1.5 block">Estimated Monthly Volume (Jugs)</label>
-                    <Input type="number" placeholder="e.g. 50" className="bg-[#f0f9ff] border-[#cce7f0] h-12 rounded-xl" />
+                    <Input type="number" value={formData.estimatedVolume} onChange={e => setFormData(p => ({ ...p, estimatedVolume: e.target.value }))} placeholder="e.g. 50" className="bg-[#f0f9ff] border-[#cce7f0] h-12 rounded-xl" />
                   </div>
 
                   <Button 

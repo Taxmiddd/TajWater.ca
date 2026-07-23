@@ -140,3 +140,16 @@ export interface PaymentLink {
   paid_at: string | null
   created_by: string | null
 }
+
+export interface WholesaleApplication {
+  id: string
+  first_name: string
+  last_name: string
+  business_name: string
+  email: string
+  phone: string
+  business_type: string
+  estimated_volume: number | null
+  status: 'pending' | 'approved' | 'rejected'
+  created_at: string
+}
