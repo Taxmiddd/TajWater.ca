@@ -424,31 +424,36 @@ export async function POST(req: NextRequest) {
     }
 
     if (!isOffline && !isWallet) {
-      const square = getSquareClient()
-      const amountCents = Math.round(serverTotal * 100)
-      const idempotencyKey = crypto.randomUUID()
-      const paymentSourceId = squareCardId ?? sourceId!
+      try {
+        const square = getSquareClient()
+        const amountCents = Math.round(serverTotal * 100)
+        const idempotencyKey = crypto.randomUUID()
+        const paymentSourceId = squareCardId ?? sourceId!
 
-      const response = await square.payments.create({
-        sourceId: paymentSourceId,
-        customerId: squareCustomerId ?? undefined,
-        idempotencyKey,
-        amountMoney: {
-          amount: BigInt(amountCents),
-          currency: 'CAD',
-        },
-        locationId: process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID!,
-        referenceId: order.id,
-        note: `TajWater order ${order.id.slice(-8).toUpperCase()}`,
-      })
+        const response = await square.payments.create({
+          sourceId: paymentSourceId,
+          customerId: squareCustomerId ?? undefined,
+          idempotencyKey,
+          amountMoney: {
+            amount: BigInt(amountCents),
+            currency: 'CAD',
+          },
+          locationId: process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID!,
+          referenceId: order.id,
+          note: `TajWater order ${order.id.slice(-8).toUpperCase()}`,
+        })
 
-      const payment = response.payment
-      if (!payment || (payment.status !== 'COMPLETED' && payment.status !== 'APPROVED')) {
-        // Payment failed — update order status
+        const payment = response.payment
+        if (!payment || (payment.status !== 'COMPLETED' && payment.status !== 'APPROVED')) {
+          await db.from('orders').update({ payment_status: 'failed' }).eq('id', order.id)
+          return NextResponse.json({ error: 'Payment was declined. Please try again.' }, { status: 400 })
+        }
+        squarePaymentId = payment.id ?? null
+      } catch (err: any) {
+        console.error('Square payment error:', err)
         await db.from('orders').update({ payment_status: 'failed' }).eq('id', order.id)
-        return NextResponse.json({ error: 'Payment was declined. Please try again.' }, { status: 400 })
+        return NextResponse.json({ error: 'Payment was declined by the processor. Please check your card details and try again.' }, { status: 400 })
       }
-      squarePaymentId = payment.id ?? null
     }
 
     // 11. Store payment details and update status
