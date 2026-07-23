@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
           ),
           React.createElement(View, { style: { alignItems: 'flex-end' } },
             React.createElement(Text, { style: styles.footerText }, 'tajwater.ca'),
-            React.createElement(Text, { style: { ...styles.footerText, marginTop: 2 } }, 'GST# 84157 2639 RT0001'),
+            React.createElement(Text, { style: { ...styles.footerText, marginTop: 2 } }, 'GST/HST: 70869 8741 RT0001'),
           ),
         ),
     ),

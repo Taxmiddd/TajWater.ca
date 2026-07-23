@@ -117,14 +117,20 @@ export async function POST(req: NextRequest) {
       .select('id, price, active, category, subscription_interval, taxable, wallet_eligible')
       .in('id', productIds)
 
-    if (productError || !products) {
-      return NextResponse.json({ error: 'Failed to fetch product prices' }, { status: 500 })
+    if (productError) {
+      console.error('Product fetch error:', productError)
+      return NextResponse.json({ error: 'Failed to fetch product prices. Please refresh and try again.' }, { status: 500 })
+    }
+
+    if (!products || products.length === 0) {
+      console.error('No products found for IDs:', productIds)
+      return NextResponse.json({ error: 'One or more products in your cart could not be found. Please refresh the page and try again.' }, { status: 400 })
     }
 
     const productMap: Record<string, { price: number; category: string; subscription_interval: string | null; taxable: boolean; wallet_eligible: boolean }> = {}
     for (const p of products) {
       if (!p.active) {
-        return NextResponse.json({ error: `Product is no longer available` }, { status: 400 })
+        return NextResponse.json({ error: `A product in your cart is no longer available. Please refresh and update your cart.` }, { status: 400 })
       }
       productMap[p.id] = {
         price: p.price,
@@ -134,6 +140,15 @@ export async function POST(req: NextRequest) {
         wallet_eligible: p.wallet_eligible !== false,
       }
     }
+
+    // Verify every item in the cart resolved to a product
+    for (const item of items as CartItem[]) {
+      if (!productMap[item.product_id]) {
+        console.error('Product not found in DB:', item.product_id)
+        return NextResponse.json({ error: 'A product in your cart no longer exists. Please refresh the page.' }, { status: 400 })
+      }
+    }
+
 
     // 3. Recalculate subtotal server-side using DB prices
     let subtotal = 0
@@ -151,14 +166,14 @@ export async function POST(req: NextRequest) {
     }
 
     if (isUpstairs && fulfillmentType !== 'pickup') {
+      const { data: siteContent } = await db.from('site_content').select('value').eq('key', 'upstairs_delivery_charge').maybeSingle()
+      const baseUpstairsCharge = parseFloat(siteContent?.value ?? '7.5') || 0
+      
       let upstairsCharge = 0
       if (waterJugQty > 2) {
-        upstairsCharge = 7.5 + (waterJugQty - 2) * 2.5
-      } else if (waterJugQty > 0) {
-        upstairsCharge = 7.5
+        upstairsCharge = baseUpstairsCharge + (waterJugQty - 2) * 2.5
       } else {
-        const { data: siteContent } = await db.from('site_content').select('value').eq('key', 'upstairs_delivery_charge').maybeSingle()
-        upstairsCharge = parseFloat(siteContent?.value ?? '5') || 0
+        upstairsCharge = baseUpstairsCharge
       }
       deliveryFee += upstairsCharge
     }

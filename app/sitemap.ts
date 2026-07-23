@@ -12,6 +12,9 @@ const CITIES = [
 ]
 
 const BLOG_POSTS = [
+  { slug: 'water-delivery-coquitlam-reviews', date: '2026-07-23' },
+  { slug: 'water-delivery-port-coquitlam', date: '2026-07-23' },
+  { slug: 'best-water-delivery-city-of-coquitlam', date: '2026-07-23' },
   { slug: 'spring-vs-alkaline-vs-distilled-water-vancouver', date: '2026-04-15' },
   { slug: 'is-vancouver-tap-water-safe-to-drink', date: '2026-04-22' },
   { slug: 'how-much-does-water-delivery-cost-metro-vancouver', date: '2026-04-29' },

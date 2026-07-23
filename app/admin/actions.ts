@@ -134,3 +134,16 @@ export async function bulkAdjustCustomerWallets(userIds: string[], amountToAdd: 
 
   return { successCount, failCount }
 }
+
+export async function getWalletTransactions(userId: string) {
+  const db = createAdminClient() // Service role bypasses RLS
+  const { data, error } = await db
+    .from('wallet_transactions')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(50)
+  if (error) return []
+  return data ?? []
+}
+

@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { ShoppingCart } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCart } from '@/store/cartStore'
@@ -18,13 +19,15 @@ interface WalletPackagesProps {
 export default function WalletPackages({ packages, isLoggedIn, isBusiness = false }: WalletPackagesProps) {
   const router = useRouter()
   const { addItem } = useCart()
+  const [activeTab, setActiveTab] = React.useState<'consumer' | 'business'>(isBusiness ? 'business' : 'consumer')
 
   const handleAddToCart = (pkg: Package) => {
-    const credits = isBusiness ? pkg.pay : pkg.credits
+    const isBiz = activeTab === 'business'
+    const credits = isBiz ? pkg.pay : pkg.credits
     
     // Add to cart store (which is persisted in localStorage)
     addItem({
-      id: `wallet_credit_${pkg.pay}`,
+      id: `wallet_credit_${pkg.pay}_${activeTab}`,
       name: `Wallet Credit - $${pkg.pay}`,
       description: `Adds ${credits} credits to your TajWater Wallet`,
       price: pkg.pay,
@@ -36,18 +39,32 @@ export default function WalletPackages({ packages, isLoggedIn, isBusiness = fals
 
     if (!isLoggedIn) {
       router.push('/auth/login?redirect=/wallet')
-    } else {
-      // Optional: Give feedback or open cart drawer
-      // Here we could just let them know it was added or send them to checkout
-      // For now, redirecting to cart or showing toast would be good. 
-      // Assuming there's a global cart UI, we'll just let the state update.
     }
   }
 
   return (
     <div className="space-y-4">
+      <div className="flex bg-slate-100 p-1 rounded-xl mb-6">
+        <button
+          onClick={() => setActiveTab('consumer')}
+          className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${
+            activeTab === 'consumer' ? 'bg-white text-[#0097a7] shadow-sm' : 'text-slate-500 hover:text-slate-700'
+          }`}
+        >
+          Consumer
+        </button>
+        <button
+          onClick={() => setActiveTab('business')}
+          className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${
+            activeTab === 'business' ? 'bg-white text-[#0097a7] shadow-sm' : 'text-slate-500 hover:text-slate-700'
+          }`}
+        >
+          Business
+        </button>
+      </div>
       {packages.map((pkg) => {
-        const credits = isBusiness ? pkg.pay : pkg.credits
+        const isBiz = activeTab === 'business'
+        const credits = isBiz ? pkg.pay : pkg.credits
         const bonus = credits - pkg.pay
         return (
           <div 

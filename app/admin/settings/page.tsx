@@ -75,6 +75,13 @@ const EMAIL_TEMPLATE_DEFAULTS: Record<EmailTemplateKey, string> = {
   email_delivered_subject: 'Your TajWater order has been delivered! 💧',
 }
 
+type Announcement = { text: string; href: string }
+const ANNOUNCEMENT_DEFAULTS: Announcement[] = [
+  { text: '🚚 Free delivery on orders over $40 · Same-day available in most zones', href: '/shop' },
+  { text: '💧 New customers: get your first jug delivered FREE with code FIRSTJUG', href: '/auth/register' },
+  { text: '⭐ Rated 4.9/5 by 500+ Metro Vancouver families · Trusted since 2020', href: '/blog/water-delivery-coquitlam-reviews' },
+]
+
 // ── Component ────────────────────────────────────────────────────────────────
 export default function SettingsPage() {
   const [zones, setZones] = useState<Zone[]>([])
@@ -85,6 +92,7 @@ export default function SettingsPage() {
   const [revenueGoal, setRevenueGoal] = useState('')
   const [socials, setSocialsState] = useState({ facebook: '', instagram: '', twitter: '', tiktok: '' })
   const [emailTmpl, setEmailTmpl] = useState<Record<EmailTemplateKey, string>>(EMAIL_TEMPLATE_DEFAULTS)
+  const [announcements, setAnnouncements] = useState<Announcement[]>(ANNOUNCEMENT_DEFAULTS)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState('')
@@ -103,6 +111,9 @@ export default function SettingsPage() {
       'social_facebook', 'social_instagram', 'social_twitter', 'social_tiktok',
       ...NOTIF_KEYS.map(n => n.key),
       ...EMAIL_TEMPLATE_KEYS,
+      'announcement_1_text', 'announcement_1_href',
+      'announcement_2_text', 'announcement_2_href',
+      'announcement_3_text', 'announcement_3_href',
     ]
 
     const [zonesRes, contentRes, subsRes] = await Promise.all([
@@ -140,6 +151,15 @@ export default function SettingsPage() {
       const tmpl = { ...EMAIL_TEMPLATE_DEFAULTS }
       EMAIL_TEMPLATE_KEYS.forEach(k => { if (map[k]) tmpl[k] = map[k] })
       setEmailTmpl(tmpl)
+
+      const loadedAnn = [...ANNOUNCEMENT_DEFAULTS]
+      if (map['announcement_1_text']) loadedAnn[0].text = map['announcement_1_text']
+      if (map['announcement_1_href']) loadedAnn[0].href = map['announcement_1_href']
+      if (map['announcement_2_text']) loadedAnn[1].text = map['announcement_2_text']
+      if (map['announcement_2_href']) loadedAnn[1].href = map['announcement_2_href']
+      if (map['announcement_3_text']) loadedAnn[2].text = map['announcement_3_text']
+      if (map['announcement_3_href']) loadedAnn[2].href = map['announcement_3_href']
+      setAnnouncements(loadedAnn)
     }
     setLoading(false)
   }
@@ -167,6 +187,23 @@ export default function SettingsPage() {
     setSaving(false)
     if (error) { showToast('Error saving — please try again.'); return }
     showToast('Social links saved!')
+  }
+
+  // ── Save: Announcements ───────────────────────────────────────────────────
+  const saveAnnouncements = async () => {
+    setSaving(true)
+    const rows = [
+      { key: 'announcement_1_text', value: announcements[0].text },
+      { key: 'announcement_1_href', value: announcements[0].href },
+      { key: 'announcement_2_text', value: announcements[1].text },
+      { key: 'announcement_2_href', value: announcements[1].href },
+      { key: 'announcement_3_text', value: announcements[2].text },
+      { key: 'announcement_3_href', value: announcements[2].href },
+    ]
+    const { error } = await supabase.from('site_content').upsert(rows, { onConflict: 'key' })
+    setSaving(false)
+    if (error) { showToast('Error saving — please try again.'); return }
+    showToast('Announcements saved!')
   }
 
   useEffect(() => { fetchAll() }, [])
@@ -283,6 +320,9 @@ export default function SettingsPage() {
           </TabsTrigger>
           <TabsTrigger value="socials" className="rounded-xl px-5 py-2 text-sm font-bold data-[state=active]:bg-[#e0f7fa] dark:data-[state=active]:bg-[#0097a7]/20 data-[state=active]:text-[#0097a7] dark:data-[state=active]:text-[#b3e5fc] transition-all">
             <Share2 className="w-4 h-4 mr-2" /> Socials
+          </TabsTrigger>
+          <TabsTrigger value="announcements" className="rounded-xl px-5 py-2 text-sm font-bold data-[state=active]:bg-[#e0f7fa] dark:data-[state=active]:bg-[#0097a7]/20 data-[state=active]:text-[#0097a7] dark:data-[state=active]:text-[#b3e5fc] transition-all">
+            <Bell className="w-4 h-4 mr-2" /> Announcements
           </TabsTrigger>
         </TabsList>
 
@@ -778,6 +818,64 @@ export default function SettingsPage() {
             <Button onClick={saveEmailTemplates} disabled={saving || loading} className="bg-gradient-to-r from-[#0097a7] to-[#1565c0] text-white gap-2">
               {saving ? 'Saving...' : <><CheckCircle2 className="w-4 h-4" /> Save Email Templates</>}
             </Button>
+          </motion.div>
+        </TabsContent>
+
+        {/* ── Announcements tab ─────────────────────────────────────── */}
+        <TabsContent value="announcements">
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+            className="bg-white dark:bg-[#1e293b] rounded-3xl border border-[#cce7f0] dark:border-white/10 shadow-sm p-6 space-y-6 transition-colors">
+            
+            <div className="flex items-center gap-2 mb-2">
+              <Bell className="w-5 h-5 text-[#0097a7] dark:text-[#b3e5fc]" />
+              <h3 className="font-bold text-[#0c2340] dark:text-[#f8fafc]">Top Announcement Bar</h3>
+              <span className="ml-auto text-xs text-[#4a7fa5] dark:text-[#94a3b8]">Cycles 3 messages</span>
+            </div>
+
+            {loading ? (
+              <div className="space-y-4">
+                {[...Array(3)].map((_, i) => <div key={i} className="h-24 bg-[#f0f9ff] dark:bg-white/5 rounded-xl animate-pulse" />)}
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {[0, 1, 2].map((idx) => (
+                  <div key={idx} className="p-4 rounded-xl border border-[#cce7f0] dark:border-white/10 space-y-3 bg-[#f0f9ff]/30 dark:bg-white/5">
+                    <h4 className="font-semibold text-sm text-[#0c2340] dark:text-[#f8fafc]">Message {idx + 1}</h4>
+                    <div>
+                      <label className="text-xs font-bold text-[#4a7fa5] mb-1.5 block">Text Content</label>
+                      <Input
+                        value={announcements[idx].text}
+                        onChange={(e) => {
+                          const newAnn = [...announcements]
+                          newAnn[idx].text = e.target.value
+                          setAnnouncements(newAnn)
+                        }}
+                        placeholder="e.g. 🚚 Free delivery on orders over $40"
+                        className="border-[#cce7f0] dark:border-white/10"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-[#4a7fa5] mb-1.5 block">Link URL</label>
+                      <Input
+                        value={announcements[idx].href}
+                        onChange={(e) => {
+                          const newAnn = [...announcements]
+                          newAnn[idx].href = e.target.value
+                          setAnnouncements(newAnn)
+                        }}
+                        placeholder="e.g. /shop"
+                        className="border-[#cce7f0] dark:border-white/10"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <Button onClick={saveAnnouncements} disabled={saving || loading} className="bg-gradient-to-r from-[#0097a7] to-[#1565c0] text-white gap-2">
+              {saving ? 'Saving...' : <><CheckCircle2 className="w-4 h-4" /> Save Announcements</>}
+            </Button>
+
           </motion.div>
         </TabsContent>
       </Tabs>

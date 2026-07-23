@@ -85,7 +85,7 @@ export default function CheckoutPage() {
         if (data) {
           const map: Record<string, string> = {}
           data.forEach(d => map[d.key] = d.value)
-          setUpstairsCharge(parseFloat(map['upstairs_delivery_charge'] ?? '5') || 0)
+          setUpstairsCharge(parseFloat(map['upstairs_delivery_charge'] ?? '7.5') || 0)
           setPickupCharge(parseFloat(map['bottle_pickup_charge'] ?? '10') || 0)
         }
       })
@@ -175,8 +175,8 @@ export default function CheckoutPage() {
     .reduce((sum, i) => sum + i.quantity, 0)
 
   const calculatedUpstairsCharge = waterJugQty > 2 
-    ? 7.5 + (waterJugQty - 2) * 2.5 
-    : (waterJugQty > 0 ? 7.5 : upstairsCharge);
+    ? upstairsCharge + (waterJugQty - 2) * 2.5 
+    : upstairsCharge;
 
   const subtotal = total()
   const taxableSubtotal = items.reduce((acc, item) => acc + (item.product.taxable !== false ? item.product.price * item.quantity : 0), 0)

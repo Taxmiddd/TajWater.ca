@@ -4,13 +4,12 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Menu, X, ShoppingCart, User } from 'lucide-react'
+import { Menu, X, ShoppingCart, User, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import { useCart } from '@/store/cartStore'
 
 const navLinks = [
-  { label: 'Home', href: '/' },
   { label: 'Services', href: '/services' },
   { label: 'Delivery Areas', href: '/areas' },
   { label: 'Shop', href: '/shop' },
@@ -18,6 +17,12 @@ const navLinks = [
   { label: 'Blog', href: '/blog' },
   { label: 'FAQ', href: '/faq' },
   { label: 'Contact', href: '/contact' },
+]
+
+const DEFAULT_ANNOUNCEMENTS = [
+  { text: '🚚 Free delivery on orders over $40 · Same-day available in most zones', href: '/shop' },
+  { text: '💧 New customers: get your first jug delivered FREE with code FIRSTJUG', href: '/auth/register' },
+  { text: '⭐ Rated 4.9/5 by 500+ Metro Vancouver families · Trusted since 2020', href: '/blog/water-delivery-coquitlam-reviews' },
 ]
 
 import { supabase } from '@/lib/supabase'
@@ -47,21 +52,99 @@ export default function Navbar() {
     return () => subscription.unsubscribe()
   }, [])
 
+  const [annIdx, setAnnIdx] = useState(0)
+  const [annDismissed, setAnnDismissed] = useState(false)
+  const [announcements, setAnnouncements] = useState(DEFAULT_ANNOUNCEMENTS)
+
+  useEffect(() => {
+    supabase
+      .from('site_content')
+      .select('key, value')
+      .in('key', [
+        'announcement_1_text', 'announcement_1_href',
+        'announcement_2_text', 'announcement_2_href',
+        'announcement_3_text', 'announcement_3_href'
+      ])
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          const map: Record<string, string> = {}
+          data.forEach(r => { map[r.key] = r.value })
+          const loadedAnn = [...DEFAULT_ANNOUNCEMENTS]
+          if (map['announcement_1_text']) loadedAnn[0].text = map['announcement_1_text']
+          if (map['announcement_1_href']) loadedAnn[0].href = map['announcement_1_href']
+          if (map['announcement_2_text']) loadedAnn[1].text = map['announcement_2_text']
+          if (map['announcement_2_href']) loadedAnn[1].href = map['announcement_2_href']
+          if (map['announcement_3_text']) loadedAnn[2].text = map['announcement_3_text']
+          if (map['announcement_3_href']) loadedAnn[2].href = map['announcement_3_href']
+          setAnnouncements(loadedAnn)
+        }
+      })
+  }, [])
+
   // Close mobile menu on route change
   useEffect(() => { setMobileOpen(false) }, [pathname])
 
-  if (pathname.startsWith('/admin') || pathname.startsWith('/auth') || pathname.startsWith('/dashboard')) return null
+  // Cycle announcement bar
+  useEffect(() => {
+    const t = setInterval(() => setAnnIdx(i => (i + 1) % announcements.length), 4000)
+    return () => clearInterval(t)
+  }, [])
 
   const isHome = pathname === '/'
   const transparent = isHome && !scrolled
 
+  if (pathname.startsWith('/admin') || pathname.startsWith('/auth') || pathname.startsWith('/dashboard')) return null
+
   return (
     <>
+      {/* ── Announcement bar ── */}
+      <AnimatePresence>
+        {!annDismissed && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed top-0 left-0 right-0 z-[60] bg-gradient-to-r from-[#006064] via-[#0097a7] to-[#1565c0] overflow-hidden"
+          >
+            <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-9">
+              <div className="flex-1 overflow-hidden">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={annIdx}
+                    initial={{ y: 12, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -12, opacity: 0 }}
+                    transition={{ duration: 0.35 }}
+                  >
+                    <Link
+                      href={announcements[annIdx].href}
+                      className="flex items-center justify-center gap-2 text-white text-xs sm:text-sm font-medium hover:underline"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                      {announcements[annIdx].text}
+                    </Link>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+              <button
+                onClick={() => setAnnDismissed(true)}
+                className="ml-3 text-white/60 hover:text-white transition-colors p-1"
+                aria-label="Dismiss announcement"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${transparent
-          ? 'bg-transparent'
-          : 'glass shadow-lg shadow-aqua/10 border-b border-white/30'
-          }`}
+        className={`fixed left-0 right-0 z-50 transition-all duration-300 ${annDismissed ? 'top-0' : 'top-9'} ${
+          transparent
+            ? 'bg-transparent'
+            : 'glass shadow-lg shadow-aqua/10 border-b border-white/30'
+        }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 lg:h-20">

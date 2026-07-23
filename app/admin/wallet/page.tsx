@@ -9,7 +9,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
-import { adjustCustomerWallet, bulkAdjustCustomerWallets } from '@/app/admin/actions'
+import { adjustCustomerWallet, bulkAdjustCustomerWallets, getWalletTransactions } from '@/app/admin/actions'
 
 type CustomerWallet = {
   id: string
@@ -128,13 +128,8 @@ export default function AdminWalletPage() {
     setSelectedItems([])
     setDiscountPercent('0')
     setLoadingTx(true)
-    const { data } = await supabase
-      .from('wallet_transactions')
-      .select('*')
-      .eq('user_id', customer.id)
-      .order('created_at', { ascending: false })
-      .limit(50)
-    setTransactions((data ?? []) as WalletTransaction[])
+    const data = await getWalletTransactions(customer.id)
+    setTransactions(data as WalletTransaction[])
     setLoadingTx(false)
   }
 
@@ -183,13 +178,8 @@ export default function AdminWalletPage() {
     showToast(`Successfully ${adjustDir === 'add' ? 'added' : 'deducted'} $${amount.toFixed(2)} ${adjustDir === 'add' ? 'to' : 'from'} ${selected.name ?? selected.email}`)
 
     // Refresh transactions
-    const { data } = await supabase
-      .from('wallet_transactions')
-      .select('*')
-      .eq('user_id', selected.id)
-      .order('created_at', { ascending: false })
-      .limit(50)
-    setTransactions((data ?? []) as WalletTransaction[])
+    const data = await getWalletTransactions(selected.id)
+    setTransactions(data as WalletTransaction[])
 
     setAdjusting(false)
   }

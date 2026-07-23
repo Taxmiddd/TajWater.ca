@@ -3,6 +3,30 @@ import { ArrowRight, BookOpen } from 'lucide-react'
 
 const posts = [
   {
+    slug: 'water-delivery-coquitlam-reviews',
+    title: 'Water Delivery in Coquitlam: What Our Customers Say (2026)',
+    description: 'Real testimonials from Coquitlam and City of Coquitlam residents who switched to TajWater. See why hundreds of Coquitlam families trust TajWater for their alkaline, spring, and distilled water delivery.',
+    date: '2026-07-23',
+    readTime: '6 min read',
+    category: 'Customer Reviews',
+  },
+  {
+    slug: 'water-delivery-port-coquitlam',
+    title: 'Premium Water Delivery in Port Coquitlam, BC (2026 Guide)',
+    description: 'TajWater is based right in Port Coquitlam — making delivery to PoCo the fastest in the Tri-Cities. Alkaline, spring, and distilled water delivered to your Port Coquitlam home or office.',
+    date: '2026-07-23',
+    readTime: '6 min read',
+    category: 'Local Guide',
+  },
+  {
+    slug: 'best-water-delivery-city-of-coquitlam',
+    title: 'The Best Water Delivery Service in City of Coquitlam, BC (2026)',
+    description: 'Looking for the best water delivery in City of Coquitlam? This guide covers all water types, delivery areas, pricing, and why City Coquitlam residents consistently choose TajWater.',
+    date: '2026-07-23',
+    readTime: '7 min read',
+    category: "Buyer's Guide",
+  },
+  {
     slug: 'best-water-for-babies-toddlers-metro-vancouver',
     title: 'Best Water for Babies & Toddlers in Metro Vancouver (2026)',
     description: 'Which water is safest for infant formula, baby food, and toddler drinking in Metro Vancouver? A guide to distilled, spring, filtered, and tap water for BC families with young children.',
