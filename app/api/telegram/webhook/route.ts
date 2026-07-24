@@ -9,7 +9,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
-const DRIVER_CHAT_IDS = (process.env.TELEGRAM_DRIVER_CHAT_IDS || '').split(',')
+
 
 async function sendTelegramMessage(chatId: string | number, text: string) {
   if (!TELEGRAM_BOT_TOKEN) return
@@ -36,11 +36,7 @@ export async function POST(req: Request) {
     const chatId = message.chat.id.toString()
     const text = message.text.trim()
 
-    // 1. Verify if the sender is an authorized driver
-    if (!DRIVER_CHAT_IDS.includes(chatId)) {
-      console.log(`Unauthorized Telegram chat ID: ${chatId}`)
-      return NextResponse.json({ ok: true })
-    }
+
 
     // 2. Parse the message (Regex to keep it 100% free)
     // Looking for an email and a number of bottles
