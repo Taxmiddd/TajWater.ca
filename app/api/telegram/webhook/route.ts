@@ -105,12 +105,14 @@ export async function POST(req: Request) {
         type: 'deduct',
         amount: totalCost,
         newBalance: newBalance,
-        reason: \`Product Purchase: \${quantity}x \${product ? product.name : 'Water Refill'}\`,
+        reason: `Product Purchase: ${quantity}x ${product ? product.name : 'Water Refill'}`,
+
         dateStr: new Date().toLocaleString()
       })
       
       await resend.emails.send({
-        from: \`TajWater <\${process.env.NEXT_PUBLIC_COMPANY_EMAIL || 'info@tajwater.ca'}>\`,
+        from: `TajWater <${process.env.NEXT_PUBLIC_COMPANY_EMAIL || 'info@tajwater.ca'}>`,
+
         to: profile.email,
         subject: 'TajWater Wallet Deduction Receipt',
         html: emailHtml
@@ -120,7 +122,7 @@ export async function POST(req: Request) {
     }
 
     // 8. Send success confirmation to driver
-    await sendTelegramMessage(chatId, \`✅ Success! Deducted $\${totalCost.toFixed(2)} for \${quantity} bottles from \${profile.name} (\${profile.email}).\\nNew Balance: $\${newBalance.toFixed(2)}\`)
+    await sendTelegramMessage(chatId, `✅ Success! Deducted $${totalCost.toFixed(2)} for ${quantity} bottles from ${profile.name} (${profile.email}).\nNew Balance: $${newBalance.toFixed(2)}`)
 
     return NextResponse.json({ ok: true })
   } catch (err) {
