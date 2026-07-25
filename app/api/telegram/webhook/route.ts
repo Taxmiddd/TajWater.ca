@@ -4,7 +4,7 @@ import { buildWalletAdjustmentEmail, resend } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
 
-async function sendTelegramMessage(chatId: string | number, text: string) {
+async function sendTelegramMessage(chatId: string | number, text: string, replyMarkup?: any) {
   // Strip any accidental spaces or quotes from the env var
   const token = (process.env.TELEGRAM_BOT_TOKEN || '').replace(/['"]/g, '').trim()
   console.log(`[TG Bot] DEBUG TOKEN: Length=${token.length}, StartsWith=${token.substring(0, 5)}`)
@@ -13,10 +13,16 @@ async function sendTelegramMessage(chatId: string | number, text: string) {
     console.error('[TG Bot] TELEGRAM_BOT_TOKEN not set!')
     return
   }
+
+  const payload: any = { chat_id: chatId, text }
+  if (replyMarkup) {
+    payload.reply_markup = replyMarkup
+  }
+
   const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: chatId, text }),
+    body: JSON.stringify(payload),
   })
   const data = await res.json()
   if (!data.ok) console.error('[TG Bot] sendMessage failed:', JSON.stringify(data))
@@ -65,12 +71,193 @@ function findProduct(keyword: string, products: { id: string; name: string; pric
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const message = body?.message
 
-    if (!message || !message.text) return NextResponse.json({ ok: true })
+    // ─── Handle Callback Queries (Button Presses) ─────────────────────────
+    if (body.callback_query) {
+      const callbackQuery = body.callback_query
+      const chatId = callbackQuery.message?.chat?.id
+      const data = callbackQuery.data
+
+      // Answer callback query to remove loading state
+      const token = (process.env.TELEGRAM_BOT_TOKEN || '').replace(/['"]/g, '').trim()
+      await fetch(`https://api.telegram.org/bot${token}/answerCallbackQuery`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ callback_query_id: callbackQuery.id })
+      })
+
+      if (!chatId) return NextResponse.json({ ok: true })
+
+      if (data === 'log_delivery') {
+        await sendTelegramMessage(chatId, "To log a delivery, simply send me a message in this format:\n`john@email.com, 5 bottles, 2 paper cups`", { parse_mode: 'Markdown' })
+      } else if (data === 'start_shift') {
+        await sendTelegramMessage(chatId, "Shift started! Drive safely. 🚚")
+      } else if (data === 'end_shift') {
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        
+        // Init Supabase
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!
+        )
+        
+        const { data: txs } = await supabase
+          .from('wallet_transactions')
+          .select('amount')
+          .eq('created_by', 'Driver (Telegram)')
+          .gte('created_at', today.toISOString())
+          
+        const dailyTotal = txs ? txs.reduce((sum, t) => sum + Math.abs(t.amount), 0) : 0
+        const dailyCount = txs ? txs.length : 0
+          
+        await sendTelegramMessage(chatId, `Shift ended! Have a good rest. 🛑\n\n📊 *Today's Stats (All Drivers):*\nDeliveries Logged: ${dailyCount}\nValue Deducted: $${dailyTotal.toFixed(2)}`, { parse_mode: 'Markdown' })
+      }
+      return NextResponse.json({ ok: true })
+    }
+
+    // ─── Handle Text Messages & Photos ────────────────────────────────────
+    const message = body?.message
+    // If it has a photo, the text is in the caption
+    const textRaw = message?.text || message?.caption
+    if (!message || (!textRaw && !message.location)) return NextResponse.json({ ok: true })
 
     const chatId = message.chat.id
-    const text = (message.text as string).trim()
+    const text = (textRaw as string || '').trim()
+
+    // ─── Handle Two-Way Admin Replies to Support Tickets ──────────────────
+    if (message.reply_to_message) {
+      const adminChatIds = (process.env.TELEGRAM_ADMIN_CHAT_IDS || '').split(',')
+      if (adminChatIds.includes(chatId.toString())) {
+        const originalText = message.reply_to_message.text || ''
+        
+        // If the original message was a support ticket
+        if (originalText.includes('New Support Ticket')) {
+          const emailMatch = originalText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/)
+          if (emailMatch) {
+            const customerEmail = emailMatch[0]
+            try {
+              await resend.emails.send({
+                from: `TajWater Support <${process.env.NEXT_PUBLIC_COMPANY_EMAIL ?? 'support@tajwater.ca'}>`,
+                to: customerEmail,
+                subject: 'Re: Your Support Ticket',
+                text: text, // The admin's reply
+              })
+              await sendTelegramMessage(chatId, `✅ Reply sent to ${customerEmail}`)
+              return NextResponse.json({ ok: true })
+            } catch (err) {
+              console.error('[TG Bot] Failed to send reply email:', err)
+              await sendTelegramMessage(chatId, `❌ Failed to send reply to ${customerEmail}`)
+              return NextResponse.json({ ok: true })
+            }
+          }
+        }
+      }
+    }
+
+    // Handle /start command for interactive menu
+    if (text.startsWith('/start')) {
+      await sendTelegramMessage(chatId, "Welcome to the TajWater Driver Hub! What would you like to do?", {
+        inline_keyboard: [
+          [
+            { text: "🚚 Start Shift", callback_data: "start_shift" },
+            { text: "🛑 End Shift", callback_data: "end_shift" }
+          ],
+          [
+            { text: "📦 Log Delivery", callback_data: "log_delivery" }
+          ]
+        ]
+      })
+      return NextResponse.json({ ok: true })
+    }
+
+    // Handle /topup command for admins
+    if (text.startsWith('/topup')) {
+      const adminChatIds = (process.env.TELEGRAM_ADMIN_CHAT_IDS || '').split(',')
+      if (!adminChatIds.includes(chatId.toString())) {
+        await sendTelegramMessage(chatId, "❌ You do not have permission to use this command.")
+        return NextResponse.json({ ok: true })
+      }
+
+      const args = text.split(' ')
+      if (args.length < 3) {
+        await sendTelegramMessage(chatId, "❌ Invalid format. Use: /topup customer@email.com 50")
+        return NextResponse.json({ ok: true })
+      }
+
+      const email = args[1].toLowerCase()
+      const amount = parseFloat(args[2])
+
+      if (isNaN(amount) || amount <= 0) {
+        await sendTelegramMessage(chatId, "❌ Invalid amount.")
+        return NextResponse.json({ ok: true })
+      }
+
+      // Init Supabase
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
+
+      // Find profile
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, name, email, wallet_balance')
+        .eq('email', email)
+        .single()
+
+      if (profileError || !profile) {
+        await sendTelegramMessage(chatId, `❌ No customer found with email: ${email}`)
+        return NextResponse.json({ ok: true })
+      }
+
+      const newBalance = (profile.wallet_balance ?? 0) + amount
+      const { error: updateError } = await supabase.from('profiles').update({ wallet_balance: newBalance }).eq('id', profile.id)
+
+      if (updateError) {
+        await sendTelegramMessage(chatId, `❌ Failed to update wallet.`)
+        return NextResponse.json({ ok: true })
+      }
+
+      await supabase.from('wallet_transactions').insert({
+        user_id: profile.id,
+        amount: amount,
+        balance_after: newBalance,
+        transaction_type: 'admin_topup',
+        reason: `Telegram Admin Top-up`,
+        created_by: 'Admin (Telegram)',
+      })
+
+      await sendTelegramMessage(chatId, `✅ Success! Added $${amount.toFixed(2)} to ${profile.name}'s wallet. New balance: $${newBalance.toFixed(2)}`)
+      return NextResponse.json({ ok: true })
+    }
+
+    // Handle /broadcast command for admins
+    if (text.startsWith('/broadcast')) {
+      const adminChatIds = (process.env.TELEGRAM_ADMIN_CHAT_IDS || '').split(',')
+      if (!adminChatIds.includes(chatId.toString())) {
+        await sendTelegramMessage(chatId, "❌ You do not have permission to use this command.")
+        return NextResponse.json({ ok: true })
+      }
+
+      const messageToBroadcast = text.replace('/broadcast', '').trim()
+      if (!messageToBroadcast) {
+        await sendTelegramMessage(chatId, "❌ Please provide a message. Example:\n/broadcast Traffic delay on Main St.")
+        return NextResponse.json({ ok: true })
+      }
+
+      const driverChatIds = (process.env.TELEGRAM_DRIVER_CHAT_IDS || '').split(',')
+      let sentCount = 0
+      for (const dChatId of driverChatIds) {
+        if (dChatId.trim()) {
+           await sendTelegramMessage(dChatId.trim(), `📢 *ADMIN BROADCAST*\n\n${messageToBroadcast}`, { parse_mode: 'Markdown' })
+           sentCount++
+        }
+      }
+      
+      await sendTelegramMessage(chatId, `✅ Broadcast sent to ${sentCount} driver(s).`)
+      return NextResponse.json({ ok: true })
+    }
 
     console.log(`[TG Bot] Message from ${chatId}: "${text}"`)
 
@@ -92,6 +279,21 @@ export async function POST(req: Request) {
     }
 
     console.log(`[TG Bot] Parsed items:`, parsedItems)
+
+    // Handle Photo (Proof of Delivery)
+    let proofUrl = null
+    if (message.photo && message.photo.length > 0) {
+      const token = (process.env.TELEGRAM_BOT_TOKEN || '').replace(/['"]/g, '').trim()
+      // Get the largest photo size
+      const photo = message.photo[message.photo.length - 1]
+      const fileRes = await fetch(`https://api.telegram.org/bot${token}/getFile?file_id=${photo.file_id}`)
+      const fileData = await fileRes.json()
+      if (fileData.ok && fileData.result.file_path) {
+         // This is the direct Telegram URL for the file (temporary, ideally you'd download and upload to Supabase here)
+         proofUrl = `https://api.telegram.org/file/bot${token}/${fileData.result.file_path}`
+         console.log(`[TG Bot] Received proof of delivery photo: ${proofUrl}`)
+      }
+    }
 
     // Init Supabase with service role
     const supabase = createClient(
@@ -184,14 +386,19 @@ export async function POST(req: Request) {
 
     // Log transaction history
     const reasonText = matched.map(m => `${m.quantity}x ${m.product.name}`).join(', ')
-    await supabase.from('wallet_transactions').insert({
+    const insertData: any = {
       user_id: profile.id,
       amount: -totalCost,
       balance_after: newBalance,
       transaction_type: 'driver_deduction',
       reason: `Driver Delivery: ${reasonText}`,
       created_by: 'Driver (Telegram)',
-    })
+    }
+    
+    // If you add a proof_url column to wallet_transactions in Supabase, uncomment this:
+    // if (proofUrl) insertData.proof_url = proofUrl
+
+    await supabase.from('wallet_transactions').insert(insertData)
 
     console.log('[TG Bot] Transaction logged.')
 
@@ -221,10 +428,15 @@ export async function POST(req: Request) {
       .map(m => `  • ${m.quantity}x ${m.product.name} — $${(m.product.price * m.quantity).toFixed(2)}`)
       .join('\n')
 
-    const unmatchedNote = unmatched.length > 0 ? `\n\n⚠️ Not found in DB: ${unmatched.join(', ')}` : ''
+    let unmatchedNote = unmatched.length > 0 ? `\n\n⚠️ Not found in DB: ${unmatched.join(', ')}` : ''
+    
+    // Low balance warning
+    if (newBalance < 15) {
+      unmatchedNote += `\n\n⚠️ *LOW BALANCE WARNING*\nCustomer balance is $${newBalance.toFixed(2)}. Please remind them to top up!`
+    }
 
     await sendTelegramMessage(chatId,
-      `✅ Delivery logged!\n\nCustomer: ${profile.name}\n\nItems:\n${itemLines}\n\nTotal Charged: $${totalCost.toFixed(2)}\nNew Balance: $${newBalance.toFixed(2)}\n\nReceipt emailed ✉️${unmatchedNote}`)
+      `✅ Delivery logged!\n\nCustomer: ${profile.name}\n\nItems:\n${itemLines}\n\nTotal Charged: $${totalCost.toFixed(2)}\nNew Balance: $${newBalance.toFixed(2)}\n\nReceipt emailed ✉️${unmatchedNote}`, { parse_mode: 'Markdown' })
 
     return NextResponse.json({ ok: true })
   } catch (err) {
