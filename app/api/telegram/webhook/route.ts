@@ -21,6 +21,75 @@ async function sendTelegramMessage(chatId: string | number, text: string) {
   }
 }
 
+// ─── Product Matching ─────────────────────────────────────────────────────────
+// Given the full message and a list of DB products, find all items delivered.
+// Returns array of { product, quantity }
+function matchProducts(
+  text: string,
+  products: { id: string; name: string; price: number }[]
+) {
+  const matched: { product: typeof products[0]; quantity: number }[] = []
+  const lowerText = text.toLowerCase()
+
+  // Build keyword map: for each product, build a set of search terms from its name
+  for (const product of products) {
+    const productName = product.name.toLowerCase()
+
+    // Generate keyword variants from the product name
+    // e.g. "5 Gallon Hot & Cold Dispenser" → ["hot", "cold", "dispenser", "hot cold", "hot & cold"]
+    const words = productName
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .split(/\s+/)
+      .filter((w) => w.length > 2) // skip tiny words like "a", "of", "5"
+
+    // Check if any meaningful word from the product name is in the message
+    const productNameNoSpecial = productName.replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim()
+
+    // Try to find a quantity near this product mention
+    // Pattern: look for NUMBER + KEYWORD or KEYWORD + NUMBER
+    let quantity = 0
+    let found = false
+
+    // Try multi-word match first (more specific), then single-word
+    const searchTerms = [productNameNoSpecial, ...words].sort((a, b) => b.length - a.length)
+
+    for (const term of searchTerms) {
+      if (!lowerText.includes(term)) continue
+
+      // Found the term — now look for a number near it
+      // Pattern: (\d+)\s*TERM or TERM\s*(\d+)
+      const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const beforeMatch = new RegExp(`(\\d+)\\s*(?:\\w+\\s*){0,3}${escapedTerm}`, 'i').exec(text)
+      const afterMatch = new RegExp(`${escapedTerm}\\s*(?:\\w+\\s*){0,3}(\\d+)`, 'i').exec(text)
+
+      if (beforeMatch) {
+        quantity = parseInt(beforeMatch[1], 10)
+        found = true
+        break
+      } else if (afterMatch) {
+        quantity = parseInt(afterMatch[1], 10)
+        found = true
+        break
+      } else {
+        // Term found but no number — assume quantity 1
+        quantity = 1
+        found = true
+        break
+      }
+    }
+
+    if (found && quantity > 0) {
+      // Don't double-count (if product already matched, skip)
+      if (!matched.find((m) => m.product.id === product.id)) {
+        matched.push({ product, quantity })
+      }
+    }
+  }
+
+  return matched
+}
+
+// ─── Handler ──────────────────────────────────────────────────────────────────
 export async function POST(req: Request) {
   try {
     const body = await req.json()
@@ -38,23 +107,12 @@ export async function POST(req: Request) {
     // Parse email
     const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/)
     if (!emailMatch) {
-      await sendTelegramMessage(chatId, `❌ No email found in your message. Example: "john@email.com 3 bottles"`)
+      await sendTelegramMessage(chatId, `❌ No email found.\n\nExample:\njohn@email.com 2 refills 1 dispenser`)
       return NextResponse.json({ ok: true })
     }
     const customerEmail = emailMatch[0].toLowerCase()
 
-    // Parse quantity — allows "3refills", "3 bottles", "3 jugs" etc.
-    const qtyMatch = text.match(/(\d+)\s*(bottle|bottles|refill|refills|jug|jugs)/i)
-    const quantity = qtyMatch ? parseInt(qtyMatch[1], 10) : 0
-
-    if (quantity <= 0) {
-      await sendTelegramMessage(chatId, `❌ Could not detect quantity. Example: "john@email.com 3 bottles"`)
-      return NextResponse.json({ ok: true })
-    }
-
-    console.log(`[Telegram Bot] Parsed: email=${customerEmail}, qty=${quantity}`)
-
-    // Init Supabase with service role
+    // Init Supabase
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -68,28 +126,46 @@ export async function POST(req: Request) {
       .single()
 
     if (profileError || !profile) {
-      console.error('[Telegram Bot] Profile lookup error:', profileError)
+      console.error('[Telegram Bot] Profile not found:', profileError)
       await sendTelegramMessage(chatId, `❌ No customer found with email: ${customerEmail}`)
       return NextResponse.json({ ok: true })
     }
 
-    // Get product price
-    const { data: product } = await supabase
+    // Fetch ALL active products from DB
+    const { data: allProducts, error: productsError } = await supabase
       .from('products')
       .select('id, name, price')
-      .ilike('name', '%refill%')
       .eq('active', true)
-      .limit(1)
-      .single()
 
-    const pricePerUnit = product?.price ?? 10
-    const totalCost = pricePerUnit * quantity
+    if (productsError || !allProducts || allProducts.length === 0) {
+      console.error('[Telegram Bot] Products error:', productsError)
+      await sendTelegramMessage(chatId, `❌ Could not load products from database.`)
+      return NextResponse.json({ ok: true })
+    }
+
+    // Match products from the message
+    const matched = matchProducts(text, allProducts)
+
+    if (matched.length === 0) {
+      await sendTelegramMessage(
+        chatId,
+        `❌ Could not identify any products in your message.\n\nExamples:\n• john@email.com 2 refills\n• john@email.com 1 hot cold dispenser 3 refills 2 paper cups`
+      )
+      return NextResponse.json({ ok: true })
+    }
+
+    // Calculate total
+    const totalCost = matched.reduce((sum, m) => sum + m.product.price * m.quantity, 0)
     const currentBalance = profile.wallet_balance ?? 0
 
-    console.log(`[Telegram Bot] Customer: ${profile.name}, Balance: ${currentBalance}, Cost: ${totalCost}`)
+    console.log(`[Telegram Bot] Matched products:`, matched.map(m => `${m.quantity}x ${m.product.name}`).join(', '))
+    console.log(`[Telegram Bot] Total: $${totalCost.toFixed(2)}, Balance: $${currentBalance.toFixed(2)}`)
 
     if (currentBalance < totalCost) {
-      await sendTelegramMessage(chatId, `❌ Insufficient balance for ${profile.name}.\nNeeded: $${totalCost.toFixed(2)} | Available: $${currentBalance.toFixed(2)}`)
+      await sendTelegramMessage(
+        chatId,
+        `❌ Insufficient balance for ${profile.name}.\nNeeded: $${totalCost.toFixed(2)} | Available: $${currentBalance.toFixed(2)}`
+      )
       return NextResponse.json({ ok: true })
     }
 
@@ -102,18 +178,27 @@ export async function POST(req: Request) {
 
     if (updateError) {
       console.error('[Telegram Bot] Update error:', updateError)
-      await sendTelegramMessage(chatId, `❌ Failed to update wallet balance. Please try again.`)
+      await sendTelegramMessage(chatId, `❌ Failed to update wallet. Please try again.`)
       return NextResponse.json({ ok: true })
     }
 
-    // Send receipt email to customer
+    // Build itemized list for email
+    const itemsForEmail = matched.map((m) => ({
+      name: m.product.name,
+      qty: m.quantity,
+      price: m.product.price,
+    }))
+
+    const reasonText = `Product Purchase: ` + matched.map(m => `${m.quantity}x ${m.product.name}`).join(', ')
+
+    // Send receipt email
     try {
       const emailHtml = buildWalletAdjustmentEmail({
         customerName: profile.name,
         type: 'deduct',
         amount: totalCost,
         newBalance,
-        reason: `Product Purchase: ${quantity}x ${product?.name ?? 'Water Refill'}`,
+        reason: reasonText,
         dateStr: new Date().toLocaleString('en-CA'),
       })
       await resend.emails.send({
@@ -122,15 +207,19 @@ export async function POST(req: Request) {
         subject: 'TajWater – Delivery Receipt',
         html: emailHtml,
       })
-      console.log(`[Telegram Bot] Receipt email sent to ${profile.email}`)
+      console.log(`[Telegram Bot] Receipt emailed to ${profile.email}`)
     } catch (emailErr) {
       console.error('[Telegram Bot] Email error:', emailErr)
     }
 
-    // Confirm to driver
+    // Build itemized confirmation for driver
+    const itemLines = matched
+      .map((m) => `  • ${m.quantity}x ${m.product.name} — $${(m.product.price * m.quantity).toFixed(2)}`)
+      .join('\n')
+
     await sendTelegramMessage(
       chatId,
-      `✅ Done!\n\nCustomer: ${profile.name}\nDelivered: ${quantity}x ${product?.name ?? 'Water Refill'}\nCharged: $${totalCost.toFixed(2)}\nNew Balance: $${newBalance.toFixed(2)}\n\nReceipt emailed to ${profile.email}`
+      `✅ Delivery logged!\n\nCustomer: ${profile.name}\n\nItems Delivered:\n${itemLines}\n\nTotal Charged: $${totalCost.toFixed(2)}\nNew Balance: $${newBalance.toFixed(2)}\n\nReceipt emailed to ${profile.email} ✉️`
     )
 
     return NextResponse.json({ ok: true })
