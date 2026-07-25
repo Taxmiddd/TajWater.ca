@@ -39,7 +39,7 @@ export async function POST(req: Request) {
   }
 
   // Send Push Notification to Telegram
-  const botToken = process.env.TELEGRAM_BOT_TOKEN
+  const botToken = (process.env.TELEGRAM_BOT_TOKEN || '').replace(/['"]/g, '').trim()
   const adminChatIds = (process.env.TELEGRAM_ADMIN_CHAT_IDS || '').split(',')
 
   if (botToken && adminChatIds.length > 0) {
