@@ -7,6 +7,8 @@ export const dynamic = 'force-dynamic'
 async function sendTelegramMessage(chatId: string | number, text: string) {
   // Strip any accidental spaces or quotes from the env var
   const token = (process.env.TELEGRAM_BOT_TOKEN || '').replace(/['"]/g, '').trim()
+  console.log(`[TG Bot] DEBUG TOKEN: Length=${token.length}, StartsWith=${token.substring(0, 5)}`)
+  
   if (!token) {
     console.error('[TG Bot] TELEGRAM_BOT_TOKEN not set!')
     return
