@@ -5,7 +5,8 @@ import { buildWalletAdjustmentEmail, resend } from '@/lib/email'
 export const dynamic = 'force-dynamic'
 
 async function sendTelegramMessage(chatId: string | number, text: string) {
-  const token = process.env.TELEGRAM_BOT_TOKEN
+  // Strip any accidental spaces or quotes from the env var
+  const token = (process.env.TELEGRAM_BOT_TOKEN || '').replace(/['"]/g, '').trim()
   if (!token) {
     console.error('[TG Bot] TELEGRAM_BOT_TOKEN not set!')
     return
@@ -19,13 +20,13 @@ async function sendTelegramMessage(chatId: string | number, text: string) {
   if (!data.ok) console.error('[TG Bot] sendMessage failed:', JSON.stringify(data))
 }
 
-// ─── Parse comma-separated items ─────────────────────────────────────────────
-// Input:  "5 bottles, 2 paper cups, 1 dispenser"
+// ─── Parse items ─────────────────────────────────────────────
+// Input:  "5 bottles, 2 paper cups. 1 dispenser"
 // Output: [{ qty: 5, keyword: 'bottles' }, { qty: 2, keyword: 'paper cups' }, ...]
 function parseItems(text: string, emailStr: string) {
-  // Remove the email from text then split by comma
+  // Remove the email from text then split by comma, period, or semicolon
   const withoutEmail = text.replace(emailStr, '').trim()
-  const segments = withoutEmail.split(',').map((s) => s.trim()).filter(Boolean)
+  const segments = withoutEmail.split(/[,;.]/).map((s) => s.trim()).filter(Boolean)
 
   const items: { qty: number; keyword: string }[] = []
   for (const seg of segments) {
