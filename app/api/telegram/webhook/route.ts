@@ -169,18 +169,27 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true })
     }
 
-    // Deduct balance
+    // Deduct balance — use .select() to verify the row was actually updated (catches silent RLS failures)
     const newBalance = currentBalance - totalCost
-    const { error: updateError } = await supabase
+    const { data: updatedRows, error: updateError } = await supabase
       .from('profiles')
       .update({ wallet_balance: newBalance })
       .eq('id', profile.id)
+      .select('id, wallet_balance')
 
     if (updateError) {
-      console.error('[Telegram Bot] Update error:', updateError)
-      await sendTelegramMessage(chatId, `❌ Failed to update wallet. Please try again.`)
+      console.error('[Telegram Bot] Update error:', JSON.stringify(updateError))
+      await sendTelegramMessage(chatId, `❌ Failed to update wallet (DB error). Please try again.`)
       return NextResponse.json({ ok: true })
     }
+
+    if (!updatedRows || updatedRows.length === 0) {
+      console.error('[Telegram Bot] Update returned 0 rows — likely RLS blocking. Profile ID:', profile.id)
+      await sendTelegramMessage(chatId, `❌ Could not update wallet for ${profile.name}. Permission error — please contact admin.`)
+      return NextResponse.json({ ok: true })
+    }
+
+    console.log('[Telegram Bot] Wallet updated. New balance confirmed:', updatedRows[0]?.wallet_balance)
 
     // Build itemized list for email
     const itemsForEmail = matched.map((m) => ({
