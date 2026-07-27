@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { supabase } from '@/lib/supabase'
 import { motion } from 'framer-motion'
 import { Download, Search, FileText } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -20,7 +20,7 @@ export default function ExpensesPage() {
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const supabase = createClientComponentClient()
+
 
   useEffect(() => {
     fetchExpenses()

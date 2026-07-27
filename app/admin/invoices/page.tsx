@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { supabase } from '@/lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FileEdit, Search, Download, CheckCircle2, AlertCircle, RefreshCw, Eye } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -23,7 +23,7 @@ export default function InvoicesPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [updating, setUpdating] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+
 
   const fetchInvoices = async () => {
     setLoading(true)
