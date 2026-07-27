@@ -36,6 +36,7 @@ type WalletTransaction = {
   reason: string | null
   created_by: string | null
   created_at: string
+  proof_url?: string | null
   profiles?: { name: string | null; email: string | null }
 }
 
@@ -674,6 +675,13 @@ export default function AdminWalletPage() {
                                   <span>{new Date(tx.created_at).toLocaleDateString('en-CA', { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</span>
                                   {tx.created_by && <span className="bg-[#e0f7fa] px-1.5 rounded-full text-[#0097a7]">By {tx.created_by}</span>}
                                 </p>
+                                {tx.proof_url && (
+                                  <div className="mt-2">
+                                    <a href={tx.proof_url} target="_blank" rel="noreferrer" className="text-[10px] text-blue-500 underline flex items-center gap-1">
+                                      <Package className="w-3 h-3" /> View Delivery Photo
+                                    </a>
+                                  </div>
+                                )}
                               </div>
                               <div className="text-right shrink-0">
                                 <p className={`font-bold text-sm ${isAdd ? 'text-green-600' : 'text-red-500'}`}>
@@ -780,6 +788,13 @@ export default function AdminWalletPage() {
                               <p className="mt-1 text-[11px] bg-amber-50 text-amber-700 border border-amber-200 px-2 py-1 rounded-lg inline-flex items-center gap-1.5">
                                 <FileText className="w-3 h-3" /> {notes}
                               </p>
+                            )}
+                            {tx.proof_url && (
+                              <div className="mt-2">
+                                <a href={tx.proof_url} target="_blank" rel="noreferrer" className="text-[11px] text-blue-500 underline flex items-center gap-1">
+                                  <Package className="w-3 h-3" /> View Delivery Photo
+                                </a>
+                              </div>
                             )}
                           </td>
                           <td className="px-6 py-4 text-right text-xs text-[#4a7fa5]">

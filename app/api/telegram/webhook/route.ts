@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { buildWalletAdjustmentEmail, resend } from '@/lib/email'
+import sharp from 'sharp'
 
 export const dynamic = 'force-dynamic'
 
@@ -112,6 +113,14 @@ export async function POST(req: Request) {
         const dailyCount = txs ? txs.length : 0
           
         await sendTelegramMessage(chatId, `Shift ended! Have a good rest. 🛑\n\n📊 *Today's Stats (All Drivers):*\nDeliveries Logged: ${dailyCount}\nValue Deducted: $${dailyTotal.toFixed(2)}`, { parse_mode: 'Markdown' })
+      } else if (data === 'stock_truck') {
+        await sendTelegramMessage(chatId, "To log bottles loaded onto your truck, send:\n`/stock 50`", { parse_mode: 'Markdown' })
+      } else if (data === 'return_empties') {
+        await sendTelegramMessage(chatId, "To log empty bottles returned from a customer, send:\n`/return john@email.com 5`", { parse_mode: 'Markdown' })
+      } else if (data === 'customer_history') {
+        await sendTelegramMessage(chatId, "To view a customer's last 5 transactions, send:\n`/history john@email.com`", { parse_mode: 'Markdown' })
+      } else if (data === 'my_stats') {
+        await sendTelegramMessage(chatId, "Please type `/stats` to view your current inventory and shift stats.", { parse_mode: 'Markdown' })
       }
       return NextResponse.json({ ok: true })
     }
@@ -155,6 +164,128 @@ export async function POST(req: Request) {
       }
     }
 
+    
+    // Handle /invoice command for manual invoicing
+    if (text.startsWith('/invoice')) {
+      const args = text.split(' ')
+      if (args.length < 4) {
+        await sendTelegramMessage(chatId, "❌ Invalid format. Use: /invoice customer@email.com 50 Description")
+        return NextResponse.json({ ok: true })
+      }
+      const email = args[1].toLowerCase()
+      const amount = parseFloat(args[2])
+      const description = args.slice(3).join(' ')
+
+      if (isNaN(amount) || amount <= 0) {
+        await sendTelegramMessage(chatId, "❌ Invalid amount.")
+        return NextResponse.json({ ok: true })
+      }
+
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
+
+      await supabase.from('invoices').insert({
+        customer_email: email,
+        amount: amount,
+        description: description,
+        status: 'unpaid'
+      })
+
+      // Send email logic would go here (omitted for brevity, could use resend)
+      await sendTelegramMessage(chatId, `✅ Invoice generated for ${email} - ${amount}`)
+      return NextResponse.json({ ok: true })
+    }
+
+    // Handle /lead command
+    if (text.startsWith('/lead')) {
+      const args = text.split(' ')
+      if (args.length < 3) {
+        await sendTelegramMessage(chatId, "❌ Invalid format. Use: /lead Name Contact Notes")
+        return NextResponse.json({ ok: true })
+      }
+      const name = args[1]
+      const contactInfo = args[2]
+      const notes = args.slice(3).join(' ')
+
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
+
+      await supabase.from('leads').insert({
+        name: name,
+        contact_info: contactInfo,
+        notes: notes,
+        created_by: chatId.toString()
+      })
+
+      await sendTelegramMessage(chatId, `✅ Lead ${name} saved to CRM.`)
+      return NextResponse.json({ ok: true })
+    }
+
+    // Handle /expense command
+    if (text.startsWith('/expense')) {
+      const args = text.split(' ')
+      if (args.length < 4) {
+        await sendTelegramMessage(chatId, "❌ Invalid format. Use: /expense 50 Gas Refilled truck")
+        return NextResponse.json({ ok: true })
+      }
+      const amount = parseFloat(args[1])
+      const category = args[2]
+      const description = args.slice(3).join(' ')
+
+      if (isNaN(amount) || amount <= 0) {
+        await sendTelegramMessage(chatId, "❌ Invalid amount.")
+        return NextResponse.json({ ok: true })
+      }
+
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
+
+      await supabase.from('expenses').insert({
+        amount: amount,
+        category: category,
+        description: description,
+        logged_by: chatId.toString()
+      })
+
+      await sendTelegramMessage(chatId, `✅ Expense of $${amount.toFixed(2)} logged for ${category}.`)
+      return NextResponse.json({ ok: true })
+    }
+    
+    // Handle /crm command for customers
+    if (text.startsWith('/crm')) {
+      const args = text.split(' ')
+      if (args.length < 2) {
+        await sendTelegramMessage(chatId, "❌ Use: /crm customer@email.com")
+        return NextResponse.json({ ok: true })
+      }
+      const email = args[1].toLowerCase()
+
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
+
+      const { data: profile } = await supabase.from('profiles').select('*').eq('email', email).single()
+      if (!profile) {
+        await sendTelegramMessage(chatId, `❌ No customer found with email: ${email}`)
+        return NextResponse.json({ ok: true })
+      }
+
+      await sendTelegramMessage(chatId, `👤 *Customer CRM: ${profile.name}*
+Email: ${profile.email}
+Balance: ${profile.wallet_balance}
+Jars Held: ${profile.empty_jars_held || 0}
+Dispenser Sub: ${profile.dispenser_subscription_active ? 'Yes' : 'No'}
+Notes: ${profile.customer_notes || 'None'}`, { parse_mode: 'Markdown' })
+      return NextResponse.json({ ok: true })
+    }
+
     // Handle /start command for interactive menu
     if (text.startsWith('/start')) {
       await sendTelegramMessage(chatId, "Welcome to the TajWater Driver Hub! What would you like to do?", {
@@ -165,6 +296,14 @@ export async function POST(req: Request) {
           ],
           [
             { text: "📦 Log Delivery", callback_data: "log_delivery" }
+          ],
+          [
+            { text: "📥 Stock Truck", callback_data: "stock_truck" },
+            { text: "🔄 Return Empties", callback_data: "return_empties" }
+          ],
+          [
+            { text: "📜 Customer History", callback_data: "customer_history" },
+            { text: "📊 My Stats", callback_data: "my_stats" }
           ]
         ]
       })
@@ -202,7 +341,7 @@ export async function POST(req: Request) {
       // Find profile
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('id, name, email, wallet_balance')
+        .select('id, name, email, wallet_balance, empty_jars_held, dispenser_subscription_active, notes')
         .eq('email', email)
         .single()
 
@@ -232,6 +371,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true })
     }
 
+    
+    if (text.startsWith('/assign_dispenser')) {
+      const args = text.split(' ');
+      if (args.length < 2) return NextResponse.json({ ok: true });
+      const email = args[1].toLowerCase();
+      
+      const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+      await supabase.from('profiles').update({ dispenser_subscription_active: true }).eq('email', email);
+      
+      await sendTelegramMessage(chatId, `✅ Dispenser assigned to ${email}`);
+      return NextResponse.json({ ok: true });
+    }
+
     // Handle /broadcast command for admins
     if (text.startsWith('/broadcast')) {
       const adminChatIds = (process.env.TELEGRAM_ADMIN_CHAT_IDS || '').split(',')
@@ -259,6 +411,147 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true })
     }
 
+    // Handle /history command
+    if (text.startsWith('/history')) {
+      const args = text.split(' ')
+      if (args.length < 2) {
+        await sendTelegramMessage(chatId, "❌ Please provide an email. Example:\n`/history customer@email.com`", { parse_mode: 'Markdown' })
+        return NextResponse.json({ ok: true })
+      }
+      const email = args[1].toLowerCase()
+
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
+
+      const { data: profile } = await supabase.from('profiles').select('id, name, wallet_balance').eq('email', email).single()
+      if (!profile) {
+        await sendTelegramMessage(chatId, `❌ No customer found with email: ${email}`)
+        return NextResponse.json({ ok: true })
+      }
+
+      const { data: txs } = await supabase
+        .from('wallet_transactions')
+        .select('*')
+        .eq('user_id', profile.id)
+        .order('created_at', { ascending: false })
+        .limit(5)
+
+      let txLines = ''
+      if (txs && txs.length > 0) {
+        txLines = txs.map(t => {
+          const date = new Date(t.created_at).toLocaleDateString()
+          const amountStr = t.amount > 0 ? `+${t.amount}` : `${t.amount}`
+          return `• ${date}: $${amountStr} (${t.transaction_type})`
+        }).join('\n')
+      } else {
+        txLines = 'No recent transactions.'
+      }
+
+      await sendTelegramMessage(chatId, `📜 *History for ${profile.name}*\nBalance: $${profile.wallet_balance?.toFixed(2) ?? '0.00'}\n\n*Last 5 Transactions:*\n${txLines}`, { parse_mode: 'Markdown' })
+      return NextResponse.json({ ok: true })
+    }
+
+    // Handle /return command
+    if (text.startsWith('/return')) {
+      const args = text.split(' ')
+      if (args.length < 3) {
+        await sendTelegramMessage(chatId, "❌ Invalid format. Use:\n`/return customer@email.com 5`", { parse_mode: 'Markdown' })
+        return NextResponse.json({ ok: true })
+      }
+      const email = args[1].toLowerCase()
+      const qty = parseInt(args[2])
+
+      if (isNaN(qty) || qty <= 0) {
+        await sendTelegramMessage(chatId, "❌ Invalid quantity.")
+        return NextResponse.json({ ok: true })
+      }
+
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
+
+      
+      // Decrement jars
+      const { data: prof } = await supabase.from('profiles').select('empty_jars_held').eq('email', email).single()
+      if (prof) {
+         await supabase.from('profiles').update({ empty_jars_held: Math.max(0, (prof.empty_jars_held || 0) - qty) }).eq('email', email)
+      }
+
+      await supabase.from('inventory_logs').insert({
+        driver_id: chatId.toString(),
+        action_type: 'picked_up_empty',
+        quantity: qty,
+        customer_email: email
+      })
+
+      await sendTelegramMessage(chatId, `✅ Logged ${qty} empty bottles returned from ${email}.`)
+      return NextResponse.json({ ok: true })
+    }
+
+    // Handle /stock command
+    if (text.startsWith('/stock')) {
+      const args = text.split(' ')
+      if (args.length < 2) {
+        await sendTelegramMessage(chatId, "❌ Please provide a quantity. Example:\n`/stock 50`", { parse_mode: 'Markdown' })
+        return NextResponse.json({ ok: true })
+      }
+      const qty = parseInt(args[1])
+      if (isNaN(qty) || qty <= 0) {
+        await sendTelegramMessage(chatId, "❌ Invalid quantity.")
+        return NextResponse.json({ ok: true })
+      }
+
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
+
+      await supabase.from('inventory_logs').insert({
+        driver_id: chatId.toString(),
+        action_type: 'loaded_full',
+        quantity: qty
+      })
+
+      await sendTelegramMessage(chatId, `✅ Added ${qty} full bottles to your truck inventory.`)
+      return NextResponse.json({ ok: true })
+    }
+
+    // Handle /stats command
+    if (text.startsWith('/stats')) {
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
+
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      // Fetch driver inventory for today
+      const { data: inv } = await supabase
+        .from('inventory_logs')
+        .select('*')
+        .eq('driver_id', chatId.toString())
+        .gte('created_at', today.toISOString())
+
+      let loaded = 0
+      let delivered = 0
+      let empties = 0
+      if (inv) {
+        for (const log of inv) {
+          if (log.action_type === 'loaded_full') loaded += log.quantity
+          if (log.action_type === 'delivered_full') delivered += log.quantity
+          if (log.action_type === 'picked_up_empty') empties += log.quantity
+        }
+      }
+      const currentStock = loaded - delivered
+
+      await sendTelegramMessage(chatId, `📊 *Your Daily Stats*\n\nTruck Stock:\n- Loaded Today: ${loaded}\n- Delivered: ${delivered}\n- Current Full: ${currentStock}\n- Empties Picked Up: ${empties}`, { parse_mode: 'Markdown' })
+      return NextResponse.json({ ok: true })
+    }
+
     console.log(`[TG Bot] Message from ${chatId}: "${text}"`)
 
     // Extract email
@@ -282,6 +575,10 @@ export async function POST(req: Request) {
 
     // Handle Photo (Proof of Delivery)
     let proofUrl = null
+    let locationData = null
+    if (message.location) {
+      locationData = message.location
+    }
     if (message.photo && message.photo.length > 0) {
       const token = (process.env.TELEGRAM_BOT_TOKEN || '').replace(/['"]/g, '').trim()
       // Get the largest photo size
@@ -289,9 +586,21 @@ export async function POST(req: Request) {
       const fileRes = await fetch(`https://api.telegram.org/bot${token}/getFile?file_id=${photo.file_id}`)
       const fileData = await fileRes.json()
       if (fileData.ok && fileData.result.file_path) {
-         // This is the direct Telegram URL for the file (temporary, ideally you'd download and upload to Supabase here)
-         proofUrl = `https://api.telegram.org/file/bot${token}/${fileData.result.file_path}`
-         console.log(`[TG Bot] Received proof of delivery photo: ${proofUrl}`)
+         // Upload to Supabase Storage
+         const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+         const imgRes = await fetch(`https://api.telegram.org/file/bot${token}/${fileData.result.file_path}`);
+         const imgArrayBuffer = await imgRes.arrayBuffer();
+         const imgBuffer = Buffer.from(imgArrayBuffer);
+         
+         // Compress to webp using sharp
+         const webpBuffer = await sharp(imgBuffer).webp({ quality: 80 }).toBuffer();
+         
+         const fileName = `${Date.now()}-${photo.file_id}.webp`;
+         await supabase.storage.from('delivery-proofs').upload(fileName, webpBuffer, { contentType: 'image/webp' });
+         const { data: publicUrlData } = supabase.storage.from('delivery-proofs').getPublicUrl(fileName);
+         proofUrl = publicUrlData.publicUrl;
+  
+         console.log(`[TG Bot] Received and compressed proof of delivery photo: ${proofUrl}`)
       }
     }
 
@@ -396,9 +705,25 @@ export async function POST(req: Request) {
     }
     
     // If you add a proof_url column to wallet_transactions in Supabase, uncomment this:
-    // if (proofUrl) insertData.proof_url = proofUrl
+    if (proofUrl) insertData.proof_url = proofUrl;
+    if (locationData) insertData.location = locationData;
 
     await supabase.from('wallet_transactions').insert(insertData)
+
+    // Log to inventory if they delivered bottles
+    const bottleMatch = matched.find(m => m.product.name.toLowerCase().includes('bottle'))
+    if (bottleMatch) {
+       // Increment jars
+       await supabase.from('profiles').update({ empty_jars_held: (profile.empty_jars_held || 0) + bottleMatch.quantity }).eq('id', profile.id)
+    }
+    if (bottleMatch) {
+       await supabase.from('inventory_logs').insert({
+         driver_id: chatId.toString(),
+         action_type: 'delivered_full',
+         quantity: bottleMatch.quantity,
+         customer_email: customerEmail
+       })
+    }
 
     console.log('[TG Bot] Transaction logged.')
 
@@ -429,6 +754,11 @@ export async function POST(req: Request) {
       .join('\n')
 
     let unmatchedNote = unmatched.length > 0 ? `\n\n⚠️ Not found in DB: ${unmatched.join(', ')}` : ''
+    
+    // Smart Jars Reminder
+    if (profile.empty_jars_held > 5) {
+      unmatchedNote += `\n\n⚠️ *JARS WARNING*\nCustomer is holding ${profile.empty_jars_held} empty jars! Please collect them.`
+    }
     
     // Low balance warning
     if (newBalance < 15) {

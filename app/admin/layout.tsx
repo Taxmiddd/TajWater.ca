@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, ShoppingBag, Users, Package, Truck, CreditCard, Building,
   Settings, Menu, X, Shield, LogOut, Bell, FileEdit, BarChart2, MessageSquare, Droplets, UserCog, RefreshCw, Tag, ClipboardList,
-  Sun, Moon, Wallet
+  Sun, Moon, Wallet, Box, Receipt
 } from 'lucide-react'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
@@ -25,9 +25,13 @@ const NAV_ITEMS = [
   { icon: Building,        label: 'Wholesale',  href: '/admin/wholesale',   roles: ['super_admin', 'manager'] },
   { icon: CreditCard,      label: 'Payments',   href: '/admin/payments',    roles: ['super_admin', 'manager'] },
   { icon: Wallet,          label: 'Wallets',    href: '/admin/wallet',      roles: ['super_admin', 'manager'] },
+  { icon: Box,             label: 'Inventory',  href: '/admin/inventory',   roles: ['super_admin', 'manager', 'delivery'] },
   { icon: Tag,             label: 'Discounts',  href: '/admin/discounts',   roles: ['super_admin', 'manager'] },
   { icon: MessageSquare,   label: 'Tickets',    href: '/admin/tickets',     roles: ['super_admin', 'manager'] },
   { icon: BarChart2,       label: 'Analytics',  href: '/admin/analytics',   roles: ['super_admin', 'manager'] },
+  { icon: Receipt,         label: 'Expenses',   href: '/admin/expenses',    roles: ['super_admin', 'manager'] },
+  { icon: Users,           label: 'Leads CRM',  href: '/admin/crm',         roles: ['super_admin', 'manager', 'delivery'] },
+  { icon: FileEdit,        label: 'Invoices',   href: '/admin/invoices',    roles: ['super_admin', 'manager'] },
   { icon: UserCog,         label: 'Access',     href: '/admin/access',      roles: ['super_admin'] },
   { icon: ClipboardList,   label: 'Audit Log',  href: '/admin/audit',       roles: ['super_admin'] },
   { icon: FileEdit,        label: 'Content',    href: '/admin/content',     roles: ['super_admin', 'manager'] },
