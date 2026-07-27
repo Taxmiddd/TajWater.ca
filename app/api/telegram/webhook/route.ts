@@ -613,7 +613,7 @@ Notes: ${profile.customer_notes || 'None'}`, { parse_mode: 'Markdown' })
     // Find customer profile
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('id, name, email, wallet_balance')
+      .select('id, name, email, wallet_balance, empty_jars_held')
       .eq('email', customerEmail)
       .single()
 
