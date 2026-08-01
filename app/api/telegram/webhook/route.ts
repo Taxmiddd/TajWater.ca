@@ -5,20 +5,15 @@ import sharp from 'sharp'
 
 export const dynamic = 'force-dynamic'
 
-async function sendTelegramMessage(chatId: string | number, text: string, replyMarkup?: any) {
-  // Strip any accidental spaces or quotes from the env var
-  const token = (process.env.TELEGRAM_BOT_TOKEN || '').replace(/['"]/g, '').trim()
-  console.log(`[TG Bot] DEBUG TOKEN: Length=${token.length}, StartsWith=${token.substring(0, 5)}`)
+async function sendTelegramMessage(chatId: string | number, text: string, options?: Record<string, any>) {
+  const token = (process.env.TELEGRAM_BOT_TOKEN || '').trim()
   
   if (!token) {
     console.error('[TG Bot] TELEGRAM_BOT_TOKEN not set!')
     return
   }
 
-  const payload: any = { chat_id: chatId, text }
-  if (replyMarkup) {
-    payload.reply_markup = replyMarkup
-  }
+  const payload: any = { chat_id: chatId, text, ...options }
 
   const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     method: 'POST',
@@ -80,7 +75,7 @@ export async function POST(req: Request) {
       const data = callbackQuery.data
 
       // Answer callback query to remove loading state
-      const token = (process.env.TELEGRAM_BOT_TOKEN || '').replace(/['"]/g, '').trim()
+      const token = (process.env.TELEGRAM_BOT_TOKEN || '').trim()
       await fetch(`https://api.telegram.org/bot${token}/answerCallbackQuery`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -165,8 +160,13 @@ export async function POST(req: Request) {
     }
 
     
-    // Handle /invoice command for manual invoicing
+    // Handle /invoice command for manual invoicing (admin only)
     if (text.startsWith('/invoice')) {
+      const adminChatIds = (process.env.TELEGRAM_ADMIN_CHAT_IDS || '').split(',')
+      if (!adminChatIds.includes(chatId.toString())) {
+        await sendTelegramMessage(chatId, "❌ You do not have permission to use this command.")
+        return NextResponse.json({ ok: true })
+      }
       const args = text.split(' ')
       if (args.length < 4) {
         await sendTelegramMessage(chatId, "❌ Invalid format. Use: /invoice customer@email.com 50 Description")
@@ -373,6 +373,11 @@ Notes: ${profile.customer_notes || 'None'}`, { parse_mode: 'Markdown' })
 
     
     if (text.startsWith('/assign_dispenser')) {
+      const adminChatIds = (process.env.TELEGRAM_ADMIN_CHAT_IDS || '').split(',')
+      if (!adminChatIds.includes(chatId.toString())) {
+        await sendTelegramMessage(chatId, "❌ You do not have permission to use this command.")
+        return NextResponse.json({ ok: true })
+      }
       const args = text.split(' ');
       if (args.length < 2) return NextResponse.json({ ok: true });
       const email = args[1].toLowerCase();
@@ -580,7 +585,7 @@ Notes: ${profile.customer_notes || 'None'}`, { parse_mode: 'Markdown' })
       locationData = message.location
     }
     if (message.photo && message.photo.length > 0) {
-      const token = (process.env.TELEGRAM_BOT_TOKEN || '').replace(/['"]/g, '').trim()
+      const token = (process.env.TELEGRAM_BOT_TOKEN || '').trim()
       // Get the largest photo size
       const photo = message.photo[message.photo.length - 1]
       const fileRes = await fetch(`https://api.telegram.org/bot${token}/getFile?file_id=${photo.file_id}`)
@@ -713,16 +718,15 @@ Notes: ${profile.customer_notes || 'None'}`, { parse_mode: 'Markdown' })
     // Log to inventory if they delivered bottles
     const bottleMatch = matched.find(m => m.product.name.toLowerCase().includes('bottle'))
     if (bottleMatch) {
-       // Increment jars
-       await supabase.from('profiles').update({ empty_jars_held: (profile.empty_jars_held || 0) + bottleMatch.quantity }).eq('id', profile.id)
-    }
-    if (bottleMatch) {
-       await supabase.from('inventory_logs').insert({
-         driver_id: chatId.toString(),
-         action_type: 'delivered_full',
-         quantity: bottleMatch.quantity,
-         customer_email: customerEmail
-       })
+      // Increment jars held by customer
+      await supabase.from('profiles').update({ empty_jars_held: (profile.empty_jars_held || 0) + bottleMatch.quantity }).eq('id', profile.id)
+      // Log inventory movement for driver stats
+      await supabase.from('inventory_logs').insert({
+        driver_id: chatId.toString(),
+        action_type: 'delivered_full',
+        quantity: bottleMatch.quantity,
+        customer_email: customerEmail
+      })
     }
 
     console.log('[TG Bot] Transaction logged.')
@@ -755,9 +759,10 @@ Notes: ${profile.customer_notes || 'None'}`, { parse_mode: 'Markdown' })
 
     let unmatchedNote = unmatched.length > 0 ? `\n\n⚠️ Not found in DB: ${unmatched.join(', ')}` : ''
     
-    // Smart Jars Reminder
-    if (profile.empty_jars_held > 5) {
-      unmatchedNote += `\n\n⚠️ *JARS WARNING*\nCustomer is holding ${profile.empty_jars_held} empty jars! Please collect them.`
+    // Smart Jars Reminder — use post-delivery count
+    const updatedJarsHeld = (profile.empty_jars_held || 0) + (bottleMatch?.quantity ?? 0)
+    if (updatedJarsHeld > 5) {
+      unmatchedNote += `\n\n⚠️ *JARS WARNING*\nCustomer is now holding ${updatedJarsHeld} empty jars! Please collect them.`
     }
     
     // Low balance warning

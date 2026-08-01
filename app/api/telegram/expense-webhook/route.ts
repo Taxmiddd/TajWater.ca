@@ -3,18 +3,15 @@ import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
 
-async function sendTelegramMessage(chatId: string | number, text: string, options?: any) {
-  const token = (process.env.TELEGRAM_EXPENSE_BOT_TOKEN || '').replace(/['"]/g, '').trim()
+async function sendTelegramMessage(chatId: string | number, text: string, options?: Record<string, any>) {
+  const token = (process.env.TELEGRAM_EXPENSE_BOT_TOKEN || '').trim()
   
   if (!token) {
     console.error('[Expense Bot] TELEGRAM_EXPENSE_BOT_TOKEN not set!')
     return
   }
 
-  const payload: any = { chat_id: chatId, text }
-  if (options) {
-      Object.assign(payload, options)
-  }
+  const payload: any = { chat_id: chatId, text, ...options }
 
   const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     method: 'POST',
