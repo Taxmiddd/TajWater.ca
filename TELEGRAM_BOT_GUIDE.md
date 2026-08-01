@@ -8,17 +8,19 @@
 
 1. [Bot Overview](#bot-overview)
 2. [TajWater Bot — For Drivers](#-tajwater-bot--for-drivers)
-   - [Getting Started](#getting-started)
+   - [Step 1: Register](#step-1--link-your-account-first-time-only)
+   - [Step 2: Open the Menu](#step-2--open-the-menu)
    - [Logging a Delivery](#logging-a-delivery)
    - [Inventory Tracking](#inventory-tracking)
    - [Customer Lookup](#customer-lookup)
    - [Logging Expenses](#logging-expenses)
    - [Capturing Leads](#capturing-leads)
 3. [TajWater Bot — Admin Commands](#-tajwater-bot--admin-only-commands)
+   - [Granting Admin Access](#granting-admin-access)
    - [Wallet Top-Up](#wallet-top-up)
    - [Manual Invoicing](#manual-invoicing)
    - [Assign Dispenser](#assign-dispenser-subscription)
-   - [Broadcast to Drivers](#broadcast-to-drivers)
+   - [Broadcast to All Users](#broadcast-to-all-users)
    - [Reply to Support Tickets](#replying-to-support-tickets)
 4. [TajExpense Bot](#-tajexpense-bot)
 5. [Warnings & Common Errors](#-warnings--common-errors)
@@ -32,15 +34,13 @@
 | **TajWater Bot** | Deliveries, CRM, inventory, admin ops | Drivers + Admins |
 | **TajExpense Bot** | Logging business expenses | Drivers + Admins |
 
-> **Note:** Admin commands are role-locked. Roles are set in the Supabase dashboard — no pre-registration or chat ID lists required.
+> **No setup required for users.** Anyone with a TajWater account can self-register using `/register`. Admin roles are promoted via the Supabase dashboard — no chat ID configuration needed.
 
 ---
 
 ## 🚚 TajWater Bot — For Drivers
 
-### Getting Started
-
-#### Step 1 — Link Your Account (First Time Only)
+### Step 1 — Link Your Account (First Time Only)
 
 **Command:** `/register your@email.com`
 
@@ -48,7 +48,7 @@
 /register john@tajwater.ca
 ```
 
-The first time you message the bot, you need to link your Telegram account to your TajWater profile. Send this command with the email you signed up with. You'll get a confirmation:
+Send this command with the **email address you signed up with** on the TajWater website. The bot will link your Telegram account to your profile automatically:
 
 ```
 ✅ Welcome, John!
@@ -59,15 +59,19 @@ Role: 🚚 Driver
 Type /start to open the menu.
 ```
 
-You only need to do this **once**. After that, the bot remembers you.
+You only need to do this **once**. After that, the bot always knows who you are.
+
+> ⚠️ If your email isn't recognised, make sure it matches exactly what's on your TajWater account.
 
 ---
 
-#### Step 2 — Open the Menu
+### Step 2 — Open the Menu
 
 **Command:** `/start`
 
 Opens an interactive button menu. Tap any button to get instructions for that action.
+
+> If you haven't registered yet, `/start` will ask you to run `/register` first.
 
 **Menu Buttons:**
 
@@ -103,21 +107,19 @@ sarah@example.com, 10 bottles, 1 dispenser, 3 paper cups
 2. Items are matched to products in the database
 3. Customer's wallet balance is checked
 4. Total cost is deducted from their wallet
-5. Bottle count is added to the customer's "Jars Held"
-6. Your truck inventory is updated (delivered bottles)
+5. Delivered bottle count is added to the customer's "Jars Held"
+6. Your truck inventory is updated
 7. A receipt email is sent to the customer
-8. You get a confirmation with itemized breakdown
+8. You get a confirmation with an itemized breakdown
 
-**⚠️ Warnings you may receive:**
-- `❌ Insufficient balance` — Customer doesn't have enough funds; do not deliver until topped up
-- `⚠️ JARS WARNING` — Customer is holding more than 5 empty jars; collect them this visit
+**⚠️ Warnings you may receive in the confirmation:**
+- `⚠️ JARS WARNING` — Customer is holding 5+ empty jars after this delivery; collect them this visit
 - `⚠️ LOW BALANCE WARNING` — Customer balance is under $15; remind them to top up
-- `⚠️ Not found in DB: "..."` — One or more items didn't match a product; the rest were still processed
 
 **📸 Proof of Delivery (Optional)**
 
-Attach a **photo** and/or share your **location** together with your delivery message. The bot will:
-- Compress and save the photo to secure storage
+Attach a **photo** and/or share your **location** in the same message as the delivery. The bot will:
+- Compress and save the photo to secure cloud storage
 - Attach it to the transaction log for admins to review
 
 ---
@@ -229,13 +231,37 @@ Admins can view and export all logged expenses from the Admin Dashboard.
 
 Saves the lead into the CRM on the Admin Dashboard for the office to follow up.
 
-> **Note:** Multi-word names with spaces are not yet supported. Use a first name only, or combine with an underscore (e.g. `Jane_Doe`).
+> **Note:** Multi-word names are not supported yet. Use first name only, or combine with underscore (e.g. `Jane_Doe`).
 
 ---
 
 ## 👑 TajWater Bot — Admin-Only Commands
 
-> These commands will return `❌ You do not have permission` if your Telegram account is not registered as an admin.
+Admin commands require your profile to have `telegram_role = 'admin'` in the database. If you try an admin command without this role, you'll see:
+
+```
+❌ Admin access required. Register with /register first.
+```
+
+---
+
+### Granting Admin Access
+
+There are no hardcoded admin lists. Access is managed entirely in **Supabase**:
+
+1. The user runs `/register their@email.com` in Telegram
+2. Go to **Supabase Dashboard → Table Editor → `profiles`**
+3. Find the row for that user
+4. Set the `telegram_role` column to `admin`
+5. They immediately gain admin access — no restart needed
+
+> Regular drivers have `telegram_role = 'driver'` (set automatically on registration). Unregistered users have `NULL`.
+
+**Required SQL migration** (run once in Supabase SQL Editor if not already done):
+```sql
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS telegram_chat_id bigint UNIQUE;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS telegram_role text CHECK (telegram_role IN ('driver', 'admin'));
+```
 
 ---
 
@@ -275,7 +301,7 @@ Turns on the `dispenser_subscription_active` flag for this customer. It will the
 
 ---
 
-### Broadcast to Drivers
+### Broadcast to All Users
 
 **Command:** `/broadcast [message]`
 
@@ -284,7 +310,7 @@ Turns on the `dispenser_subscription_active` flag for this customer. It will the
 /broadcast Route change today — avoid downtown core until 3pm
 ```
 
-Sends your message to **all registered Telegram users** (anyone who has run `/register`). They will receive:
+Sends your message to **every registered Telegram user** (anyone who has ever run `/register`). They receive:
 
 ```
 📢 ADMIN BROADCAST
@@ -296,7 +322,7 @@ Traffic delay on Highway 1, drive safely!
 
 ### Replying to Support Tickets
 
-When a customer submits a support ticket via the website, the bot sends a notification to all admin chats that looks like this:
+When a customer submits a support ticket via the website, all admins receive a notification:
 
 ```
 🚨 New Support Ticket 🚨
@@ -309,25 +335,25 @@ My order from yesterday never arrived.
 ```
 
 **To reply:**
-1. Tap and hold on that specific notification message
-2. Tap **Reply** in Telegram
+1. Tap and hold on that specific notification message in Telegram
+2. Tap **Reply**
 3. Type your response and send
 
-The bot will automatically email your reply to the customer and confirm with `✅ Reply sent to jane@email.com`.
+The bot emails your reply directly to the customer and confirms with `✅ Reply sent to jane@email.com`.
 
-> ⚠️ You **must** use Telegram's Reply feature on the exact ticket message. Sending a new message will not work.
+> ⚠️ You **must** use Telegram's Reply feature on the exact ticket message. A new message will not be routed.
 
 ---
 
 ## 💸 TajExpense Bot
 
-A dedicated, lightweight bot purely for logging business expenses. Useful if you want a separate bot for expense tracking without access to delivery or CRM features.
+A dedicated lightweight bot for logging business expenses. Operates independently from the TajWater Bot — no `/register` required.
 
 ### Getting Started
 
 **Command:** `/start`
 
-Sends a welcome message with the usage format.
+Sends a welcome message with usage instructions.
 
 ---
 
@@ -354,22 +380,24 @@ Category: Gas
 Desc: Refilled truck 1
 ```
 
-All expenses are visible on the Admin Dashboard.
+All expenses are visible and exportable from the Admin Dashboard.
 
 ---
 
 ## ⚠️ Warnings & Common Errors
 
-| Error Message | Cause | Fix |
-|---------------|-------|-----|
+| Message | Cause | Fix |
+|---------|-------|-----|
 | `❌ No email found` | Delivery message missing a valid email | Include the customer's email at the start |
-| `❌ No items found after the email` | Email sent but no items listed | Add items after the email, e.g. `john@x.com, 5 bottles` |
-| `❌ None of the items matched` | Product names don't match the database | Use common names: `bottles`, `refill`, `dispenser`, `paper cups` |
-| `❌ Insufficient balance` | Customer wallet too low | Ask admin to top up, or don't proceed with delivery |
-| `❌ No customer found with email` | Email not registered in the system | Double-check the email spelling |
-| `❌ You do not have permission` | Command is admin-only | Contact your admin |
-| `❌ Invalid amount` | Amount is 0, negative, or not a number | Use a positive number, e.g. `50` or `12.50` |
-| `❌ Invalid format` | Command arguments are missing or wrong | Check the format shown in this guide |
+| `❌ No items found after the email` | Email sent with no items | Add items after the email, e.g. `john@x.com, 5 bottles` |
+| `❌ None of the items matched` | Item names don't match the database | Use names like: `bottles`, `refill`, `dispenser`, `paper cups` |
+| `❌ Insufficient balance` | Customer wallet too low | Ask admin to `/topup`, do not deliver |
+| `❌ No customer found with email` | Email not in the system | Double-check spelling |
+| `❌ Admin access required` | Command needs admin role | Ask admin to set `telegram_role = 'admin'` in Supabase |
+| `❌ No account found with email` | `/register` email doesn't match any profile | Use the exact email from your TajWater account |
+| `⚠️ This email is already linked` | Email is registered on a different Telegram account | Contact your admin |
+| `❌ Invalid amount` | Amount is 0, negative, or non-numeric | Use a positive number, e.g. `50` or `12.50` |
+| `❌ Invalid format` | Command arguments are missing | Check the format in this guide |
 
 ---
 
