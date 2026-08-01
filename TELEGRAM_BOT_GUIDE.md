@@ -32,13 +32,38 @@
 | **TajWater Bot** | Deliveries, CRM, inventory, admin ops | Drivers + Admins |
 | **TajExpense Bot** | Logging business expenses | Drivers + Admins |
 
-> **Note:** Admin commands in the TajWater Bot are locked. If you're not a registered admin, you'll get a `❌ You do not have permission` message.
+> **Note:** Admin commands are role-locked. Roles are set in the Supabase dashboard — no pre-registration or chat ID lists required.
 
 ---
 
 ## 🚚 TajWater Bot — For Drivers
 
 ### Getting Started
+
+#### Step 1 — Link Your Account (First Time Only)
+
+**Command:** `/register your@email.com`
+
+```
+/register john@tajwater.ca
+```
+
+The first time you message the bot, you need to link your Telegram account to your TajWater profile. Send this command with the email you signed up with. You'll get a confirmation:
+
+```
+✅ Welcome, John!
+
+Your Telegram account is now linked.
+Role: 🚚 Driver
+
+Type /start to open the menu.
+```
+
+You only need to do this **once**. After that, the bot remembers you.
+
+---
+
+#### Step 2 — Open the Menu
 
 **Command:** `/start`
 
@@ -259,7 +284,7 @@ Turns on the `dispenser_subscription_active` flag for this customer. It will the
 /broadcast Route change today — avoid downtown core until 3pm
 ```
 
-Sends your message to all registered drivers. The drivers will receive:
+Sends your message to **all registered Telegram users** (anyone who has run `/register`). They will receive:
 
 ```
 📢 ADMIN BROADCAST

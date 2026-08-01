@@ -24,6 +24,16 @@ async function sendTelegramMessage(chatId: string | number, text: string, option
   if (!data.ok) console.error('[TG Bot] sendMessage failed:', JSON.stringify(data))
 }
 
+// ─── DB-based auth: look up registered Telegram user ─────────────────────────
+async function getTelegramUser(supabase: ReturnType<typeof createClient>, chatId: number) {
+  const { data } = await supabase
+    .from('profiles')
+    .select('id, name, email, telegram_role, wallet_balance, empty_jars_held')
+    .eq('telegram_chat_id', chatId)
+    .single()
+  return data ?? null
+}
+
 // ─── Parse items ─────────────────────────────────────────────
 // Input:  "5 bottles, 2 paper cups. 1 dispenser"
 // Output: [{ qty: 5, keyword: 'bottles' }, { qty: 2, keyword: 'paper cups' }, ...]
@@ -131,8 +141,9 @@ export async function POST(req: Request) {
 
     // ─── Handle Two-Way Admin Replies to Support Tickets ──────────────────
     if (message.reply_to_message) {
-      const adminChatIds = (process.env.TELEGRAM_ADMIN_CHAT_IDS || '').split(',')
-      if (adminChatIds.includes(chatId.toString())) {
+      const supabaseReply = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+      const replyUser = await getTelegramUser(supabaseReply, chatId)
+      if (replyUser?.telegram_role === 'admin') {
         const originalText = message.reply_to_message.text || ''
         
         // If the original message was a support ticket
@@ -145,7 +156,7 @@ export async function POST(req: Request) {
                 from: `TajWater Support <${process.env.NEXT_PUBLIC_COMPANY_EMAIL ?? 'support@tajwater.ca'}>`,
                 to: customerEmail,
                 subject: 'Re: Your Support Ticket',
-                text: text, // The admin's reply
+                text: text,
               })
               await sendTelegramMessage(chatId, `✅ Reply sent to ${customerEmail}`)
               return NextResponse.json({ ok: true })
@@ -160,11 +171,50 @@ export async function POST(req: Request) {
     }
 
     
+    // Handle /register command — links Telegram account to a profile by email
+    if (text.startsWith('/register')) {
+      const args = text.split(' ')
+      if (args.length < 2) {
+        await sendTelegramMessage(chatId, "❌ Please provide your account email.\nExample: `/register your@email.com`", { parse_mode: 'Markdown' })
+        return NextResponse.json({ ok: true })
+      }
+      const regEmail = args[1].toLowerCase()
+      const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+
+      const { data: regProfile, error: regErr } = await supabase
+        .from('profiles')
+        .select('id, name, telegram_role, telegram_chat_id')
+        .eq('email', regEmail)
+        .single()
+
+      if (regErr || !regProfile) {
+        await sendTelegramMessage(chatId, `❌ No account found with email: ${regEmail}\nMake sure you use the email you signed up with.`)
+        return NextResponse.json({ ok: true })
+      }
+
+      if (regProfile.telegram_chat_id && regProfile.telegram_chat_id !== chatId) {
+        await sendTelegramMessage(chatId, `⚠️ This email is already linked to a different Telegram account. Contact your admin.`)
+        return NextResponse.json({ ok: true })
+      }
+
+      // Link the chat ID and set role to 'driver' if not already set
+      const newRole = regProfile.telegram_role ?? 'driver'
+      await supabase.from('profiles').update({ telegram_chat_id: chatId, telegram_role: newRole }).eq('id', regProfile.id)
+
+      const roleLabel = newRole === 'admin' ? '👑 Admin' : '🚚 Driver'
+      await sendTelegramMessage(chatId,
+        `✅ *Welcome, ${regProfile.name}!*\n\nYour Telegram account is now linked.\nRole: ${roleLabel}\n\nType /start to open the menu.`,
+        { parse_mode: 'Markdown' }
+      )
+      return NextResponse.json({ ok: true })
+    }
+
     // Handle /invoice command for manual invoicing (admin only)
     if (text.startsWith('/invoice')) {
-      const adminChatIds = (process.env.TELEGRAM_ADMIN_CHAT_IDS || '').split(',')
-      if (!adminChatIds.includes(chatId.toString())) {
-        await sendTelegramMessage(chatId, "❌ You do not have permission to use this command.")
+      const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+      const invoiceUser = await getTelegramUser(supabase, chatId)
+      if (!invoiceUser || invoiceUser.telegram_role !== 'admin') {
+        await sendTelegramMessage(chatId, "❌ Admin access required. Register with /register first.")
         return NextResponse.json({ ok: true })
       }
       const args = text.split(' ')
@@ -181,11 +231,6 @@ export async function POST(req: Request) {
         return NextResponse.json({ ok: true })
       }
 
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-      )
-
       await supabase.from('invoices').insert({
         customer_email: email,
         amount: amount,
@@ -193,8 +238,7 @@ export async function POST(req: Request) {
         status: 'unpaid'
       })
 
-      // Send email logic would go here (omitted for brevity, could use resend)
-      await sendTelegramMessage(chatId, `✅ Invoice generated for ${email} - ${amount}`)
+      await sendTelegramMessage(chatId, `✅ Invoice generated for ${email} — $${amount.toFixed(2)}`)
       return NextResponse.json({ ok: true })
     }
 
@@ -288,33 +332,48 @@ Notes: ${profile.customer_notes || 'None'}`, { parse_mode: 'Markdown' })
 
     // Handle /start command for interactive menu
     if (text.startsWith('/start')) {
-      await sendTelegramMessage(chatId, "Welcome to the TajWater Driver Hub! What would you like to do?", {
-        inline_keyboard: [
-          [
-            { text: "🚚 Start Shift", callback_data: "start_shift" },
-            { text: "🛑 End Shift", callback_data: "end_shift" }
-          ],
-          [
-            { text: "📦 Log Delivery", callback_data: "log_delivery" }
-          ],
-          [
-            { text: "📥 Stock Truck", callback_data: "stock_truck" },
-            { text: "🔄 Return Empties", callback_data: "return_empties" }
-          ],
-          [
-            { text: "📜 Customer History", callback_data: "customer_history" },
-            { text: "📊 My Stats", callback_data: "my_stats" }
+      const supabaseStart = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+      const startUser = await getTelegramUser(supabaseStart, chatId)
+
+      // Prompt registration if not linked
+      if (!startUser) {
+        await sendTelegramMessage(chatId,
+          `👋 Welcome to TajWater Bot!\n\nTo get started, link your account:\n\`/register your@email.com\``,
+          { parse_mode: 'Markdown' }
+        )
+        return NextResponse.json({ ok: true })
+      }
+
+      await sendTelegramMessage(chatId, `Welcome back, ${startUser.name}! What would you like to do?`, {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              { text: "🚚 Start Shift", callback_data: "start_shift" },
+              { text: "🛑 End Shift", callback_data: "end_shift" }
+            ],
+            [
+              { text: "📦 Log Delivery", callback_data: "log_delivery" }
+            ],
+            [
+              { text: "📥 Stock Truck", callback_data: "stock_truck" },
+              { text: "🔄 Return Empties", callback_data: "return_empties" }
+            ],
+            [
+              { text: "📜 Customer History", callback_data: "customer_history" },
+              { text: "📊 My Stats", callback_data: "my_stats" }
+            ]
           ]
-        ]
+        }
       })
       return NextResponse.json({ ok: true })
     }
 
     // Handle /topup command for admins
     if (text.startsWith('/topup')) {
-      const adminChatIds = (process.env.TELEGRAM_ADMIN_CHAT_IDS || '').split(',')
-      if (!adminChatIds.includes(chatId.toString())) {
-        await sendTelegramMessage(chatId, "❌ You do not have permission to use this command.")
+      const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+      const topupUser = await getTelegramUser(supabase, chatId)
+      if (!topupUser || topupUser.telegram_role !== 'admin') {
+        await sendTelegramMessage(chatId, "❌ Admin access required. Register with /register first.")
         return NextResponse.json({ ok: true })
       }
 
@@ -332,16 +391,9 @@ Notes: ${profile.customer_notes || 'None'}`, { parse_mode: 'Markdown' })
         return NextResponse.json({ ok: true })
       }
 
-      // Init Supabase
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-      )
-
-      // Find profile
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('id, name, email, wallet_balance, empty_jars_held, dispenser_subscription_active, notes')
+        .select('id, name, email, wallet_balance')
         .eq('email', email)
         .single()
 
@@ -371,48 +423,51 @@ Notes: ${profile.customer_notes || 'None'}`, { parse_mode: 'Markdown' })
       return NextResponse.json({ ok: true })
     }
 
-    
     if (text.startsWith('/assign_dispenser')) {
-      const adminChatIds = (process.env.TELEGRAM_ADMIN_CHAT_IDS || '').split(',')
-      if (!adminChatIds.includes(chatId.toString())) {
-        await sendTelegramMessage(chatId, "❌ You do not have permission to use this command.")
+      const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+      const assignUser = await getTelegramUser(supabase, chatId)
+      if (!assignUser || assignUser.telegram_role !== 'admin') {
+        await sendTelegramMessage(chatId, "❌ Admin access required. Register with /register first.")
         return NextResponse.json({ ok: true })
       }
       const args = text.split(' ');
       if (args.length < 2) return NextResponse.json({ ok: true });
       const email = args[1].toLowerCase();
-      
-      const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
       await supabase.from('profiles').update({ dispenser_subscription_active: true }).eq('email', email);
-      
       await sendTelegramMessage(chatId, `✅ Dispenser assigned to ${email}`);
       return NextResponse.json({ ok: true });
     }
 
     // Handle /broadcast command for admins
     if (text.startsWith('/broadcast')) {
-      const adminChatIds = (process.env.TELEGRAM_ADMIN_CHAT_IDS || '').split(',')
-      if (!adminChatIds.includes(chatId.toString())) {
-        await sendTelegramMessage(chatId, "❌ You do not have permission to use this command.")
+      const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+      const broadcastUser = await getTelegramUser(supabase, chatId)
+      if (!broadcastUser || broadcastUser.telegram_role !== 'admin') {
+        await sendTelegramMessage(chatId, "❌ Admin access required. Register with /register first.")
         return NextResponse.json({ ok: true })
       }
 
       const messageToBroadcast = text.replace('/broadcast', '').trim()
       if (!messageToBroadcast) {
-        await sendTelegramMessage(chatId, "❌ Please provide a message. Example:\n/broadcast Traffic delay on Main St.")
+        await sendTelegramMessage(chatId, "❌ Please provide a message. Example:\n`/broadcast Traffic delay on Main St.`", { parse_mode: 'Markdown' })
         return NextResponse.json({ ok: true })
       }
 
-      const driverChatIds = (process.env.TELEGRAM_DRIVER_CHAT_IDS || '').split(',')
+      // Fetch all registered Telegram users from DB
+      const { data: registeredUsers } = await supabase
+        .from('profiles')
+        .select('telegram_chat_id')
+        .not('telegram_chat_id', 'is', null)
+
       let sentCount = 0
-      for (const dChatId of driverChatIds) {
-        if (dChatId.trim()) {
-           await sendTelegramMessage(dChatId.trim(), `📢 *ADMIN BROADCAST*\n\n${messageToBroadcast}`, { parse_mode: 'Markdown' })
-           sentCount++
+      for (const user of registeredUsers ?? []) {
+        if (user.telegram_chat_id && user.telegram_chat_id !== chatId) {
+          await sendTelegramMessage(user.telegram_chat_id, `📢 *ADMIN BROADCAST*\n\n${messageToBroadcast}`, { parse_mode: 'Markdown' })
+          sentCount++
         }
       }
-      
-      await sendTelegramMessage(chatId, `✅ Broadcast sent to ${sentCount} driver(s).`)
+
+      await sendTelegramMessage(chatId, `✅ Broadcast sent to ${sentCount} registered user(s).`)
       return NextResponse.json({ ok: true })
     }
 

@@ -36,3 +36,10 @@ CREATE TABLE IF NOT EXISTS invoices (
   status text DEFAULT 'unpaid',
   created_at timestamp with time zone DEFAULT now()
 );
+
+-- 7. Add Telegram self-registration columns to profiles
+-- telegram_chat_id: the user's Telegram numeric chat ID (auto-set on /register)
+-- telegram_role: 'driver' or 'admin' — set 'admin' manually in Supabase Dashboard for admins
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS telegram_chat_id bigint UNIQUE;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS telegram_role text CHECK (telegram_role IN ('driver', 'admin'));
+

@@ -38,27 +38,36 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Failed to send message' }, { status: 500 })
   }
 
-  // Send Push Notification to Telegram
-  const botToken = (process.env.TELEGRAM_BOT_TOKEN || '').replace(/['"]/g, '').trim()
-  const adminChatIds = (process.env.TELEGRAM_ADMIN_CHAT_IDS || '').split(',')
+  // Send Push Notification to Telegram admins (fetched from DB)
+  const botToken = (process.env.TELEGRAM_BOT_TOKEN || '').trim()
 
-  if (botToken && adminChatIds.length > 0) {
+  if (botToken) {
     const notifyText = `🚨 *New Support Ticket* 🚨\n\n*From:* ${name} (${email})\n*Subject:* ${subject}\n\n*Message:*\n${message}`
-    
-    // Fire and forget telegram notification
-    Promise.all(adminChatIds.map(async (chatId) => {
-      if (!chatId.trim()) return
-      try {
-        await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: chatId.trim(), text: notifyText, parse_mode: 'Markdown' }),
-        })
-      } catch (err) {
-        console.error('Failed to notify telegram admin:', err)
-      }
-    }))
+
+    // Fetch all admin chat IDs from DB
+    const { data: admins } = await db
+      .from('profiles')
+      .select('telegram_chat_id')
+      .eq('telegram_role', 'admin')
+      .not('telegram_chat_id', 'is', null)
+
+    if (admins && admins.length > 0) {
+      // Fire and forget telegram notification
+      Promise.all(admins.map(async (admin) => {
+        if (!admin.telegram_chat_id) return
+        try {
+          await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: admin.telegram_chat_id, text: notifyText, parse_mode: 'Markdown' }),
+          })
+        } catch (err) {
+          console.error('Failed to notify telegram admin:', err)
+        }
+      }))
+    }
   }
+
 
   return NextResponse.json({ success: true })
 }
