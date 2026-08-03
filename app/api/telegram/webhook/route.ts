@@ -197,16 +197,20 @@ export async function POST(req: Request) {
         return NextResponse.json({ ok: true })
       }
 
-      // If the profile already has a role set, keep it.
-      // Otherwise check admin_users table — admins get 'admin', everyone else gets 'driver'.
+      // If the profile is in admin_users, force their role to 'admin'
+      // Otherwise, default to 'driver' (or keep their existing role if already set)
       let newRole = regProfile.telegram_role
-      if (!newRole) {
-        const { data: adminEntry } = await supabase
-          .from('admin_users')
-          .select('role')
-          .eq('email', regEmail)
-          .single()
-        newRole = adminEntry ? 'admin' : 'driver'
+
+      const { data: adminEntry } = await supabase
+        .from('admin_users')
+        .select('role')
+        .eq('email', regEmail)
+        .single()
+        
+      if (adminEntry) {
+        newRole = 'admin'
+      } else if (!newRole) {
+        newRole = 'driver'
       }
 
       await supabase.from('profiles').update({ telegram_chat_id: chatId, telegram_role: newRole }).eq('id', regProfile.id)
