@@ -7,11 +7,11 @@ import crypto from 'crypto'
 
 // Fixed recharge packages: [CAD charged, credits added to wallet]
 const RECHARGE_PACKAGES: Record<number, number> = {
-  100: 107,
-  200: 220,
-  300: 330,
-  400: 450,
-  500: 600,
+  100: 100,
+  200: 200,
+  300: 300,
+  400: 400,
+  500: 500,
 }
 
 export async function POST(req: NextRequest) {

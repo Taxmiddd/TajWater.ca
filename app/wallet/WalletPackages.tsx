@@ -22,8 +22,7 @@ export default function WalletPackages({ packages, isLoggedIn, isBusiness = fals
   const [activeTab, setActiveTab] = React.useState<'consumer' | 'business'>(isBusiness ? 'business' : 'consumer')
 
   const handleAddToCart = (pkg: Package) => {
-    const isBiz = activeTab === 'business'
-    const credits = isBiz ? pkg.pay : pkg.credits
+    const credits = pkg.pay
     
     // Add to cart store (which is persisted in localStorage)
     addItem({
@@ -64,9 +63,7 @@ export default function WalletPackages({ packages, isLoggedIn, isBusiness = fals
         </button>
       </div>
       {packages.map((pkg) => {
-        const isBiz = activeTab === 'business'
-        const credits = isBiz ? pkg.pay : pkg.credits
-        const bonus = credits - pkg.pay
+        const credits = pkg.pay
         return (
           <div 
             key={pkg.pay} 
@@ -82,13 +79,6 @@ export default function WalletPackages({ packages, isLoggedIn, isBusiness = fals
                 <p className="text-xs text-[#4a7fa5]">Pay ${pkg.pay} CAD</p>
               </div>
             </div>
-            {bonus > 0 && (
-              <div className="text-right transition-transform group-hover:translate-x-12 opacity-100 group-hover:opacity-0">
-                <span className="inline-block bg-green-100 text-green-700 text-sm font-bold px-3 py-1 rounded-full shadow-sm">
-                  +{bonus} Bonus
-                </span>
-              </div>
-            )}
 
             {/* Hover Cart Button */}
             <div className="absolute right-4 top-1/2 -translate-y-1/2 translate-x-12 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all">
@@ -108,7 +98,7 @@ export default function WalletPackages({ packages, isLoggedIn, isBusiness = fals
       <div className="p-4 rounded-2xl bg-white border border-slate-200 mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <p className="font-bold text-[#0c2340]">Custom Amount</p>
-          <p className="text-xs text-[#4a7fa5]">Minimum $100 CAD. <span className="text-slate-500 italic">No bonus credits given.</span></p>
+          <p className="text-xs text-[#4a7fa5]">Minimum $100 CAD.</p>
         </div>
         
         {!isLoggedIn ? (

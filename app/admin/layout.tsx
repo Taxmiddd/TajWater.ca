@@ -26,6 +26,7 @@ const NAV_ITEMS = [
   { icon: CreditCard,      label: 'Payments',   href: '/admin/payments',    roles: ['super_admin', 'manager'] },
   { icon: Wallet,          label: 'Wallets',    href: '/admin/wallet',      roles: ['super_admin', 'manager'] },
   { icon: Box,             label: 'Inventory',  href: '/admin/inventory',   roles: ['super_admin', 'manager', 'delivery'] },
+  { icon: Package,         label: 'Bottles',    href: '/admin/bottles',     roles: ['super_admin', 'manager', 'delivery'] },
   { icon: Tag,             label: 'Discounts',  href: '/admin/discounts',   roles: ['super_admin', 'manager'] },
   { icon: MessageSquare,   label: 'Tickets',    href: '/admin/tickets',     roles: ['super_admin', 'manager'] },
   { icon: BarChart2,       label: 'Analytics',  href: '/admin/analytics',   roles: ['super_admin', 'manager'] },

@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button'
 import WalletPackages from './WalletPackages'
 
 export const metadata = {
-  title: 'TajWater Wallet | Bonus Credits & Easy Payments',
-  description: 'Load your TajWater wallet and earn bonus credits. The smartest way to pay for water refills and products in Vancouver.',
+  title: 'TajWater Wallet | Easy Payments',
+  description: 'Load your TajWater wallet to pay for water refills and products in Vancouver.',
 }
 
 export default async function WalletInfoPage() {
@@ -34,9 +34,9 @@ export default async function WalletInfoPage() {
 
   const features = [
     {
-      icon: <Gift className="w-6 h-6 text-[#0097a7]" />,
-      title: 'Earn Bonus Credits',
-      description: 'Get extra credits on every top-up. The more you load, the more bonus credits you receive automatically.'
+      icon: <Wallet className="w-6 h-6 text-[#0097a7]" />,
+      title: 'Easy Reloads',
+      description: 'Quickly add funds to your wallet and keep track of your spending on all TajWater products.'
     },
     {
       icon: <Zap className="w-6 h-6 text-[#1565c0]" />,
@@ -56,11 +56,11 @@ export default async function WalletInfoPage() {
   ]
 
   const packages = [
-    { pay: 100, credits: 107 },
-    { pay: 200, credits: 220 },
-    { pay: 300, credits: 330 },
-    { pay: 400, credits: 450 },
-    { pay: 500, credits: 600 },
+    { pay: 100, credits: 100 },
+    { pay: 200, credits: 200 },
+    { pay: 300, credits: 300 },
+    { pay: 400, credits: 400 },
+    { pay: 500, credits: 500 },
   ]
 
   return (
@@ -77,7 +77,7 @@ export default async function WalletInfoPage() {
               The smartest way to pay for your <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0097a7] to-[#1565c0]">pure water.</span>
             </h1>
             <p className="text-lg text-[#4a7fa5] max-w-xl leading-relaxed">
-              Load funds into your account and unlock bonus credits instantly. Use your balance for fast, secure checkout on all products and refills.
+              Load funds into your account for fast, secure checkout on all products and refills.
             </p>
 
             <div className="pt-4 flex flex-col sm:flex-row gap-4">
@@ -100,7 +100,7 @@ export default async function WalletInfoPage() {
           <div className="relative animate-in fade-in slide-in-from-right-8 duration-700 delay-150">
             <div className="absolute inset-0 bg-gradient-to-tr from-[#0097a7]/20 to-[#1565c0]/20 rounded-[3rem] blur-3xl transform -rotate-6" />
             <div className="relative bg-white border border-[#cce7f0] p-8 sm:p-12 rounded-[2rem] shadow-2xl">
-              <h3 className="text-2xl font-bold text-[#0c2340] mb-6 text-center">Bonus Packages</h3>
+              <h3 className="text-2xl font-bold text-[#0c2340] mb-6 text-center">Wallet Packages</h3>
               <WalletPackages packages={packages} isLoggedIn={isLoggedIn} isBusiness={isBusiness} />
             </div>
           </div>
@@ -147,8 +147,8 @@ export default async function WalletInfoPage() {
           <div className="flex gap-4">
             <div className="shrink-0 w-8 h-8 rounded-full bg-[#0097a7] text-white font-bold flex items-center justify-center mt-1">2</div>
             <div>
-              <h4 className="text-xl font-bold text-[#0c2340] mb-2">Add Funds & Get Bonuses</h4>
-              <p className="text-[#4a7fa5] leading-relaxed">Navigate to your Wallet Dashboard, select a package, and pay securely via Square using your saved card. Bonus credits are applied instantly.</p>
+              <h4 className="text-xl font-bold text-[#0c2340] mb-2">Add Funds to your Wallet</h4>
+              <p className="text-[#4a7fa5] leading-relaxed">Navigate to your Wallet Dashboard, select a package, and pay securely via Square using your saved card. Credits are applied instantly.</p>
             </div>
           </div>
           <div className="flex gap-4">

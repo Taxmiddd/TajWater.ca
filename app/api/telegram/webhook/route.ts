@@ -799,23 +799,60 @@ Notes: ${profile.customer_notes || 'None'}`, { parse_mode: 'Markdown' })
       .select('id, name, price')
       .eq('active', true)
 
+    // Fetch delivery zones
+    const { data: allZones, error: zonesError } = await supabase
+      .from('delivery_zones')
+      .select('id, name, price')
+      .eq('active', true)
+      
+    // Fallback if delivery_zones doesn't exist or errors (we can also check 'zones')
+    let zonesToUse = allZones || [];
+    if (zonesError) {
+      const { data: altZones } = await supabase.from('zones').select('id, name, delivery_fee');
+      if (altZones) {
+        zonesToUse = altZones.map(z => ({ id: z.id, name: `Delivery ${z.name}`, price: z.delivery_fee }));
+      }
+    }
+
     if (productsError || !allProducts?.length) {
       console.error('[TG Bot] Products error:', productsError)
       await sendTelegramMessage(chatId, `❌ Could not load products from database.`)
       return NextResponse.json({ ok: true })
     }
 
-    // Match each parsed item to a product
-    const matched: { product: typeof allProducts[0]; quantity: number }[] = []
+    // Match each parsed item to a product or zone
+    const matched: { product: { id: string, name: string, price: number }; quantity: number }[] = []
     const unmatched: string[] = []
 
     for (const item of parsedItems) {
-      const product = findProduct(item.keyword, allProducts)
-      if (product) {
+      // First try to match as a product
+      let match = findProduct(item.keyword, allProducts)
+      
+      // If not found, try to match as a delivery zone
+      if (!match && zonesToUse.length > 0) {
+        const kw = item.keyword.toLowerCase();
+        // Look for "delivery <zone>" or just "<zone>" if keyword has "delivery"
+        let zoneMatch = zonesToUse.find(z => kw.includes(z.name.toLowerCase()));
+        if (!zoneMatch) {
+           // Also try matching by word if "delivery" is in the keyword
+           if (kw.includes('delivery')) {
+             const words = kw.split(/\s+/).filter(w => w.length > 3 && w !== 'delivery');
+             for (const w of words) {
+                zoneMatch = zonesToUse.find(z => z.name.toLowerCase().includes(w));
+                if (zoneMatch) break;
+             }
+           }
+        }
+        if (zoneMatch) {
+           match = { id: zoneMatch.id, name: zoneMatch.name.startsWith('Delivery') ? zoneMatch.name : `Delivery ${zoneMatch.name}`, price: zoneMatch.price };
+        }
+      }
+
+      if (match) {
         // Merge duplicates
-        const existing = matched.find((m) => m.product.id === product.id)
+        const existing = matched.find((m) => m.product.id === match!.id)
         if (existing) existing.quantity += item.qty
-        else matched.push({ product, quantity: item.qty })
+        else matched.push({ product: match, quantity: item.qty })
       } else {
         unmatched.push(`"${item.keyword}"`)
       }
@@ -823,7 +860,7 @@ Notes: ${profile.customer_notes || 'None'}`, { parse_mode: 'Markdown' })
 
     if (matched.length === 0) {
       await sendTelegramMessage(chatId,
-        `❌ None of the items matched any products in the database.\nUnrecognized: ${unmatched.join(', ')}\n\nTry using names like: refill, dispenser, paper cups`)
+        `❌ None of the items matched any products or zones in the database.\nUnrecognized: ${unmatched.join(', ')}\n\nTry using names like: refill, dispenser, paper cups, Delivery Burnaby`)
       return NextResponse.json({ ok: true })
     }
 
@@ -833,12 +870,6 @@ Notes: ${profile.customer_notes || 'None'}`, { parse_mode: 'Markdown' })
 
     console.log(`[TG Bot] Matched:`, matched.map(m => `${m.quantity}x ${m.product.name} @ $${m.product.price}`).join(', '))
     console.log(`[TG Bot] Total: $${totalCost.toFixed(2)}, Balance: $${currentBalance.toFixed(2)}`)
-
-    if (currentBalance < totalCost) {
-      await sendTelegramMessage(chatId,
-        `❌ Insufficient balance for ${profile.name}.\nNeeded: $${totalCost.toFixed(2)} | Available: $${currentBalance.toFixed(2)}`)
-      return NextResponse.json({ ok: true })
-    }
 
     const newBalance = currentBalance - totalCost
 
@@ -931,7 +962,9 @@ Notes: ${profile.customer_notes || 'None'}`, { parse_mode: 'Markdown' })
     }
     
     // Low balance warning
-    if (newBalance < 15) {
+    if (newBalance < 0) {
+      unmatchedNote += `\n\n🚨 *NEGATIVE BALANCE WARNING*\nCustomer balance is $${newBalance.toFixed(2)}. This account is in the negative. Please remind them to top up immediately!`
+    } else if (newBalance < 15) {
       unmatchedNote += `\n\n⚠️ *LOW BALANCE WARNING*\nCustomer balance is $${newBalance.toFixed(2)}. Please remind them to top up!`
     }
 

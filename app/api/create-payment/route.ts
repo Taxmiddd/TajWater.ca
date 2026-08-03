@@ -483,21 +483,12 @@ export async function POST(req: NextRequest) {
       if (walletItems.length > 0) {
         const { data: walletProfile } = await db.from('profiles').select('wallet_balance, account_type').eq('id', userId).single()
         let addedCredits = 0
-        const isBiz = walletProfile?.account_type === 'business'
         
         for (const wi of walletItems) {
           const payStr = wi.product_id.split('_')[2]
           const pay = parseFloat(payStr)
           let credits = pay
           
-          if (!isBiz) {
-            // Consumer bonus logic
-            if (pay >= 500) credits = 600
-            else if (pay >= 400) credits = 450
-            else if (pay >= 300) credits = 330
-            else if (pay >= 200) credits = 220
-            else if (pay >= 100) credits = 107
-          }
           addedCredits += (credits * wi.quantity)
         }
         

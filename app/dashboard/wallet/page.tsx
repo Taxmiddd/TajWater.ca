@@ -19,11 +19,11 @@ type Transaction = {
 
 // Fixed recharge packages: [CAD paid, credits received]
 const RECHARGE_PACKAGES = [
-  { pay: 100, credits: 107 },
-  { pay: 200, credits: 220 },
-  { pay: 300, credits: 330 },
-  { pay: 400, credits: 450 },
-  { pay: 500, credits: 600 },
+  { pay: 100, credits: 100 },
+  { pay: 200, credits: 200 },
+  { pay: 300, credits: 300 },
+  { pay: 400, credits: 400 },
+  { pay: 500, credits: 500 },
 ] as const
 
 export default function WalletPage() {
@@ -75,7 +75,7 @@ export default function WalletPage() {
         return
       }
 
-      const credits = accountType === 'business' ? pkg.pay : pkg.credits
+      const credits = pkg.pay
 
       // User is logged in: Add Wallet Credit to Shopping Cart
       addItem({
@@ -145,7 +145,7 @@ export default function WalletPage() {
             </div>
             <h3 className="text-xl font-bold text-[#0c2340]">Recharge Wallet</h3>
           </div>
-          <p className="text-xs text-[#4a7fa5] mb-2">Choose a package — the more you load, the more bonus credits you get!</p>
+          <p className="text-xs text-[#4a7fa5] mb-2">Choose a package to load credits into your wallet.</p>
           <div className="bg-[#f0f9ff] border border-[#cce7f0] rounded-xl p-3 mb-6 flex items-start gap-2">
             <Info className="w-4 h-4 text-[#0097a7] shrink-0 mt-0.5" />
             <p className="text-[11px] text-[#4a7fa5] leading-relaxed">
@@ -155,8 +155,7 @@ export default function WalletPage() {
 
           <div className="space-y-3">
             {RECHARGE_PACKAGES.map((pkg) => {
-              const credits = accountType === 'business' ? pkg.pay : pkg.credits
-              const bonus = credits - pkg.pay
+              const credits = pkg.pay // Removed business logic and bonus calculation
               const isSelected = selectedPkg?.pay === pkg.pay
               return (
                 <button
@@ -173,13 +172,6 @@ export default function WalletPage() {
                       <p className="text-xs text-[#4a7fa5]">{credits} credits</p>
                     </div>
                   </div>
-                  {bonus > 0 && (
-                    <div className="text-right">
-                      <span className="inline-block bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full">
-                        +{bonus} bonus
-                      </span>
-                    </div>
-                  )}
                 </button>
               )
             })}

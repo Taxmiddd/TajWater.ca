@@ -624,8 +624,25 @@ export default function AdminWalletPage() {
                               <Plus className="w-3.5 h-3.5" /> Add Charge
                             </button>
                           </div>
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            <button
+                              type="button"
+                              onClick={() => setCustomCharges(prev => [...prev, { label: 'Delivery Fee', amount: '7.50' }])}
+                              className="text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 px-2 py-1 rounded-md hover:bg-slate-200"
+                            >+ Delivery Fee</button>
+                            <button
+                              type="button"
+                              onClick={() => setCustomCharges(prev => [...prev, { label: 'Upstairs Fee', amount: '2.50' }])}
+                              className="text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 px-2 py-1 rounded-md hover:bg-slate-200"
+                            >+ Upstairs Fee</button>
+                            <button
+                              type="button"
+                              onClick={() => setCustomCharges(prev => [...prev, { label: 'Rack Rental', amount: '5.00' }])}
+                              className="text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 px-2 py-1 rounded-md hover:bg-slate-200"
+                            >+ Rack Rental</button>
+                          </div>
                           {customCharges.length === 0 && (
-                            <p className="text-[11px] text-slate-400 italic">e.g. Delivery Fee, Upstairs Fee, Rack Rental…</p>
+                            <p className="text-[11px] text-slate-400 italic">Select a preset above or add a custom charge.</p>
                           )}
                           <div className="space-y-2">
                             {customCharges.map((charge, i) => (
