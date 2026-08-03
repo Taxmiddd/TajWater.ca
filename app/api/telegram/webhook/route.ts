@@ -825,27 +825,27 @@ Notes: ${profile.customer_notes || 'None'}`, { parse_mode: 'Markdown' })
     const unmatched: string[] = []
 
     for (const item of parsedItems) {
-      // First try to match as a product
-      let match = findProduct(item.keyword, allProducts)
-      
-      // If not found, try to match as a delivery zone
-      if (!match && zonesToUse.length > 0) {
-        const kw = item.keyword.toLowerCase();
-        // Look for "delivery <zone>" or just "<zone>" if keyword has "delivery"
+      let match: any = null;
+      const kw = item.keyword.toLowerCase();
+
+      // If the keyword contains "delivery", try matching a zone first
+      if (kw.includes('delivery') && zonesToUse.length > 0) {
         let zoneMatch = zonesToUse.find(z => kw.includes(z.name.toLowerCase()));
         if (!zoneMatch) {
-           // Also try matching by word if "delivery" is in the keyword
-           if (kw.includes('delivery')) {
-             const words = kw.split(/\s+/).filter(w => w.length > 3 && w !== 'delivery');
-             for (const w of words) {
-                zoneMatch = zonesToUse.find(z => z.name.toLowerCase().includes(w));
-                if (zoneMatch) break;
-             }
+           const words = kw.split(/\s+/).filter(w => w.length > 3 && w !== 'delivery');
+           for (const w of words) {
+              zoneMatch = zonesToUse.find(z => z.name.toLowerCase().includes(w));
+              if (zoneMatch) break;
            }
         }
         if (zoneMatch) {
            match = { id: zoneMatch.id, name: zoneMatch.name.startsWith('Delivery') ? zoneMatch.name : `Delivery ${zoneMatch.name}`, price: zoneMatch.price };
         }
+      }
+
+      // If no zone match, try matching as a regular product
+      if (!match) {
+        match = findProduct(item.keyword, allProducts);
       }
 
       if (match) {
