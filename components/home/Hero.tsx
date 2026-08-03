@@ -56,18 +56,18 @@ export default function Hero({ description }: { description: string }) {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 border border-white/25 text-white text-sm mb-6 backdrop-blur-sm"
           >
             <span className="w-2 h-2 rounded-full bg-[#00bcd4] animate-pulse" />
-            Trusted by 500+ Metro Vancouver Families
+            Trusted by 500+ Metro Vancouver &amp; Coquitlam Families
           </motion.div>
 
           {/* Headline */}
           <h1
             className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-[1.15] mb-6"
           >
-            Vancouver&apos;s #1
+            Metro Vancouver
             <br />
-            <span className="gradient-text-light">Water Delivery</span>
+            <span className="gradient-text-light">&amp; Coquitlam&apos;s #1</span>
             <br />
-            Service
+            Water Delivery
           </h1>
 
           <p

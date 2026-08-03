@@ -169,7 +169,13 @@ export async function POST(req: NextRequest) {
     }
 
 
-    // 3. Recalculate subtotal server-side using DB prices
+    // 3. Check if all items are wallet_credit (digital) — no delivery fee applies
+    const allItemsAreWalletCredit = (items as CartItem[]).every(i => productMap[i.product_id]?.category === 'wallet_credit')
+    if (allItemsAreWalletCredit) {
+      deliveryFee = 0
+    }
+
+    // Recalculate subtotal server-side using DB prices
     let subtotal = 0
     let taxableSubtotal = 0
     let waterJugQty = 0
@@ -233,10 +239,14 @@ export async function POST(req: NextRequest) {
       : Math.round((discountedSubtotal + deliveryFee + taxAmount) * 100) / 100
 
     // 5a. For wallet payments, enforce that all items are wallet-eligible
+    // Accessories (paper cups, etc.) are also eligible for wallet payment
+    const WALLET_ELIGIBLE_CATEGORIES_SERVER = ['water', 'refill', 'water_product', 'accessories']
     if (isWallet) {
-      const ineligibleItems = (items as CartItem[]).filter(i =>
-        !productMap[i.product_id]?.wallet_eligible
-      )
+      const ineligibleItems = (items as CartItem[]).filter(i => {
+        const pInfo = productMap[i.product_id]
+        if (!pInfo) return true
+        return !pInfo.wallet_eligible && !WALLET_ELIGIBLE_CATEGORIES_SERVER.includes(pInfo.category)
+      })
       if (ineligibleItems.length > 0) {
         return NextResponse.json(
           { error: 'One or more items in your cart cannot be paid for using wallet credits. Please use a card or remove those items.' },

@@ -82,6 +82,13 @@ export default function AdminWalletPage() {
   const [notifyCustomer, setNotifyCustomer] = useState(true)
   const [internalNotes, setInternalNotes] = useState('')
 
+  // Custom charges (delivery fee, upstairs fee, rack rental, etc.)
+  const [customCharges, setCustomCharges] = useState<{label: string, amount: string}[]>([])
+  const addCustomCharge = () => setCustomCharges(prev => [...prev, { label: '', amount: '' }])
+  const updateCustomCharge = (i: number, field: 'label' | 'amount', val: string) =>
+    setCustomCharges(prev => prev.map((c, idx) => idx === i ? { ...c, [field]: val } : c))
+  const removeCustomCharge = (i: number) => setCustomCharges(prev => prev.filter((_, idx) => idx !== i))
+
   // Bulk Selection
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [bulkSelectedItems, setBulkSelectedItems] = useState<{product: Product, qty: number}[]>([])
@@ -161,11 +168,12 @@ export default function AdminWalletPage() {
   useEffect(() => {
     if (adjustReason === 'Product Purchase' && adjustDir === 'deduct') {
       const subtotal = selectedItems.reduce((sum, item) => sum + (item.product.price * item.qty), 0)
+      const customTotal = customCharges.reduce((sum, c) => sum + (parseFloat(c.amount) || 0), 0)
       const discount = parseFloat(discountPercent) || 0
-      const total = subtotal - (subtotal * discount / 100)
+      const total = (subtotal + customTotal) - ((subtotal + customTotal) * discount / 100)
       setAdjustAmount(Math.max(0, total).toFixed(2))
     }
-  }, [selectedItems, discountPercent, adjustReason, adjustDir])
+  }, [selectedItems, customCharges, discountPercent, adjustReason, adjustDir])
 
   useEffect(() => {
     if (adjustReason === 'Product Purchase' && adjustDir === 'deduct') {
@@ -182,8 +190,11 @@ export default function AdminWalletPage() {
     if (isNaN(amount) || amount <= 0) { showToast('Enter a valid amount', false); return }
     let finalReason = adjustReason === 'Other' ? adjustCustomReason : adjustReason
     if (adjustReason === 'Product Purchase' && adjustDir === 'deduct') {
-      if (selectedItems.length === 0) { showToast('Please select at least one product', false); return }
-      const itemsStr = selectedItems.map(i => `${i.qty}x ${i.product.name}`).join(', ')
+      if (selectedItems.length === 0 && customCharges.filter(c => c.label && parseFloat(c.amount) > 0).length === 0) { showToast('Please select at least one product or add a custom charge', false); return }
+      const itemsStr = [
+        ...selectedItems.map(i => `${i.qty}x ${i.product.name}`),
+        ...customCharges.filter(c => c.label && parseFloat(c.amount) > 0).map(c => `${c.label} ($${parseFloat(c.amount).toFixed(2)})`)
+      ].join(', ')
       const discountStr = (parseFloat(discountPercent) || 0) > 0 ? ` (${discountPercent}% Off)` : ''
       finalReason = `Product Purchase: ${itemsStr}${discountStr}`
     }
@@ -193,7 +204,13 @@ export default function AdminWalletPage() {
     const delta = adjustDir === 'add' ? amount : -amount
     const newBalance = Math.max(0, (selected.wallet_balance ?? 0) + delta)
 
-    const { success, error } = await adjustCustomerWallet(selected.id, delta, newBalance, finalReason, notifyCustomer, internalNotes.trim() || undefined)
+    // Build items for email (products + custom charges)
+    const emailItems: { name: string; qty: number; unitPrice: number }[] = [
+      ...selectedItems.map(i => ({ name: i.product.name, qty: i.qty, unitPrice: i.product.price })),
+      ...customCharges.filter(c => c.label && parseFloat(c.amount) > 0).map(c => ({ name: c.label, qty: 1, unitPrice: parseFloat(c.amount) })),
+    ]
+
+    const { success, error } = await adjustCustomerWallet(selected.id, delta, newBalance, finalReason, notifyCustomer, internalNotes.trim() || undefined, emailItems.length > 0 ? emailItems : undefined)
 
     if (!success) {
       showToast('Update failed: ' + error, false)
@@ -207,6 +224,9 @@ export default function AdminWalletPage() {
     setCustomers(prev => prev.map(c => c.id === selected.id ? updated : c))
     setAdjustAmount('')
     setInternalNotes('')
+    setCustomCharges([])
+    setSelectedItems([])
+    setDiscountPercent('0')
     showToast(`Successfully ${adjustDir === 'add' ? 'added' : 'deducted'} $${amount.toFixed(2)} ${adjustDir === 'add' ? 'to' : 'from'} ${selected.name ?? selected.email}`)
 
     // Refresh transactions
@@ -509,7 +529,6 @@ export default function AdminWalletPage() {
                         value={adjustAmount}
                         onChange={e => setAdjustAmount(e.target.value)}
                         className="border-[#cce7f0] text-lg font-bold"
-                        readOnly={adjustReason === 'Product Purchase' && adjustDir === 'deduct'}
                       />
                     </div>
                     <div>
@@ -591,6 +610,58 @@ export default function AdminWalletPage() {
                             onChange={e => setDiscountPercent(e.target.value)}
                             className="border-slate-300 dark:border-slate-700 bg-white"
                           />
+                        </div>
+
+                        {/* Custom charges (delivery fee, upstairs, rack rental, etc.) */}
+                        <div className="mt-3">
+                          <div className="flex items-center justify-between mb-2">
+                            <label className="text-xs font-semibold text-slate-500 uppercase">Custom Charges</label>
+                            <button
+                              type="button"
+                              onClick={addCustomCharge}
+                              className="text-xs font-semibold text-[#0097a7] hover:text-[#00838f] flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-[#f0f9ff] transition-colors"
+                            >
+                              <Plus className="w-3.5 h-3.5" /> Add Charge
+                            </button>
+                          </div>
+                          {customCharges.length === 0 && (
+                            <p className="text-[11px] text-slate-400 italic">e.g. Delivery Fee, Upstairs Fee, Rack Rental…</p>
+                          )}
+                          <div className="space-y-2">
+                            {customCharges.map((charge, i) => (
+                              <div key={i} className="flex gap-2 items-center">
+                                <Input
+                                  placeholder="Label (e.g. Delivery Fee)"
+                                  value={charge.label}
+                                  onChange={e => updateCustomCharge(i, 'label', e.target.value)}
+                                  className="flex-1 border-slate-300 dark:border-slate-700 bg-white text-sm"
+                                />
+                                <div className="relative w-28 shrink-0">
+                                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-medium">$</span>
+                                  <Input
+                                    type="number"
+                                    min={0}
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    value={charge.amount}
+                                    onChange={e => updateCustomCharge(i, 'amount', e.target.value)}
+                                    className="pl-6 border-slate-300 dark:border-slate-700 bg-white text-sm font-semibold"
+                                  />
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => removeCustomCharge(i)}
+                                  className="w-7 h-7 rounded bg-red-100 text-red-500 flex items-center justify-center hover:bg-red-200 shrink-0"
+                                >×</button>
+                              </div>
+                            ))}
+                          </div>
+                          {customCharges.filter(c => c.label && parseFloat(c.amount) > 0).length > 0 && (
+                            <div className="mt-2 flex justify-between text-xs font-semibold text-[#0097a7] bg-[#f0f9ff] rounded-lg px-3 py-1.5">
+                              <span>Custom charges subtotal</span>
+                              <span>${customCharges.reduce((s, c) => s + (parseFloat(c.amount) || 0), 0).toFixed(2)}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}

@@ -51,7 +51,8 @@ export async function adjustCustomerWallet(
   newBalance: number,
   reason: string,
   notifyCustomer: boolean = true,
-  internalNotes?: string
+  internalNotes?: string,
+  items?: { name: string; qty: number; unitPrice: number }[]
 ) {
   const { email, display } = await getAdminDetails()
   const db = createAdminClient()
@@ -94,7 +95,8 @@ export async function adjustCustomerWallet(
         amount: Math.abs(delta),
         newBalance,
         reason: reason,
-        dateStr: new Date().toLocaleDateString('en-CA', { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+        dateStr: new Date().toLocaleDateString('en-CA', { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+        items,
       })
 
       const subject = `Wallet Update: ${delta > 0 ? '+' : '-'}$${Math.abs(delta).toFixed(2)} CAD`

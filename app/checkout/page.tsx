@@ -34,8 +34,8 @@ import { supabase } from '@/lib/supabase'
 type Step = 'cart' | 'address' | 'payment' | 'confirmed'
 type Zone = { id: string; name: string; delivery_fee: number }
 
-// Wallet-eligible product categories (water refills and water products only)
-const WALLET_ELIGIBLE_CATEGORIES = ['water', 'refill', 'water_product']
+// Wallet-eligible product categories
+const WALLET_ELIGIBLE_CATEGORIES = ['water', 'refill', 'water_product', 'accessories']
 
 // --- Main checkout page ---
 export default function CheckoutPage() {
@@ -186,7 +186,10 @@ export default function CheckoutPage() {
     return acc + (isTaxable ? item.product.price * item.quantity : 0)
   }, 0)
   const tax = Math.round(taxableSubtotal * 0.12 * 100) / 100
-  const deliveryFeeValue = fulfillmentType === 'pickup' ? 0 : deliveryFee + (isUpstairs ? calculatedUpstairsCharge : 0)
+
+  // Wallet credit orders are digital — no delivery fee applies
+  const isAllWalletCredit = items.length > 0 && items.every(i => i.product.category === 'wallet_credit' || i.product.id.startsWith('wallet_credit_'))
+  const deliveryFeeValue = (fulfillmentType === 'pickup' || isAllWalletCredit) ? 0 : deliveryFee + (isUpstairs ? calculatedUpstairsCharge : 0)
 
   // Wallet: covers items + tax only. Delivery always paid by card.
   const walletItemsTotal = Math.max(0, subtotal) + tax
@@ -199,8 +202,9 @@ export default function CheckoutPage() {
   const walletDeliveryCardAmount = deliveryFeeValue
 
   // Check if all items in cart are wallet-eligible
+  // Use per-product wallet_eligible field if available, otherwise fall back to category check
   const allItemsWalletEligible = items.every(i =>
-    WALLET_ELIGIBLE_CATEGORIES.includes(i.product.category)
+    i.product.wallet_eligible !== false && WALLET_ELIGIBLE_CATEGORIES.includes(i.product.category)
   )
 
   // --- Cart validation ---
@@ -219,6 +223,12 @@ export default function CheckoutPage() {
 
   const handleProceedFromCart = () => {
     if (validateCart()) {
+      // Wallet credit orders are digital — skip address & delivery entirely
+      if (isAllWalletCredit) {
+        setFulfillmentType('pickup')
+        setStep('payment')
+        return
+      }
       if (waterJugQty > 0 && !hasBoughtDeposit) {
         setShowDepositPopup(true)
       } else {
@@ -229,6 +239,12 @@ export default function CheckoutPage() {
 
   const handleConfirmDeposit = () => {
     setShowDepositPopup(false)
+    // For wallet credit orders: skip address step, go straight to payment
+    if (isAllWalletCredit) {
+      setFulfillmentType('pickup')
+      setStep('payment')
+      return
+    }
     setStep('address')
   }
 
@@ -578,8 +594,9 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
-                {/* Delivery or Pickup toggle */}
-                {items.length > 0 && (
+                {/* Delivery or Pickup toggle — hidden for wallet credit-only carts */}
+                {items.length > 0 && !isAllWalletCredit && (
+
                   <div className="mx-5 mb-4">
                     <p className="text-xs font-semibold text-[#4a7fa5] mb-2 uppercase tracking-wider">Fulfillment</p>
                     <div className="flex p-1 bg-[#f0f9ff] rounded-2xl border border-[#cce7f0]">
@@ -1027,10 +1044,10 @@ export default function CheckoutPage() {
                     <span>${subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-xs text-[#4a7fa5]">
-                    {fulfillmentType === 'pickup' ? (
+                    {fulfillmentType === 'pickup' || isAllWalletCredit ? (
                       <>
-                        <span>Pickup</span>
-                        <span className="text-green-600 font-semibold">Free</span>
+                        <span>{isAllWalletCredit ? 'Delivery' : 'Pickup'}</span>
+                        <span className="text-green-600 font-semibold">{isAllWalletCredit ? 'N/A (Digital)' : 'Free'}</span>
                       </>
                     ) : (
                       <>

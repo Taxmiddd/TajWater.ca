@@ -214,7 +214,7 @@ export async function POST(req: Request) {
       const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
       const invoiceUser = await getTelegramUser(supabase, chatId)
       if (!invoiceUser || invoiceUser.telegram_role !== 'admin') {
-        await sendTelegramMessage(chatId, "❌ Admin access required. Register with /register first.")
+        await sendTelegramMessage(chatId, "❌ Admin access required. Your Telegram account is not linked to a TajWater admin account. Contact your manager.")
         return NextResponse.json({ ok: true })
       }
       const args = text.split(' ')
@@ -335,12 +335,34 @@ Notes: ${profile.customer_notes || 'None'}`, { parse_mode: 'Markdown' })
       const supabaseStart = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
       const startUser = await getTelegramUser(supabaseStart, chatId)
 
-      // Prompt registration if not linked
+      // Show menu even if not registered; soft-prompt registration
       if (!startUser) {
         await sendTelegramMessage(chatId,
-          `👋 Welcome to TajWater Bot!\n\nTo get started, link your account:\n\`/register your@email.com\``,
+          `👋 Welcome to TajWater Bot!\n\nYou can log deliveries, check customer history, and more.\n\n💡 *Optional:* Link your account to enable full features:\n\`/register your@email.com\``,
           { parse_mode: 'Markdown' }
         )
+        // Still show the menu
+        await sendTelegramMessage(chatId, `What would you like to do?`, {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                { text: "🚚 Start Shift", callback_data: "start_shift" },
+                { text: "🛑 End Shift", callback_data: "end_shift" }
+              ],
+              [
+                { text: "📦 Log Delivery", callback_data: "log_delivery" }
+              ],
+              [
+                { text: "📥 Stock Truck", callback_data: "stock_truck" },
+                { text: "🔄 Return Empties", callback_data: "return_empties" }
+              ],
+              [
+                { text: "📜 Customer History", callback_data: "customer_history" },
+                { text: "📊 My Stats", callback_data: "my_stats" }
+              ]
+            ]
+          }
+        })
         return NextResponse.json({ ok: true })
       }
 
@@ -373,7 +395,7 @@ Notes: ${profile.customer_notes || 'None'}`, { parse_mode: 'Markdown' })
       const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
       const topupUser = await getTelegramUser(supabase, chatId)
       if (!topupUser || topupUser.telegram_role !== 'admin') {
-        await sendTelegramMessage(chatId, "❌ Admin access required. Register with /register first.")
+        await sendTelegramMessage(chatId, "❌ Admin access required. Your Telegram account is not linked to a TajWater admin account. Contact your manager.")
         return NextResponse.json({ ok: true })
       }
 
@@ -427,7 +449,7 @@ Notes: ${profile.customer_notes || 'None'}`, { parse_mode: 'Markdown' })
       const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
       const assignUser = await getTelegramUser(supabase, chatId)
       if (!assignUser || assignUser.telegram_role !== 'admin') {
-        await sendTelegramMessage(chatId, "❌ Admin access required. Register with /register first.")
+        await sendTelegramMessage(chatId, "❌ Admin access required. Your Telegram account is not linked to a TajWater admin account. Contact your manager.")
         return NextResponse.json({ ok: true })
       }
       const args = text.split(' ');
@@ -443,7 +465,7 @@ Notes: ${profile.customer_notes || 'None'}`, { parse_mode: 'Markdown' })
       const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
       const broadcastUser = await getTelegramUser(supabase, chatId)
       if (!broadcastUser || broadcastUser.telegram_role !== 'admin') {
-        await sendTelegramMessage(chatId, "❌ Admin access required. Register with /register first.")
+        await sendTelegramMessage(chatId, "❌ Admin access required. Your Telegram account is not linked to a TajWater admin account. Contact your manager.")
         return NextResponse.json({ ok: true })
       }
 

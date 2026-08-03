@@ -413,13 +413,46 @@ export function buildPaymentReceiptEmail({ paymentId, amount, description, custo
 }
 
 // ─── Wallet Adjustment Receipt ────────────────────────────────────────────────
-export function buildWalletAdjustmentEmail({ customerName, type, amount, newBalance, reason, dateStr }: {
-  customerName?: string; type: 'add' | 'deduct'; amount: number; newBalance: number; reason: string; dateStr: string
+export function buildWalletAdjustmentEmail({ customerName, type, amount, newBalance, reason, dateStr, items }: {
+  customerName?: string; type: 'add' | 'deduct'; amount: number; newBalance: number; reason: string; dateStr: string;
+  items?: { name: string; qty: number; unitPrice: number }[]
 }): string {
   const coEmail = process.env.NEXT_PUBLIC_COMPANY_EMAIL ?? 'billing@tajwater.ca'
   const coUrl   = process.env.NEXT_PUBLIC_SITE_URL      ?? 'https://tajwater.ca'
   const greet = customerName ? `Dear ${customerName},` : 'Hello,'
   const actionText = type === 'add' ? 'added to' : 'deducted from'
+
+  // Build itemized list with per-item pricing if available
+  const buildItemsHtml = () => {
+    if (items && items.length > 0) {
+      const rows = items.map(i => {
+        const lineTotal = (i.unitPrice * i.qty).toFixed(2)
+        const unitDisplay = i.unitPrice > 0 ? ` <span style="color:#64748b;font-size:12px;">($${i.unitPrice.toFixed(2)} each)</span>` : ''
+        return `<tr>
+          <td style="padding:6px 0;font-size:14px;color:#1e293b;">&bull; ${i.qty}x ${i.name}${unitDisplay}</td>
+          <td style="padding:6px 0;font-size:14px;color:#1e293b;font-weight:700;text-align:right;">$${lineTotal}</td>
+        </tr>`
+      }).join('')
+      return `
+        <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Items Billed</p>
+        <div style="background:#f1f5f9;border-radius:8px;padding:16px;margin-bottom:16px;">
+          <table style="width:100%;border-collapse:collapse;">${rows}</table>
+        </div>
+      `
+    } else if (reason.startsWith('Product Purchase: ')) {
+      return `
+        <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Items Billed</p>
+        <div style="background:#f1f5f9;border-radius:8px;padding:16px;margin-bottom:16px;">
+          <p style="margin:0;font-size:14px;color:#1e293b;line-height:1.8;">&bull; ${reason.replace('Product Purchase: ', '').split(', ').join('<br/>&bull; ')}</p>
+        </div>
+      `
+    } else {
+      return `
+        <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Reason</p>
+        <p style="margin:0 0 16px;font-size:15px;color:#1e293b;">${reason}</p>
+      `
+    }
+  }
 
   return shell(`
 <div style="text-align:center;margin-bottom:24px;">
@@ -434,18 +467,7 @@ export function buildWalletAdjustmentEmail({ customerName, type, amount, newBala
     ${type === 'add' ? '+' : '-'}$${amount.toFixed(2)} CAD
   </p>
 
-  ${reason.startsWith('Product Purchase: ') 
-    ? `
-      <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Items Billed</p>
-      <div style="background:#f1f5f9;border-radius:8px;padding:16px;margin-bottom:16px;">
-        <p style="margin:0;font-size:14px;color:#1e293b;line-height:1.8;">&bull; ${reason.replace('Product Purchase: ', '').split(', ').join('<br/>&bull; ')}</p>
-      </div>
-    ` 
-    : `
-      <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Reason</p>
-      <p style="margin:0 0 16px;font-size:15px;color:#1e293b;">${reason}</p>
-    `
-  }
+  ${buildItemsHtml()}
 
   <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Date</p>
   <p style="margin:0 0 16px;font-size:15px;color:#1e293b;">${dateStr}</p>
