@@ -16,6 +16,8 @@ import {
   Wallet,
   Info,
   Package,
+  Tag,
+  X,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -60,6 +62,12 @@ export default function CheckoutPage() {
   const [isFirstOrder, setIsFirstOrder] = useState(false)
   const [cartError, setCartError] = useState('')
   const router = useRouter()
+
+  // Coupon code state
+  const [couponInput, setCouponInput] = useState('')
+  const [appliedCoupon, setAppliedCoupon] = useState<{ id: string; code: string; type: 'percent' | 'fixed'; value: number; discountAmount: number } | null>(null)
+  const [couponError, setCouponError] = useState('')
+  const [couponLoading, setCouponLoading] = useState(false)
 
   const [upstairsCharge, setUpstairsCharge] = useState(0)
   const [pickupCharge, setPickupCharge] = useState(0)
@@ -179,22 +187,26 @@ export default function CheckoutPage() {
     : upstairsCharge;
 
   const subtotal = total()
+  const discountAmount = appliedCoupon?.discountAmount ?? 0
+  const discountedSubtotal = Math.max(0, subtotal - discountAmount)
   const taxableSubtotal = items.reduce((acc, item) => {
     const isWalletCredit = item.product.category === 'wallet_credit'
     const isDeposit = item.product.name.toLowerCase().includes('deposit')
     const isTaxable = (isWalletCredit || isDeposit) ? false : item.product.taxable !== false
     return acc + (isTaxable ? item.product.price * item.quantity : 0)
   }, 0)
-  const tax = Math.round(taxableSubtotal * 0.12 * 100) / 100
+  // Scale taxable amount proportionally if discount applied
+  const taxablePortion = subtotal > 0 ? (taxableSubtotal / subtotal) * discountedSubtotal : 0
+  const tax = Math.round(taxablePortion * 0.12 * 100) / 100
 
   // Wallet credit orders are digital — no delivery fee applies
   const isAllWalletCredit = items.length > 0 && items.every(i => i.product.category === 'wallet_credit' || i.product.id.startsWith('wallet_credit_'))
   const deliveryFeeValue = (fulfillmentType === 'pickup' || isAllWalletCredit) ? 0 : deliveryFee + (isUpstairs ? calculatedUpstairsCharge : 0)
 
   // Wallet: covers items + tax only. Delivery always paid by card.
-  const walletItemsTotal = Math.max(0, subtotal) + tax
+  const walletItemsTotal = Math.max(0, discountedSubtotal) + tax
   // Online / card on delivery: full total
-  const orderTotal = Math.max(0, subtotal) + deliveryFeeValue + tax
+  const orderTotal = Math.max(0, discountedSubtotal) + deliveryFeeValue + tax
   const displayTotal = serverTotal ?? orderTotal
 
   // For wallet mode, wallet covers items+tax; delivery charged to card separately
@@ -326,8 +338,8 @@ export default function CheckoutPage() {
           },
           notes: address.notes ? `${address.notes}${isUpstairs ? ' | Upstairs Delivery Requested' : ''}` : (isUpstairs ? 'Upstairs Delivery Requested' : null),
           userId,
-          discountCodeId: null,
-          discountAmount: 0,
+          discountCodeId: appliedCoupon?.id ?? null,
+          discountAmount: appliedCoupon?.discountAmount ?? 0,
           paymentMethod: 'square_online',
           fulfillmentType,
           isUpstairs,
@@ -346,9 +358,40 @@ export default function CheckoutPage() {
     } finally {
       setProcessing(false)
     }
-  }, [orderTotal, items, address, userId, clearCart])
+  }, [orderTotal, items, address, userId, appliedCoupon, clearCart])
 
 
+
+  const handleApplyCoupon = async () => {
+    if (!couponInput.trim()) return
+    setCouponError('')
+    setCouponLoading(true)
+    try {
+      const res = await fetch('/api/validate-coupon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: couponInput.trim(), subtotal }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setCouponError(data.error || 'Invalid coupon code')
+        setAppliedCoupon(null)
+      } else {
+        setAppliedCoupon(data)
+        setCouponInput('')
+      }
+    } catch {
+      setCouponError('Could not validate coupon. Please try again.')
+    } finally {
+      setCouponLoading(false)
+    }
+  }
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null)
+    setCouponError('')
+    setCouponInput('')
+  }
 
   const handleWalletOrder = async (deliveryToken?: string) => {
     setProcessing(true)
@@ -377,8 +420,8 @@ export default function CheckoutPage() {
           },
           notes: address.notes ? `${address.notes}${isUpstairs ? ' | Upstairs Delivery Requested' : ''}` : (isUpstairs ? 'Upstairs Delivery Requested' : null),
           userId,
-          discountCodeId: null,
-          discountAmount: 0,
+          discountCodeId: appliedCoupon?.id ?? null,
+          discountAmount: appliedCoupon?.discountAmount ?? 0,
           paymentMethod: 'wallet',
           fulfillmentType,
           isUpstairs,
@@ -591,6 +634,57 @@ export default function CheckoutPage() {
                   <div className="mx-5 mb-3 flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl p-3">
                     <AlertCircle className="w-4 h-4 shrink-0" />
                     {cartError}
+                  </div>
+                )}
+
+                {/* Coupon code input */}
+                {items.length > 0 && (
+                  <div className="mx-5 mb-4">
+                    <p className="text-xs font-semibold text-[#4a7fa5] mb-2 uppercase tracking-wider">Coupon Code</p>
+                    {appliedCoupon ? (
+                      <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-3 py-2.5">
+                        <Tag className="w-4 h-4 text-green-600 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <span className="font-mono font-bold text-green-700 text-sm">{appliedCoupon.code}</span>
+                          <span className="ml-2 text-xs text-green-600">
+                            {appliedCoupon.type === 'percent'
+                              ? `${appliedCoupon.value}% off`
+                              : `$${appliedCoupon.value.toFixed(2)} off`}
+                            {' '}— saving <strong>${appliedCoupon.discountAmount.toFixed(2)}</strong>
+                          </span>
+                        </div>
+                        <button
+                          onClick={handleRemoveCoupon}
+                          className="w-6 h-6 rounded-lg bg-green-100 hover:bg-green-200 flex items-center justify-center text-green-700 transition-colors shrink-0"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={couponInput}
+                          onChange={(e) => { setCouponInput(e.target.value.toUpperCase()); setCouponError('') }}
+                          onKeyDown={(e) => e.key === 'Enter' && handleApplyCoupon()}
+                          placeholder="Enter coupon code"
+                          className="flex-1 h-10 px-3 rounded-xl border border-[#cce7f0] text-sm font-mono uppercase focus:border-[#0097a7] focus:outline-none text-[#0c2340] placeholder:normal-case placeholder:font-sans"
+                        />
+                        <button
+                          onClick={handleApplyCoupon}
+                          disabled={couponLoading || !couponInput.trim()}
+                          className="h-10 px-4 rounded-xl bg-[#0097a7] text-white text-sm font-semibold hover:bg-[#00838f] disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+                        >
+                          {couponLoading ? 'Applying…' : 'Apply'}
+                        </button>
+                      </div>
+                    )}
+                    {couponError && (
+                      <p className="mt-1.5 text-xs text-red-600 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3 shrink-0" />
+                        {couponError}
+                      </p>
+                    )}
                   </div>
                 )}
 
@@ -1043,6 +1137,15 @@ export default function CheckoutPage() {
                     <span>Subtotal</span>
                     <span>${subtotal.toFixed(2)}</span>
                   </div>
+                  {appliedCoupon && (
+                    <div className="flex justify-between text-xs text-green-600 font-semibold">
+                      <span className="flex items-center gap-1">
+                        <Tag className="w-3 h-3" />
+                        {appliedCoupon.code}
+                      </span>
+                      <span>−${appliedCoupon.discountAmount.toFixed(2)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-xs text-[#4a7fa5]">
                     {fulfillmentType === 'pickup' || isAllWalletCredit ? (
                       <>
