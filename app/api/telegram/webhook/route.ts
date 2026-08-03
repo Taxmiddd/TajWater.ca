@@ -518,7 +518,15 @@ Notes: ${profile.customer_notes || 'None'}`, { parse_mode: 'Markdown' })
         process.env.SUPABASE_SERVICE_ROLE_KEY!
       )
 
-      const { data: profile } = await supabase.from('profiles').select('id, name, wallet_balance').eq('email', email).single()
+      let { data: profile } = await supabase.from('profiles').select('id, name, wallet_balance').eq('email', email).single()
+      if (!profile) {
+        const { data: { users: authUsers } } = await supabase.auth.admin.listUsers({ perPage: 1000 })
+        const authUser = authUsers?.find(u => u.email?.toLowerCase() === email)
+        if (authUser) {
+          const { data: profileById } = await supabase.from('profiles').select('id, name, wallet_balance').eq('id', authUser.id).single()
+          if (profileById) profile = profileById
+        }
+      }
       if (!profile) {
         await sendTelegramMessage(chatId, `❌ No customer found with email: ${email}`)
         return NextResponse.json({ ok: true })
@@ -568,9 +576,17 @@ Notes: ${profile.customer_notes || 'None'}`, { parse_mode: 'Markdown' })
 
       
       // Decrement jars
-      const { data: prof } = await supabase.from('profiles').select('empty_jars_held').eq('email', email).single()
+      let { data: prof } = await supabase.from('profiles').select('id, empty_jars_held').eq('email', email).single()
+      if (!prof) {
+        const { data: { users: authUsers } } = await supabase.auth.admin.listUsers({ perPage: 1000 })
+        const authUser = authUsers?.find(u => u.email?.toLowerCase() === email)
+        if (authUser) {
+          const { data: profileById } = await supabase.from('profiles').select('id, empty_jars_held').eq('id', authUser.id).single()
+          if (profileById) prof = profileById
+        }
+      }
       if (prof) {
-         await supabase.from('profiles').update({ empty_jars_held: Math.max(0, (prof.empty_jars_held || 0) - qty) }).eq('email', email)
+         await supabase.from('profiles').update({ empty_jars_held: Math.max(0, (prof.empty_jars_held || 0) - qty) }).eq('id', prof.id)
       }
 
       await supabase.from('inventory_logs').insert({
@@ -703,18 +719,36 @@ Notes: ${profile.customer_notes || 'None'}`, { parse_mode: 'Markdown' })
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    // Find customer profile
-    const { data: profile, error: profileError } = await supabase
+    // Find customer profile — first try by profiles.email, then fall back to auth.users
+    let { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('id, name, email, wallet_balance, empty_jars_held')
       .eq('email', customerEmail)
       .single()
 
+    // Fallback: some profiles have no email field set — look up via auth.users instead
     if (profileError || !profile) {
-      console.error('[TG Bot] Profile not found:', profileError)
+      const { data: { users: authUsers } } = await supabase.auth.admin.listUsers({ perPage: 1000 })
+      const authUser = authUsers?.find(u => u.email?.toLowerCase() === customerEmail)
+      if (authUser) {
+        const { data: profileById } = await supabase
+          .from('profiles')
+          .select('id, name, email, wallet_balance, empty_jars_held')
+          .eq('id', authUser.id)
+          .single()
+        if (profileById) {
+          profile = { ...profileById, email: profileById.email ?? customerEmail }
+          profileError = null
+        }
+      }
+    }
+
+    if (profileError || !profile) {
+      console.error('[TG Bot] Profile not found for:', customerEmail, profileError)
       await sendTelegramMessage(chatId, `❌ No customer found with email: ${customerEmail}`)
       return NextResponse.json({ ok: true })
     }
+
 
     // Fetch all active products
     const { data: allProducts, error: productsError } = await supabase
