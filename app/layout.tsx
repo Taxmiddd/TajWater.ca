@@ -3,6 +3,7 @@ import { Geist } from 'next/font/google'
 import Script from 'next/script'
 import './globals.css'
 import ConditionalShell from '@/components/layout/ConditionalShell'
+import { Analytics } from '@vercel/analytics/next'
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist-sans' })
 
@@ -303,6 +304,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           `}
         </Script>
         <ConditionalShell>{children}</ConditionalShell>
+        <Analytics />
       </body>
     </html>
   )
