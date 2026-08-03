@@ -197,8 +197,18 @@ export async function POST(req: Request) {
         return NextResponse.json({ ok: true })
       }
 
-      // Link the chat ID and set role to 'driver' if not already set
-      const newRole = regProfile.telegram_role ?? 'driver'
+      // If the profile already has a role set, keep it.
+      // Otherwise check admin_users table — admins get 'admin', everyone else gets 'driver'.
+      let newRole = regProfile.telegram_role
+      if (!newRole) {
+        const { data: adminEntry } = await supabase
+          .from('admin_users')
+          .select('role')
+          .eq('email', regEmail)
+          .single()
+        newRole = adminEntry ? 'admin' : 'driver'
+      }
+
       await supabase.from('profiles').update({ telegram_chat_id: chatId, telegram_role: newRole }).eq('id', regProfile.id)
 
       const roleLabel = newRole === 'admin' ? '👑 Admin' : '🚚 Driver'
@@ -208,6 +218,7 @@ export async function POST(req: Request) {
       )
       return NextResponse.json({ ok: true })
     }
+
 
     // Handle /invoice command for manual invoicing (admin only)
     if (text.startsWith('/invoice')) {
