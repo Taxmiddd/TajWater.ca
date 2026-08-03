@@ -1,9 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
 import { motion } from 'framer-motion'
-import { Download, Search, FileText } from 'lucide-react'
+import { Download, Search, FileText, Trash2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
@@ -28,13 +27,24 @@ export default function ExpensesPage() {
 
   const fetchExpenses = async () => {
     setLoading(true)
-    const { data, error } = await supabase
-      .from('expenses')
-      .select('*')
-      .order('created_at', { ascending: false })
-    
-    if (data) setExpenses(data)
+    try {
+      const res = await fetch('/api/admin/expenses')
+      const data = await res.json()
+      if (Array.isArray(data)) setExpenses(data)
+    } catch (err) {
+      console.error('Failed to fetch expenses:', err)
+    }
     setLoading(false)
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Delete this expense?')) return
+    await fetch('/api/admin/expenses', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    })
+    setExpenses(prev => prev.filter(e => e.id !== id))
   }
 
   const handleDownloadCsv = () => {
@@ -109,6 +119,7 @@ export default function ExpensesPage() {
                 <th className="px-4 py-3 font-semibold">Description</th>
                 <th className="px-4 py-3 font-semibold text-right">Amount</th>
                 <th className="px-4 py-3 font-semibold">Logged By</th>
+                <th className="px-4 py-3 font-semibold"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#cce7f0] dark:divide-white/5">
@@ -136,6 +147,15 @@ export default function ExpensesPage() {
                     <td className="px-4 py-3 text-[#4a7fa5] dark:text-[#b3e5fc]/80 truncate max-w-[200px]">{e.description}</td>
                     <td className="px-4 py-3 text-[#0c2340] dark:text-[#f8fafc] font-black text-right">${e.amount.toFixed(2)}</td>
                     <td className="px-4 py-3 text-[#4a7fa5] dark:text-[#b3e5fc]/60">{e.logged_by}</td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => handleDelete(e.id)}
+                        className="w-7 h-7 rounded-lg bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-100 transition-colors"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </td>
                   </motion.tr>
                 ))
               )}
