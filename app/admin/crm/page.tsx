@@ -6,7 +6,7 @@ import { Users, Phone, FileText, CheckCircle2, Clock, Search, RefreshCw } from '
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { supabase } from '@/lib/supabase'
+import { getLeads, updateLeadStatus } from '@/app/admin/actions'
 
 type Lead = {
   id: string
@@ -33,14 +33,8 @@ export default function LeadsCRMPage() {
 
   const fetchLeads = async () => {
     setLoading(true)
-    const { data, error } = await supabase
-      .from('leads')
-      .select('*')
-      .order('created_at', { ascending: false })
-    
-    if (!error && data) {
-      setLeads(data)
-    }
+    const data = await getLeads()
+    setLeads(data)
     setLoading(false)
   }
 
@@ -50,8 +44,8 @@ export default function LeadsCRMPage() {
 
   const handleStatusChange = async (id: string, newStatus: string) => {
     setUpdating(id)
-    const { error } = await supabase.from('leads').update({ status: newStatus }).eq('id', id)
-    if (!error) {
+    const success = await updateLeadStatus(id, newStatus)
+    if (success) {
       setLeads(prev => prev.map(l => l.id === id ? { ...l, status: newStatus } : l))
     }
     setUpdating(null)

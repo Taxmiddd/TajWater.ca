@@ -187,3 +187,31 @@ export async function getAllWalletTransactions(searchQuery?: string) {
   return data ?? []
 }
 
+// Leads CRM Actions
+export async function getLeads() {
+  const db = createAdminClient();
+  const { data, error } = await db
+    .from('leads')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching leads:', error);
+    return [];
+  }
+  return data || [];
+}
+
+export async function updateLeadStatus(id: string, status: string) {
+  const db = createAdminClient();
+  const { error } = await db
+    .from('leads')
+    .update({ status })
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error updating lead status:', error);
+    return false;
+  }
+  return true;
+}
