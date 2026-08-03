@@ -246,14 +246,53 @@ export async function POST(req: Request) {
         return NextResponse.json({ ok: true })
       }
 
-      await supabase.from('invoices').insert({
+      const { data: profile } = await supabase.from('profiles').select('name').eq('email', email).single()
+
+      // Generate a short ID for the payment link
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+      let suffix = ''
+      for (let i = 0; i < 4; i++) suffix += chars[Math.floor(Math.random() * chars.length)]
+      const paymentId = `TW-${suffix}`
+
+      // Create a payment link in the DB
+      const { data: pLink, error: pErr } = await supabase.from('payment_links').insert({
+        id: paymentId,
         customer_email: email,
+        customer_name: profile?.name || null,
         amount: amount,
         description: description,
-        status: 'unpaid'
-      })
+        status: 'pending',
+        currency: 'CAD',
+      }).select().single()
 
-      await sendTelegramMessage(chatId, `✅ Invoice generated for ${email} — $${amount.toFixed(2)}`)
+      if (pErr) {
+        console.error('[TG Bot] Error creating payment link:', pErr)
+        await sendTelegramMessage(chatId, "❌ Failed to create invoice.")
+        return NextResponse.json({ ok: true })
+      }
+
+      // Send the email via Resend
+      try {
+        const { buildPaymentLinkEmail } = await import('@/lib/email')
+        const payUrl = `${process.env.NEXT_PUBLIC_PAY_URL || 'https://pay.tajwater.ca'}/${paymentId}`
+        await resend.emails.send({
+          from: `TajWater Billing <${process.env.NEXT_PUBLIC_COMPANY_EMAIL || 'billing@tajwater.ca'}>`,
+          to: email,
+          subject: `Your TajWater Payment Request — $${amount.toFixed(2)} CAD`,
+          html: buildPaymentLinkEmail({
+            paymentId: paymentId,
+            amount: amount,
+            description: description,
+            customerName: profile?.name || undefined,
+            paymentUrl: payUrl,
+          }),
+        })
+        await sendTelegramMessage(chatId, `✅ Invoice generated & emailed to ${email} — $${amount.toFixed(2)}\n\nLink: ${payUrl}`)
+      } catch (err) {
+        console.error('[TG Bot] Failed to send invoice email:', err)
+        await sendTelegramMessage(chatId, `✅ Invoice generated for ${email} — $${amount.toFixed(2)}, but failed to send email.\n\nLink: https://pay.tajwater.ca/${paymentId}`)
+      }
+
       return NextResponse.json({ ok: true })
     }
 
