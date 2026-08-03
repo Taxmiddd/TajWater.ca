@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { buildWalletAdjustmentEmail, resend } from '@/lib/email'
 import sharp from 'sharp'
 
@@ -25,7 +25,7 @@ async function sendTelegramMessage(chatId: string | number, text: string, option
 }
 
 // ─── DB-based auth: look up registered Telegram user ─────────────────────────
-async function getTelegramUser(supabase: ReturnType<typeof createClient>, chatId: number) {
+async function getTelegramUser(supabase: SupabaseClient<any>, chatId: number) {
   const { data } = await supabase
     .from('profiles')
     .select('id, name, email, telegram_role, wallet_balance, empty_jars_held')
