@@ -42,4 +42,4 @@ CREATE TABLE IF NOT EXISTS invoices (
 -- telegram_role: 'driver' or 'admin' — set 'admin' manually in Supabase Dashboard for admins
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS telegram_chat_id bigint UNIQUE;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS telegram_role text CHECK (telegram_role IN ('driver', 'admin'));
-
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS empty_jars_held integer DEFAULT 0;
