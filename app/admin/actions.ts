@@ -215,3 +215,22 @@ export async function updateLeadStatus(id: string, status: string) {
   }
   return true;
 }
+
+export async function appendLeadNote(id: string, currentNotes: string | null, newNote: string) {
+  const db = createAdminClient();
+  const timestamp = new Date().toLocaleString('en-CA', { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' });
+  const updatedNotes = currentNotes 
+    ? `${currentNotes}\n\n[${timestamp}] - ${newNote}` 
+    : `[${timestamp}] - ${newNote}`;
+
+  const { error } = await db
+    .from('leads')
+    .update({ notes: updatedNotes })
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error appending lead note:', error);
+    return null;
+  }
+  return updatedNotes;
+}

@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Users, Phone, FileText, CheckCircle2, Clock, Search, RefreshCw } from 'lucide-react'
+import { Users, Phone, FileText, CheckCircle2, Clock, Search, RefreshCw, Plus, Send } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { getLeads, updateLeadStatus } from '@/app/admin/actions'
+import { getLeads, updateLeadStatus, appendLeadNote } from '@/app/admin/actions'
 
 type Lead = {
   id: string
@@ -30,6 +30,9 @@ export default function LeadsCRMPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [updating, setUpdating] = useState<string | null>(null)
+  
+  const [addingNoteId, setAddingNoteId] = useState<string | null>(null)
+  const [newNote, setNewNote] = useState('')
 
   const fetchLeads = async () => {
     setLoading(true)
@@ -48,6 +51,18 @@ export default function LeadsCRMPage() {
     if (success) {
       setLeads(prev => prev.map(l => l.id === id ? { ...l, status: newStatus } : l))
     }
+    setUpdating(null)
+  }
+
+  const handleAddNote = async (id: string, currentNotes: string | null) => {
+    if (!newNote.trim()) return
+    setUpdating(id)
+    const updatedNotes = await appendLeadNote(id, currentNotes, newNote)
+    if (updatedNotes) {
+      setLeads(prev => prev.map(l => l.id === id ? { ...l, notes: updatedNotes } : l))
+    }
+    setAddingNoteId(null)
+    setNewNote('')
     setUpdating(null)
   }
 
@@ -160,10 +175,36 @@ export default function LeadsCRMPage() {
                 </div>
 
                 {lead.notes && (
-                  <div className="text-sm text-[#4a7fa5] dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700">
-                    <span className="font-bold flex items-center gap-1.5 mb-1"><FileText className="w-3.5 h-3.5" /> Notes:</span>
+                  <div className="text-sm text-[#4a7fa5] dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700 whitespace-pre-wrap">
+                    <div className="font-bold flex items-center justify-between mb-1">
+                      <span className="flex items-center gap-1.5"><FileText className="w-3.5 h-3.5" /> Notes:</span>
+                    </div>
                     {lead.notes}
                   </div>
+                )}
+                
+                {addingNoteId === lead.id ? (
+                  <div className="mt-2 flex gap-2">
+                    <Input
+                      autoFocus
+                      placeholder="Type a new update..."
+                      value={newNote}
+                      onChange={e => setNewNote(e.target.value)}
+                      className="text-sm"
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') handleAddNote(lead.id, lead.notes);
+                        if (e.key === 'Escape') setAddingNoteId(null);
+                      }}
+                    />
+                    <Button onClick={() => handleAddNote(lead.id, lead.notes)} disabled={updating === lead.id} size="sm" className="gap-1.5 bg-[#0097a7] hover:bg-[#007b8a]">
+                      <Send className="w-3.5 h-3.5" /> Save
+                    </Button>
+                    <Button onClick={() => setAddingNoteId(null)} variant="outline" size="sm">Cancel</Button>
+                  </div>
+                ) : (
+                  <Button onClick={() => { setAddingNoteId(lead.id); setNewNote(''); }} variant="ghost" size="sm" className="h-7 text-xs text-[#0097a7] hover:bg-[#e0f7fa] px-2 -ml-2">
+                    <Plus className="w-3.5 h-3.5 mr-1" /> Add Update
+                  </Button>
                 )}
               </div>
 
