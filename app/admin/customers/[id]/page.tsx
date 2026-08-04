@@ -27,6 +27,9 @@ interface Profile {
   wallet_balance: number
   customer_notes: string | null
   account_type: 'customer' | 'business' | null
+  dispenser_subscription_active: boolean
+  dispenser_quantity: number | null
+  dispenser_type: string | null
   created_at: string
 }
 
@@ -397,7 +400,7 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
         )}
 
         {/* Extra profile details */}
-        <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
+        <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 text-sm">
           {profile.delivery_address && (
             <div className="bg-[#f0f9ff] rounded-xl p-3">
               <p className="text-[10px] text-[#4a7fa5] font-medium mb-0.5">Delivery Address</p>
@@ -408,6 +411,12 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
             <p className="text-[10px] text-[#4a7fa5] font-medium mb-0.5 flex items-center gap-1"><Wallet className="w-3 h-3" /> Wallet Balance</p>
             <p className="text-[#0097a7] font-extrabold">${(profile.wallet_balance ?? 0).toFixed(2)}</p>
           </div>
+          {profile.dispenser_subscription_active && (
+            <div className="bg-[#e0f7fa] border border-[#b3e5fc] rounded-xl p-3 col-span-2 sm:col-span-1 md:col-span-2">
+              <p className="text-[10px] text-[#006064] font-medium mb-0.5 flex items-center gap-1"><Package className="w-3 h-3" /> Dispenser Assigned</p>
+              <p className="text-[#00838f] font-bold text-xs">{profile.dispenser_quantity || 1}x {profile.dispenser_type || 'Standard'}</p>
+            </div>
+          )}
         </div>
 
         {/* Tags */}

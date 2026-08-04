@@ -43,3 +43,7 @@ CREATE TABLE IF NOT EXISTS invoices (
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS telegram_chat_id bigint UNIQUE;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS telegram_role text CHECK (telegram_role IN ('driver', 'admin'));
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS empty_jars_held integer DEFAULT 0;
+
+-- 8. Dispenser tracking
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS dispenser_quantity integer DEFAULT 0;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS dispenser_type text;

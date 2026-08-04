@@ -375,11 +375,15 @@ export async function POST(req: Request) {
         return NextResponse.json({ ok: true })
       }
 
+      const dispenserText = profile.dispenser_subscription_active 
+        ? `Yes (${profile.dispenser_quantity || 1}x ${profile.dispenser_type || 'Standard'})`
+        : 'No'
+
       await sendTelegramMessage(chatId, `👤 *Customer CRM: ${profile.name}*
 Email: ${profile.email}
 Balance: ${profile.wallet_balance}
 Jars Held: ${profile.empty_jars_held || 0}
-Dispenser Sub: ${profile.dispenser_subscription_active ? 'Yes' : 'No'}
+Dispenser Sub: ${dispenserText}
 Notes: ${profile.customer_notes || 'None'}`, { parse_mode: 'Markdown' })
       return NextResponse.json({ ok: true })
     }
@@ -507,10 +511,27 @@ Notes: ${profile.customer_notes || 'None'}`, { parse_mode: 'Markdown' })
         return NextResponse.json({ ok: true })
       }
       const args = text.split(' ');
-      if (args.length < 2) return NextResponse.json({ ok: true });
+      if (args.length < 3) {
+        await sendTelegramMessage(chatId, "❌ Invalid format. Use:\n`/assign_dispenser customer@email.com 2 Bottom Load`", { parse_mode: 'Markdown' })
+        return NextResponse.json({ ok: true });
+      }
+      
       const email = args[1].toLowerCase();
-      await supabase.from('profiles').update({ dispenser_subscription_active: true }).eq('email', email);
-      await sendTelegramMessage(chatId, `✅ Dispenser assigned to ${email}`);
+      const qty = parseInt(args[2]);
+      const type = args.slice(3).join(' ') || 'Standard';
+
+      if (isNaN(qty) || qty <= 0) {
+        await sendTelegramMessage(chatId, "❌ Invalid quantity.")
+        return NextResponse.json({ ok: true })
+      }
+
+      await supabase.from('profiles').update({ 
+        dispenser_subscription_active: true,
+        dispenser_quantity: qty,
+        dispenser_type: type
+      }).eq('email', email);
+      
+      await sendTelegramMessage(chatId, `✅ Assigned ${qty}x ${type} dispenser(s) to ${email}`);
       return NextResponse.json({ ok: true });
     }
 
