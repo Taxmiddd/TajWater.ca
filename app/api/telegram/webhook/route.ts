@@ -173,12 +173,12 @@ export async function POST(req: Request) {
     
     // Handle /register command — links Telegram account to a profile by email
     if (text.startsWith('/register')) {
-      const args = text.split(' ')
-      if (args.length < 2) {
+      const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/)
+      if (!emailMatch) {
         await sendTelegramMessage(chatId, "❌ Please provide your account email.\nExample: `/register your@email.com`", { parse_mode: 'Markdown' })
         return NextResponse.json({ ok: true })
       }
-      const regEmail = args[1].toLowerCase()
+      const regEmail = emailMatch[0].toLowerCase()
       const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
 
       const { data: regProfile, error: regErr } = await supabase
@@ -274,7 +274,7 @@ export async function POST(req: Request) {
       // Send the email via Resend
       try {
         const { buildPaymentLinkEmail } = await import('@/lib/email')
-        const payUrl = `${process.env.NEXT_PUBLIC_PAY_URL || 'https://pay.tajwater.ca'}/${paymentId}`
+        const payUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://tajwater.ca'}/pay/${paymentId}`
         await resend.emails.send({
           from: `TajWater Billing <${process.env.NEXT_PUBLIC_COMPANY_EMAIL || 'billing@tajwater.ca'}>`,
           to: email,
@@ -290,7 +290,7 @@ export async function POST(req: Request) {
         await sendTelegramMessage(chatId, `✅ Invoice generated & emailed to ${email} — $${amount.toFixed(2)}\n\nLink: ${payUrl}`)
       } catch (err) {
         console.error('[TG Bot] Failed to send invoice email:', err)
-        await sendTelegramMessage(chatId, `✅ Invoice generated for ${email} — $${amount.toFixed(2)}, but failed to send email.\n\nLink: https://pay.tajwater.ca/${paymentId}`)
+        await sendTelegramMessage(chatId, `✅ Invoice generated for ${email} — $${amount.toFixed(2)}, but failed to send email.\n\nLink: https://tajwater.ca/pay/${paymentId}`)
       }
 
       return NextResponse.json({ ok: true })
